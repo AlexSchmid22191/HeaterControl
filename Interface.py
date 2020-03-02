@@ -59,7 +59,7 @@ class HeaterInterface(wx.Frame):
         hbox_2.Fit(self)
         self.SetSizer(hbox_2)
 
-        self.SetMinSize((800, 400))
+        self.SetMinSize((800, self.GetSize()[1]))
         self.Show(True)
 
     @in_main_thread
@@ -212,7 +212,7 @@ class StatusWindow(wx.Panel):
 
         box = wx.StaticBox(parent=self, label='Status')
         boxsizer = wx.StaticBoxSizer(box)
-        boxsizer.Add(grid_sizer)
+        boxsizer.Add(grid_sizer, flag=wx.ALL, border=5)
 
         self.SetSizer(boxsizer)
 
@@ -275,16 +275,19 @@ class MatplotWX(wx.Panel):
         self.axes.set_xlabel('Time (s)')
         self.axes.set_ylabel('Temperature (°C)')
 
-        self.sens_temp_plot, = self.axes.plot([], marker='o')
-        self.oven_temp_plot, = self.axes.plot([], marker='s')
-        self.oven_pwr_plot, = self.paxes.plot([], marker='^')
+        self.sens_temp_plot, = self.axes.plot([], marker='o', color='dodgerblue', label='Sensor Temperature')
+        self.oven_temp_plot, = self.axes.plot([], marker='s', color='orangered', label='Heater Temperature')
+        self.oven_pwr_plot, = self.paxes.plot([], marker='^', color='springgreen', label='Heater Power')
+
+        self.figure.legend(handles=[self.sens_temp_plot, self.oven_temp_plot, self.oven_pwr_plot],
+                           loc='lower center', ncol=2)
 
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, flag=wx.GROW | wx.FIXED_MINSIZE, proportion=2)
         self.SetSizer(self.sizer)
         self.Fit()
-        self.figure.tight_layout()
+        self.figure.subplots_adjust(0.15, 0.25, 0.85, 0.95)
 
     @in_main_thread
     def add_sensor_temp_point(self, temp):
