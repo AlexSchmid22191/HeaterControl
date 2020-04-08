@@ -286,8 +286,8 @@ class MatplotWX(wx.Panel):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, flag=wx.GROW | wx.FIXED_MINSIZE, proportion=2)
         self.SetSizer(self.sizer)
+        self.figure.subplots_adjust(0.2, 0.275, 0.8, 0.95)
         self.Fit()
-        self.figure.subplots_adjust(0.15, 0.25, 0.85, 0.95)
 
     @in_main_thread
     def add_sensor_temp_point(self, temp):
