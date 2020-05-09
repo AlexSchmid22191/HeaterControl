@@ -63,7 +63,7 @@ class engine:
         """
         def msgDataSpec(text):
             """
-            - temp: UNDOCUMENTED
+            - text: UNDOCUMENTED
             """
 
 class gui:

@@ -122,11 +122,11 @@ class OvenControl(wx.Panel):
         power_label = wx.StaticText(parent=self, label='Power')
 
         self.temp_entry = wx.SpinCtrlDouble(parent=self, value='0', min=0, max=1200, inc=1, style=wx.SP_ARROW_KEYS,
-                                            size=(70, 10))
+                                            size=(70, -1))
         self.ramp_entry = wx.SpinCtrlDouble(parent=self, value='15', min=0, max=480, inc=1, style=wx.SP_ARROW_KEYS,
-                                            size=(70, 10))
+                                            size=(70, -1))
         self.power_entry = wx.SpinCtrlDouble(parent=self, value='0', min=0, max=100, inc=1, style=wx.SP_ARROW_KEYS,
-                                             size=(70, 10))
+                                             size=(70, -1))
 
         set_power_btn = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
         set_temp_btn = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
