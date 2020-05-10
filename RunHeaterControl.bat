@@ -1,1 +1,0 @@
-start .\venv\Scripts\pythonw.exe .\HeaterControl.py
