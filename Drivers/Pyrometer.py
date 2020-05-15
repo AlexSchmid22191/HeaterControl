@@ -9,6 +9,7 @@ class Pyrometer(Serial):
 
     def read_temperature(self):
         with self.com_lock:
+            self.reset_input_buffer()
             self.write('TEMP'.encode())
             self.write('\r'.encode())
 
