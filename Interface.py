@@ -185,8 +185,6 @@ class StatusWindow(wx.Panel):
         self.timer = wx.Timer()
         self.timer.Bind(event=wx.EVT_TIMER, handler=self.request_data)
         self.timer.Start(milliseconds=1000)
-        
-        subscribe(listener=self.update_oven_temperature, topicName='engine.answer_oven_temp')
 
         temp_oven_label = wx.StaticText(parent=self, label='Oven Tempearture (°C)')
         temp_sens_label = wx.StaticText(parent=self, label='Sensor Temperature (°C)')
