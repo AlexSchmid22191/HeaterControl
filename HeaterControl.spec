@@ -6,7 +6,7 @@ block_cipher = None
 a = Analysis(['HeaterControl.py'],
              pathex=['C:\\Users\\Alex\\PycharmProjects\\HeaterControl'],
              binaries=[],
-             datas=[('App.mplstyle', '.')],
+             datas=[('App.mplstyle', '.'), ('Icons', 'Icons')],
              hiddenimports=['pkg_resources.py2_warn'],
              hookspath=[],
              runtime_hooks=[],
@@ -26,7 +26,8 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True )
+          console=False,
+          icon='Icons/Logo.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

@@ -11,7 +11,7 @@ class Eurotherm3216(minimalmodbus.Instrument):
 
     def __init__(self, portname, slaveadress):
         super().__init__(portname, slaveadress)
-        self.serial.baudrate=9600
+        self.serial.baudrate = 9600
         self.com_lock = Lock()
         self.decimal_precision = 0
 

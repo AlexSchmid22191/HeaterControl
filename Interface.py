@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import os
 import matplotlib
 import wx
 from pubsub.pub import sendMessage, subscribe, unsubscribe
@@ -20,7 +21,10 @@ class HeaterInterface(wx.Frame):
         super().__init__(*args, **kwargs)
 
         self.SetTitle('Heater Control')
-        self.SetBackgroundColour('White')
+        self.SetIcon(wx.Icon('Icons/Logo.ico'))
+
+        if os.name == 'nt':
+            self.SetBackgroundColour('White')
 
         self.status_bar = wx.StatusBar(parent=self)
         self.SetStatusBar(statusBar=self.status_bar)
