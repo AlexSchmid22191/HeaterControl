@@ -52,12 +52,6 @@ class HeaterControlEngine:
         subscribe(self.remove_heater, 'gui.con.disconnect_heater')
         subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
 
-        subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
-        subscribe(self.set_manual_mode, 'gui.set.manual_mode')
-        subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
-        subscribe(self.set_manual_output_power, 'gui.set.manual_power')
-        subscribe(self.set_rate, 'gui.set.rate')
-
     def set_heater_port(self, port):
         self.sensor_port = port
 
@@ -76,10 +70,23 @@ class HeaterControlEngine:
             subscribe(self.get_working_output, 'gui.request.working_output')
             subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
 
+            subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
+            subscribe(self.set_manual_mode, 'gui.set.manual_mode')
+            subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
+            subscribe(self.set_manual_output_power, 'gui.set.manual_power')
+            subscribe(self.set_rate, 'gui.set.rate')
+
     def remove_heater(self):
         unsubscribe(self.get_oven_temp, 'gui.request.oven_temp')
         unsubscribe(self.get_working_output, 'gui.request.working_output')
         unsubscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
+
+        unsubscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
+        unsubscribe(self.set_manual_mode, 'gui.set.manual_mode')
+        unsubscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
+        unsubscribe(self.set_manual_output_power, 'gui.set.manual_power')
+        unsubscribe(self.set_rate, 'gui.set.rate')
+        
         self.heater = None
 
     def add_sensor(self, sensor_type, sensor_port):
