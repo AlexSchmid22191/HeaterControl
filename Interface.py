@@ -23,7 +23,7 @@ class HeaterInterface(wx.Frame):
         self.SetTitle('Heater Control')
         self.SetIcon(wx.Icon('Icons/Logo.ico'))
 
-        if os.name == 'nt':
+        if os.name == 'nt' and False:
             self.SetBackgroundColour('White')
 
         self.status_bar = wx.StatusBar(parent=self)
@@ -369,6 +369,7 @@ class DeviceMenu(wx.Menu):
         self.heater_type_menu.Append(item='Eurotherm3216', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Eurotherm3200', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Eurotherm3210', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.heater_type_menu.Append(item='Omega Pt', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
 
         self.heater_com_menu = PortMenu()
 
