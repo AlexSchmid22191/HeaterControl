@@ -11,6 +11,7 @@ from Drivers.Pyrometer import Pyrometer
 from Drivers.Thermolino import Thermolino
 from Drivers.Thermoplatino import Thermoplatino
 from Drivers.Keithly import Keithly
+from Drivers.OmegaPt import OmegaPt
 
 from ThreadDecorators import in_new_thread
 
@@ -22,7 +23,7 @@ class HeaterControlEngine:
         self.com_lock = Lock()
 
         self.heater_types = {'Eurotherm3216': Eurotherm3216, 'Eurotherm3200': Eurotherm3216,
-                             'Eurotherm3210': Eurotherm3216}
+                             'Eurotherm3210': Eurotherm3216, 'Omega Pt': OmegaPt}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly 2000': Keithly}
 
@@ -52,12 +53,6 @@ class HeaterControlEngine:
         subscribe(self.remove_heater, 'gui.con.disconnect_heater')
         subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
 
-        subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
-        subscribe(self.set_manual_mode, 'gui.set.manual_mode')
-        subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
-        subscribe(self.set_manual_output_power, 'gui.set.manual_power')
-        subscribe(self.set_rate, 'gui.set.rate')
-
     def set_heater_port(self, port):
         self.sensor_port = port
 
@@ -68,18 +63,29 @@ class HeaterControlEngine:
         self.heater_slave_adress = adress
 
     def add_heater(self, heater_type, heater_port):
-        if heater_type == 'Eurotherm3216':
-            self.heater = self.heater_types[heater_type](portname=heater_port, slaveadress=self.heater_slave_adress)
-            sleep(2)
-            self.heater.set_manual_mode()
-            subscribe(self.get_oven_temp, 'gui.request.oven_temp')
-            subscribe(self.get_working_output, 'gui.request.working_output')
-            subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
+        self.heater = self.heater_types[heater_type](portname=heater_port, slaveadress=self.heater_slave_adress)
+        self.heater.set_manual_mode()
+        subscribe(self.get_oven_temp, 'gui.request.oven_temp')
+        subscribe(self.get_working_output, 'gui.request.working_output')
+        subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
+
+        subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
+        subscribe(self.set_manual_mode, 'gui.set.manual_mode')
+        subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
+        subscribe(self.set_manual_output_power, 'gui.set.manual_power')
+        subscribe(self.set_rate, 'gui.set.rate')
 
     def remove_heater(self):
         unsubscribe(self.get_oven_temp, 'gui.request.oven_temp')
         unsubscribe(self.get_working_output, 'gui.request.working_output')
         unsubscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
+
+        unsubscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
+        unsubscribe(self.set_manual_mode, 'gui.set.manual_mode')
+        unsubscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
+        unsubscribe(self.set_manual_output_power, 'gui.set.manual_power')
+        unsubscribe(self.set_rate, 'gui.set.rate')
+        
         self.heater = None
 
     def add_sensor(self, sensor_type, sensor_port):

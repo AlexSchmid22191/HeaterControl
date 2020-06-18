@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import os
 import matplotlib
 import wx
 from pubsub.pub import sendMessage, subscribe, unsubscribe
@@ -20,7 +21,10 @@ class HeaterInterface(wx.Frame):
         super().__init__(*args, **kwargs)
 
         self.SetTitle('Heater Control')
-        self.SetBackgroundColour('White')
+        self.SetIcon(wx.Icon('Icons/Logo.ico'))
+
+        if os.name == 'nt' and False:
+            self.SetBackgroundColour('White')
 
         self.status_bar = wx.StatusBar(parent=self)
         self.SetStatusBar(statusBar=self.status_bar)
@@ -365,6 +369,7 @@ class DeviceMenu(wx.Menu):
         self.heater_type_menu.Append(item='Eurotherm3216', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Eurotherm3200', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Eurotherm3210', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.heater_type_menu.Append(item='Omega Pt', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
 
         self.heater_com_menu = PortMenu()
 
