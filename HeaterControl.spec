@@ -26,12 +26,8 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-<<<<<<< HEAD
-          console=False )
-=======
           console=False,
           icon='Icons/Logo.ico')
->>>>>>> 3812a9c65e8725e80c54d06e166a5da134d0988b
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

@@ -23,7 +23,7 @@ class HeaterInterface(wx.Frame):
         self.SetTitle('Heater Control')
         self.SetIcon(wx.Icon('Icons/Logo.ico'))
 
-        if os.name == 'nt' and False:
+        if os.name == 'nt':
             self.SetBackgroundColour('White')
 
         self.status_bar = wx.StatusBar(parent=self)
