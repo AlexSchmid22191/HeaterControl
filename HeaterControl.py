@@ -12,6 +12,7 @@ addTopicDefnProvider(Topic_Def, TOPIC_TREE_FROM_CLASS)
 
 def main():
     app = wx.App()
+    app.locale = wx.Locale(wx.LANGUAGE_ENGLISH)
     engine = HeaterInterface(None)
     gui = HeaterControlEngine()
     print('Engine initilized: {:s}'.format(str(engine.__class__)))
