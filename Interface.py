@@ -124,7 +124,6 @@ class OvenControl(wx.Panel):
         temp_label = wx.StaticText(parent=self, label='Temperature')
         ramp_label = wx.StaticText(parent=self, label='Ramp')
         power_label = wx.StaticText(parent=self, label='Power')
-
         self.temp_entry = wx.SpinCtrlDouble(parent=self, value='0', min=0, max=1200, inc=1, style=wx.SP_ARROW_KEYS,
                                             size=(70, -1))
         self.ramp_entry = wx.SpinCtrlDouble(parent=self, value='15', min=0, max=480, inc=1, style=wx.SP_ARROW_KEYS,
@@ -217,6 +216,7 @@ class PIDFrame(wx.Frame):
         sendMessage(topicName='gui.set.pid_p', p=self.entries['P'].Getvalue())
         sendMessage(topicName='gui.set.pid_i', i=self.entries['I'].Getvalue())
         sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].Getvalue())
+
 
 class StatusWindow(wx.Panel):
     def __init__(self, *args, **kwargs):

@@ -74,6 +74,9 @@ class HeaterControlEngine:
         subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
         subscribe(self.set_manual_output_power, 'gui.set.manual_power')
         subscribe(self.set_rate, 'gui.set.rate')
+        subscribe(self.set_pid_p, 'gui.set.pid_p')
+        subscribe(self.set_pid_i, 'gui.set.pid_i')
+        subscribe(self.set_pid_d, 'gui.set.pid_d')
 
     def remove_heater(self):
         unsubscribe(self.get_oven_temp, 'gui.request.oven_temp')
@@ -85,6 +88,9 @@ class HeaterControlEngine:
         unsubscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
         unsubscribe(self.set_manual_output_power, 'gui.set.manual_power')
         unsubscribe(self.set_rate, 'gui.set.rate')
+        unsubscribe(self.set_pid_p, 'gui.set.pid_p')
+        unsubscribe(self.set_pid_i, 'gui.set.pid_i')
+        unsubscribe(self.set_pid_d, 'gui.set.pid_d')
         
         self.heater = None
 
@@ -152,6 +158,21 @@ class HeaterControlEngine:
             sendMessage(topicName='engine.answer.sensor_temp', temp=self.sensor_temperature)
         except (ValueError, SerialException, SerialTimeoutException):
             sendMessage(topicName='engine.status', text='Sensor error!')
+
+    @in_new_thread
+    def set_pid_p(self, p):
+        with self.com_lock:
+            self.heater.set_pid_p(p)
+
+    @in_new_thread
+    def set_pid_i(self, i):
+        with self.com_lock:
+            self.heater.set_pid_p(i)
+
+    @in_new_thread
+    def set_pid_d(self, d):
+        with self.com_lock:
+            self.heater.set_pid_p(d)
 
 
 class Datalogger:

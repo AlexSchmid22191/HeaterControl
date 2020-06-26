@@ -23,9 +23,7 @@ class Eurotherm3216(minimalmodbus.Instrument):
     def get_oven_temp(self):
         """Return the current temperature of the internal thermocouple"""
         with self.com_lock:
-            temp = self.read_register(1, number_of_decimals=self.decimal_precision)
-
-        return temp
+            return self.read_register(1, number_of_decimals=self.decimal_precision)
 
     def set_target_setpoint(self, temperature):
         """Set the tagert setpoint, in degree Celsius"""
@@ -40,16 +38,12 @@ class Eurotherm3216(minimalmodbus.Instrument):
     def get_working_output(self):
         """Return the current power output of the instrument"""
         with self.com_lock:
-            output = self.read_register(4, number_of_decimals=1)
-
-        return output
+            return self.read_register(4, number_of_decimals=1)
 
     def get_working_setpoint(self):
         """Get the current working setpoint of the instrument"""
         with self.com_lock:
-            setpoint = self.read_register(5, number_of_decimals=self.decimal_precision)
-
-        return setpoint
+            return self.read_register(5, number_of_decimals=self.decimal_precision)
 
     def set_rate(self, rate):
         """Set the maximum rate of change for the working setpoint i.e. the max heating/cooling rate"""
@@ -80,3 +74,15 @@ class Eurotherm3216(minimalmodbus.Instrument):
         """Enable controlling by the external sensor temperature"""
         with self.com_lock:
             self.write_register(1, 1)
+
+    def set_pid_p(self, p):
+        with self.com_lock:
+            self.write_register(6, p)
+
+    def set_pid_i(self, i):
+        with self.com_lock:
+            self.write_register(8, i)
+
+    def set_pid_d(self, d):
+        with self.com_lock:
+            self.write_register(9, d)
