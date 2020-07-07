@@ -40,12 +40,12 @@ class HeaterInterface(wx.Frame):
         self.oven_ctrl = OvenControl(parent=self)
         plot_ctrl = PlottingControl(parent=self)
         log_ctrl = LogginControl(parent=self)
-        matplot = MatplotWX(parent=self)
+        #matplot = MatplotWX(parent=self)
 
-        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.start_btn, handler=matplot.start_plotting)
-        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.stop_btn, handler=matplot.stop_plotting)
-        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.clear_btn, handler=matplot.clear_plot)
-        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.resume_btn, handler=matplot.cont_plotting)
+        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.start_btn, handler=matplot.start_plotting)
+        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.stop_btn, handler=matplot.stop_plotting)
+        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.clear_btn, handler=matplot.clear_plot)
+        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.resume_btn, handler=matplot.cont_plotting)
 
         hbox = wx.BoxSizer(orient=wx.HORIZONTAL)
         hbox.Add(self.status, flag=wx.EXPAND | wx.RIGHT, border=10)
@@ -58,12 +58,12 @@ class HeaterInterface(wx.Frame):
 
         hbox_2 = wx.BoxSizer(orient=wx.HORIZONTAL)
         hbox_2.Add(vbox, flag=wx.ALL, border=10)
-        hbox_2.Add(matplot, flag=wx.EXPAND | wx.FIXED_MINSIZE, proportion=1)
+        #hbox_2.Add(matplot, flag=wx.EXPAND | wx.FIXED_MINSIZE, proportion=1)
 
         hbox_2.Fit(self)
         self.SetSizer(hbox_2)
 
-        self.SetMinSize((800, self.GetSize()[1]))
+        #self.SetMinSize((800, self.GetSize()[1]))
         self.Show(True)
 
     @in_main_thread
@@ -122,30 +122,32 @@ class OvenControl(wx.Panel):
         super().__init__(*args, **kwargs)
 
         # Create entries and labels for setpoint, rate and pid output
+        input_box = wx.StaticBoxSizer(orient=wx.HORIZONTAL, parent=self, label='Input')
         parameters = ['Setpoint', 'Rate', 'Output']
-        self.labels = {parameter: wx.StaticText(parent=self, label=parameter) for parameter in parameters}
-        self.entries = {parameter: wx.SpinCtrlDouble(parent=self, inc=1, style=wx.SP_ARROW_KEYS, size=(70, -1))
-                        for parameter in parameters}
-        grid = wx.FlexGridSizer(rows=3, cols=2, hgap=5, vgap=5)
-        [grid.AddGrowableRow(i) for i in range(3)]
-        [grid.Add(widgets[parameter], proportion=0, flag=wx.ALIGN_CENTER_VERTICAL) for parameter in parameters
-         for widgets in (self.labels, self.entries)]
+        self.labels = {parameter: wx.StaticText(parent=input_box.GetStaticBox(), label=parameter)
+                       for parameter in parameters}
+        self.entries = {parameter: wx.SpinCtrlDouble(parent=input_box.GetStaticBox(), style=wx.SP_ARROW_KEYS,
+                                                     inc=1, size=(70, -1)) for parameter in parameters}
+        grid = wx.FlexGridSizer(rows=2, cols=3, hgap=5, vgap=5)
+        [grid.Add(widgets[parameter], proportion=0, flag=wx.ALIGN_CENTER_VERTICAL)
+         for widgets in (self.labels, self.entries) for parameter in parameters]
+        self.set_button = wx.Button(parent=input_box.GetStaticBox(), label='Set')
+        [input_box.Add(widget, flag=wx.EXPAND | wx.ALL, proportion=1) for widget in (grid, self.set_button)]
 
-        self.mode_box = wx.RadioBox(parent=self, label='Mode', choices=['Manual', 'Automatic'], majorDimension=0)
+        self.mode_box = wx.RadioBox(parent=self, label='Mode', choices=['Manual', 'Automatic'], majorDimension=1)
         self.mode_box.Bind(event=wx.EVT_RADIOBOX, handler=self.set_mode, source=self.mode_box)
         self.set_mode()
 
         pid_button = wx.Button(parent=self, id=wx.ID_ANY, label='P\nI\nD')
         pid_button.Bind(wx.EVT_BUTTON, handler=self.show_pid)
 
-        box = wx.StaticBox(parent=self, label='Controller')
-        boxsizer = wx.StaticBoxSizer(box, orient=wx.HORIZONTAL)
+        controlbox = wx.StaticBoxSizer(parent=self, label='Controller', orient=wx.HORIZONTAL)
 
-        boxsizer.Add(self.mode_box, flag=wx.ALL | wx.EXPAND, border=1, proportion=0)
-        boxsizer.Add(grid, flag=wx.ALL | wx.EXPAND, border=5, proportion=0)
-        boxsizer.Add(pid_button, flag=wx.ALL | wx.EXPAND, border=1)
+        controlbox.Add(self.mode_box, flag=wx.ALL | wx.EXPAND, border=5, proportion=1)
+        controlbox.Add(input_box, flag=wx.ALL | wx.EXPAND, border=5, proportion=1)
+        controlbox.Add(pid_button, flag=wx.ALL | wx.EXPAND, border=5, proportion=1)
 
-        self.SetSizerAndFit(boxsizer)
+        self.SetSizerAndFit(controlbox)
 
     def set_ramp(self, *args):
         rate = self.ramp_entry.GetValue()
@@ -163,7 +165,6 @@ class OvenControl(wx.Panel):
 
     def set_mode(self, *args):
         mode = self.mode_box.GetStringSelection()
-        self.set_visibility(mode)
         if mode == 'Automatic':
             sendMessage(topicName='gui.set.automatic_mode')
         else:
@@ -173,12 +174,6 @@ class OvenControl(wx.Panel):
     def show_pid(*args):
         pid = PIDFrame(parent=None)
         pid.Show()
-
-    def set_visibility(self, mode):
-        visible_in_auto = {'Setpoint': True, 'Rate': True, 'Output': False}
-        [widgets[parameter].Show(visible_in_auto[parameter] ^ (mode == 'Manual')) for parameter in visible_in_auto
-         for widgets in (self.labels, self.entries)]
-        self.Layout()
 
 
 
