@@ -32,7 +32,7 @@ class HeaterControlEngine:
 
         self.heater = None
         self.heater_port = None
-        self.heater_slave_adress = 5
+        self.heater_slave_adress = 1
 
         self.sensor_temperature = 0
 

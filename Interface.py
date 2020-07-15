@@ -197,25 +197,53 @@ class PIDFrame(wx.Frame):
         if os.name == 'nt':
             self.SetBackgroundColour('White')
 
-        parameters = {'P': 'Proportional band', 'I': 'Integral time (s)', 'D': 'Derivative time (s)'}
+        parameters = {'P': 'Proportional band', 'I': 'Integral time (s)', 'D': 'Derivative time (s)',
+                      'P1': 'Proportional band 1', 'I1': 'Integral time 1 (s)', 'D1': 'Derivative time 1 (s)',
+                      'P2': 'Proportional band 2', 'I2': 'Integral time 2 (s)', 'D2': 'Derivative time 2 (s)',
+                      'P3': 'Proportional band 3', 'I3': 'Integral time 3 (s)', 'D3': 'Derivative time 3 (s)',
+                      'GS': 'Gain scheduling', 'B12': 'Boundary 1/2', 'B23': 'Boundary 2/3'}
+
+        self.param_is_simple = {'P': True, 'I': True, 'D': True,
+                                'P1': False, 'I1': False, 'D1': False,
+                                'P2': False, 'I2': False, 'D2': False,
+                                'P3': False, 'I3': False, 'D3': False,
+                                'GS': False, 'B12': False, 'B23': False}
+
         self.labels = {key: wx.StaticText(parent=self, label=value) for (key, value) in parameters.items()}
         self.entries = {key: wx.SpinCtrl(parent=self, min=0, max=9999, initial=1) for key in parameters}
-        self.set_button = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
+        self.set_buttons = {key: wx.Button(parent=self, id=wx.ID_ANY, label='Set') for key in parameters}
 
-        grid_sizer = wx.FlexGridSizer(rows=3, cols=2, hgap=5, vgap=5)
-        [(grid_sizer.Add(self.labels[parameter]),grid_sizer.Add(self.entries[parameter])) for parameter in parameters]
+        grid_sizer = wx.FlexGridSizer(rows=15, cols=3, hgap=5, vgap=5)
+        for parameter in parameters:
+            grid_sizer.Add(self.labels[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
+            grid_sizer.Add(self.entries[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
+            grid_sizer.Add(self.set_buttons[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
+
+        self.get_button = wx.Button(parent=self, label='Get current')
+        self.adv_button = wx.ToggleButton(parent=self, label='Advanced mode')
+        self.adv_button.Bind(event=wx.EVT_TOGGLEBUTTON, handler=self.toggle_advanced)
+        buttonsizer = wx.BoxSizer(orient=wx.VERTICAL)
+        [buttonsizer.Add(button, flag=wx.EXPAND) for button in [self.get_button, self.adv_button]]
 
         boxsizer = wx.BoxSizer(orient=wx.HORIZONTAL)
         boxsizer.Add(grid_sizer, flag=wx.EXPAND | wx.ALL, border=5)
-        boxsizer.Add(self.set_button, flag=wx.EXPAND | wx.ALL, border=5)
+        boxsizer.Add(buttonsizer, flag=wx.EXPAND | wx.ALL, border=5)
 
         self.SetSizerAndFit(boxsizer)
+        self.toggle_advanced(state=False)
         self.Show()
 
     def set_pid_parameters(self):
         sendMessage(topicName='gui.set.pid_p', p=self.entries['P'].Getvalue())
         sendMessage(topicName='gui.set.pid_i', i=self.entries['I'].Getvalue())
         sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].Getvalue())
+
+    def toggle_advanced(self, *event, state=True):
+        state = event[0].IsChecked() if event else state
+        for (parameter, is_simple) in self.param_is_simple.items():
+            self.labels[parameter].Show(state != is_simple)
+            self.entries[parameter].Show(state != is_simple)
+            self.set_buttons[parameter].Show(state != is_simple)
 
 
 class StatusWindow(wx.Panel):
