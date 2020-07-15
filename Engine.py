@@ -6,7 +6,7 @@ from time import time
 from serial import SerialException, SerialTimeoutException
 from pubsub.pub import sendMessage, subscribe, unsubscribe
 
-from Drivers.Eurotherms import Eurotherm3216
+from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508
 from Drivers.Pyrometer import Pyrometer
 from Drivers.Thermolino import Thermolino
 from Drivers.Thermoplatino import Thermoplatino
@@ -23,7 +23,7 @@ class HeaterControlEngine:
         self.com_lock = Lock()
 
         self.heater_types = {'Eurotherm3216': Eurotherm3216, 'Eurotherm3200': Eurotherm3216,
-                             'Eurotherm3210': Eurotherm3216, 'Omega Pt': OmegaPt}
+                             'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly 2000': Keithly}
 
@@ -32,7 +32,7 @@ class HeaterControlEngine:
 
         self.heater = None
         self.heater_port = None
-        self.heater_slave_adress = 1
+        self.heater_slave_adress = 5
 
         self.sensor_temperature = 0
 

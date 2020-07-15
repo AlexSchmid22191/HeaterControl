@@ -15,11 +15,6 @@ class Eurotherm3216(minimalmodbus.Instrument):
         self.com_lock = Lock()
         self.decimal_precision = 0
 
-    def get_decimal_precision(self):
-        """Get the decimal precision stored in the instrument"""
-        with self.com_lock:
-            self.decimal_precision = self.read_register(525, 0)
-
     def get_oven_temp(self):
         """Return the current temperature of the internal thermocouple"""
         with self.com_lock:
@@ -74,6 +69,60 @@ class Eurotherm3216(minimalmodbus.Instrument):
         """Enable controlling by the external sensor temperature"""
         with self.com_lock:
             self.write_register(1, 1)
+
+    def set_pid_p(self, p):
+        with self.com_lock:
+            self.write_register(6, p)
+
+    def set_pid_i(self, i):
+        with self.com_lock:
+            self.write_register(8, i)
+
+    def set_pid_d(self, d):
+        with self.com_lock:
+            self.write_register(9, d)
+
+
+class Eurotherm3508(minimalmodbus.Instrument):
+    def __init__(self, portname, slaveadress):
+        super().__init__(portname, slaveadress)
+        self.serial.baudrate = 9600
+        self.com_lock = Lock()
+
+    def get_oven_temp(self):
+        """Return the current process value (i.e. the "internal" eurotherm sensor)"""
+        with self.com_lock:
+            return self.read_register(1, number_of_decimals=4, signed=True)
+
+    def set_target_setpoint(self, temperature):
+        """Set the tagert setpoint, in degree Celsius"""
+        with self.com_lock:
+            self.write_register(2, temperature, number_of_decimals=4, signed=True)
+
+    def set_manual_output_power(self, output):
+        """Set the power output of the instrument in percent"""
+        with self.com_lock:
+            self.write_register(3, output, number_of_decimals=1, signed=True)
+
+    def get_working_output(self):
+        """Return the current power output of the instrument"""
+        with self.com_lock:
+            return self.read_register(3, number_of_decimals=1)
+
+    def get_working_setpoint(self):
+        """Get the current working setpoint of the instrument"""
+        with self.com_lock:
+            return self.read_register(5, number_of_decimals=4, signed=True)
+
+    def set_automatic_mode(self):
+        """Set controller to automatic mode"""
+        with self.com_lock:
+            self.write_register(273, 0)
+
+    def set_manual_mode(self):
+        """Set controller to manual mode"""
+        with self.com_lock:
+            self.write_register(273, 1)
 
     def set_pid_p(self, p):
         with self.com_lock:
