@@ -1,10 +1,12 @@
-from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QFrame, QApplication, QGridLayout
+from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QFrame, QApplication, QGridLayout, QToolButton
 from PySide2.QtGui import QIcon, QPixmap
+from PySide2.QtCore import QSize
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 import functools
 import matplotlib.pyplot as plt
 import mplcyberpunk
+import os
 
 
 class Elchcontrol(QWidget):
@@ -12,26 +14,27 @@ class Elchcontrol(QWidget):
         super().__init__(*args, **kwargs)
 
         ribbon = ElchRibbon(parent=self)
-        matplotframe = QMatplot()
+        matplotframe = ElchMatplot()
         hbox = QHBoxLayout()
         hbox.addWidget(ribbon, stretch=0)
         hbox.addWidget(matplotframe, stretch=1)
         hbox.setSpacing(0)
         hbox.setContentsMargins(0, 0, 0, 0)
 
-        # with open('style.qss') as stylefile:
-        #     self.setStyleSheet(stylefile.read())
+        with open('style.qss') as stylefile:
+            self.setStyleSheet(stylefile.read())
 
         self.setLayout(hbox)
         self.show()
 
 
-class QMatplot(FigureCanvas):
+class ElchMatplot(FigureCanvas):
     def __init__(self, *args, **kwargs):
         super().__init__(Figure(figsize=(6, 6)), *args, **kwargs)
         plt.style.use('cyberpunk')
         self.ax = self.figure.subplots()
-        self.figure.set_facecolor(self.ax.get_facecolor())
+        self.figure.set_facecolor('#242537')
+        self.ax.set_facecolor('#242537')
         self.ax.plot([1, 2])
         mplcyberpunk.add_glow_effects(self.ax)
 
@@ -41,6 +44,8 @@ class ElchRibbon(QWidget):
         super().__init__(*args, **kwargs)
         self.menus = ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
         self.menu_buttons = {key: QPushButton(parent=self, text=key) for key in self.menus}
+        icons = {key: QIcon('../Icons/Logging.png') for key in self.menus}
+
         self.menu_frames = {key: QFrame(parent=self) for key in self.menus}
         vbox = QVBoxLayout()
 
@@ -52,6 +57,7 @@ class ElchRibbon(QWidget):
             vbox.addWidget(self.menu_frames[key])
             self.menu_frames[key].setVisible(False)
             self.menu_frames[key].setMinimumHeight(50)
+            self.menu_buttons[key].setIcon(icons[key])
             self.menu_buttons[key].clicked.connect(functools.partial(self.select_menu, key))
 
         vbox.addStretch()
@@ -85,7 +91,7 @@ class ElchLogMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         controls = ['Start', 'Stop', 'Pause']
-        self.buttons = {key: QPushButton(text=key, parent=self) for key in controls}
+        self.buttons = {key: QPushButton(parent=self, text=key) for key in controls}
 
         grid = QGridLayout()
         grid.setSpacing(0)

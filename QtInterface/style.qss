@@ -1,3 +1,3 @@
 ButtonTest{background-color: mediumspringgreen}
-QPushButton{background-color: #1f1c39; color: #74cbff; border:none; font-size: 18; min-height: 50px;
-            font-family: "FiraGO Book"}
+QPushButton{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
+            font-family: "Segoe UI Semibold"; text-align:left; }
