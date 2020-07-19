@@ -1,8 +1,9 @@
 import minimalmodbus
+from Drivers.AbstractController import AbstractController
 from threading import Lock
 
 
-class Eurotherm3216(minimalmodbus.Instrument):
+class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
     """Instrument class for Eurotherm 3216 process controller.
     Args:
     * portname (str): port name
