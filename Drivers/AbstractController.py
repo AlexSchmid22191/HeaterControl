@@ -9,12 +9,12 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('get_process_variable',
                                                                                       self.__class__.__name__))
 
-    def set_target_setpoint(self, temperature):
+    def set_target_setpoint(self, setpoint):
         """Set the target setpoint"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_target_setpoint',
                                                                                       self.__class__.__name__))
 
-    def get_target_setpoint(self, temperature):
+    def get_target_setpoint(self, setpoint):
         """Get the target setpoint (this is not always the working setpoint"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('get_target_setpoint',
                                                                                       self.__class__.__name__))
@@ -39,7 +39,7 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_rate',
                                                                                       self.__class__.__name__))
 
-    def get_rate(self, rate):
+    def get_rate(self):
         """Get the rate of change for the working setpoint e.g. the heating/cooling rate"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('get_rate',
                                                                                       self.__class__.__name__))
@@ -59,12 +59,12 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('get_control_mode',
                                                                                       self.__class__.__name__))
 
-    def write_external_target_setpoint(self, temperature):
+    def write_external_target_setpoint(self, target_value):
         """Set an external target setpoint"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('write_external_target_setpoint',
                                                                                       self.__class__.__name__))
 
-    def write_external_sensor_value(self, temperature):
+    def write_external_sensor_value(self, sensor_value):
         """Write process variable from an external sensor to the controller"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('write_external_sensor_value',
                                                                                       self.__class__.__name__))
