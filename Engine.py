@@ -1,16 +1,14 @@
 from datetime import datetime
-from threading import Lock
 from threading import Timer
-from time import sleep
-from time import time
+import time
 from serial import SerialException, SerialTimeoutException
 from pubsub.pub import sendMessage, subscribe, unsubscribe
 
-from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508
+from Drivers.AbstractSensorController import AbstractController, AbstractSensor
+from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408
+from Drivers.ElchWorks import Thermolino, Thermoplatino
+from Drivers.Keithly import Keithly2000
 from Drivers.Pyrometer import Pyrometer
-from Drivers.Thermolino import Thermolino
-from Drivers.Thermoplatino import Thermoplatino
-from Drivers.Keithly import Keithly
 from Drivers.OmegaPt import OmegaPt
 
 from ThreadDecorators import in_new_thread
@@ -18,40 +16,26 @@ from ThreadDecorators import in_new_thread
 
 class HeaterControlEngine:
     def __init__(self):
-
-        # To prevent multiple devices writing to the same variable
-        self.com_lock = Lock()
-
-        self.heater_types = {'Eurotherm3216': Eurotherm3216, 'Eurotherm3200': Eurotherm3216,
-                             'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
+        self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
+                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
-                             'Keithly 2000': Keithly}
+                             'Keithly2000': Keithly2000}
 
-        self.sensor = None
+        self.sensor = AbstractSensor()
         self.sensor_port = None
+        self.controller = AbstractController()
+        self.controller_port = None
+        self.controller_slave_address = 1
 
-        self.heater = None
-        self.heater_port = None
-        self.heater_slave_adress = 1
+        self.sensor_value = 0
+        self.controller_process_value = 0
+        self.controller_working_output = 0
+        self.controller_working_setpoint = 0
 
-        self.sensor_temperature = 0
+        self.data_logger = Datalogger(master=self)
 
-        self.heater_temperature = 0
-        self.heater_working_output = 0
-        self.heater_working_setpoint = 0
-
-        self.heater_mode = 'manual'
-        self.heater_tagert_temp = 0
-        self.heater_rate = 15
-        self.heater_power = 0
-
-        self.datalogger = Datalogger(master=self)
-
-        subscribe(self.add_heater, 'gui.con.connect_heater')
+        subscribe(self.add_controller, 'gui.con.connect_heater')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
-
-        subscribe(self.remove_heater, 'gui.con.disconnect_heater')
-        subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
 
     def set_heater_port(self, port):
         self.sensor_port = port
@@ -59,13 +43,19 @@ class HeaterControlEngine:
     def set_sensor_port(self, port):
         self.sensor_port = port
 
-    def set_heater_slave_adress(self, adress):
-        self.heater_slave_adress = adress
+    def add_controller(self, heater_type, heater_port):
+        try:
+            self.controller = self.controller_types[heater_type](portname=heater_port,
+                                                                 slaveadress=self.controller_slave_address)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Connection error!')
 
-    def add_heater(self, heater_type, heater_port):
-        self.heater = self.heater_types[heater_type](portname=heater_port, slaveadress=self.heater_slave_adress)
-        self.heater.set_manual_mode()
-        subscribe(self.get_oven_temp, 'gui.request.oven_temp')
+        self.controller.set_manual_mode()
+
+        unsubscribe(self.add_controller, 'gui.con.connect_heater')
+        subscribe(self.remove_heater, 'gui.con.disconnect_heater')
+
+        subscribe(self.get_controller_process_variable, 'gui.request.oven_temp')
         subscribe(self.get_working_output, 'gui.request.working_output')
         subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
 
@@ -79,7 +69,11 @@ class HeaterControlEngine:
         subscribe(self.set_pid_d, 'gui.set.pid_d')
 
     def remove_heater(self):
-        unsubscribe(self.get_oven_temp, 'gui.request.oven_temp')
+
+        subscribe(self.add_controller, 'gui.con.connect_heater')
+        unsubscribe(self.remove_heater, 'gui.con.disconnect_heater')
+
+        unsubscribe(self.get_controller_process_variable, 'gui.request.oven_temp')
         unsubscribe(self.get_working_output, 'gui.request.working_output')
         unsubscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
 
@@ -91,88 +85,144 @@ class HeaterControlEngine:
         unsubscribe(self.set_pid_p, 'gui.set.pid_p')
         unsubscribe(self.set_pid_i, 'gui.set.pid_i')
         unsubscribe(self.set_pid_d, 'gui.set.pid_d')
-        
-        self.heater = None
+
+        self.controller = None
 
     def add_sensor(self, sensor_type, sensor_port):
-        self.sensor = self.sensor_types[sensor_type](port=sensor_port)
-        sleep(2)
-        subscribe(self.get_sensor_temp, 'gui.request.sensor_temp')
+        try:
+            self.sensor = self.sensor_types[sensor_type](port=sensor_port)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Connection error!')
+
+        subscribe(self.get_sensor_value, 'gui.request.sensor_temp')
+        subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
+        unsubscribe(self.add_sensor, 'gui.con.connect_sensor')
 
     def remove_sensor(self):
         self.sensor.close()
-        unsubscribe(self.get_sensor_temp, 'gui.request.sensor_temp')
+        unsubscribe(self.get_sensor_value, 'gui.request.sensor_temp')
+        unsubscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
+        subscribe(self.add_sensor, 'gui.con.connect_sensor')
 
     @in_new_thread
-    def get_oven_temp(self):
-        with self.com_lock:
-            self.heater_temperature = self.heater.get_oven_temp()
-            sendMessage(topicName='engine.answer.oven_temp', temp=self.heater_temperature)
+    def get_controller_process_variable(self):
+        try:
+            self.controller_process_value = self.controller.get_process_variable()
+            sendMessage(topicName='engine.answer.process_variable', pv=self.controller_process_value)
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def get_working_output(self):
-        with self.com_lock:
-            self.heater_working_output = self.heater.get_working_output()
-            sendMessage(topicName='engine.answer.oven_working_output', output=self.heater_working_output)
+        try:
+            self.controller_working_output = self.controller.get_working_output()
+            sendMessage(topicName='engine.answer.working_output', output=self.controller_working_output)
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def get_working_setpoint(self):
-        with self.com_lock:
-            self.heater_working_setpoint = self.heater.get_working_setpoint()
-            sendMessage(topicName='engine.answer.oven_working_setpoint', setpoint=self.heater_working_setpoint)
+        try:
+            self.controller_working_setpoint = self.controller.get_working_setpoint()
+            sendMessage(topicName='engine.answer.working_setpoint', setpoint=self.controller_working_setpoint)
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_automatic_mode(self):
-        with self.com_lock:
-            self.heater.set_automatic_mode()
+        try:
+            self.controller.set_automatic_mode()
             sendMessage(topicName='engine.status', text='Heater set to automatic mode!')
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_manual_mode(self):
-        with self.com_lock:
-            self.heater.set_manual_mode()
+        try:
+            self.controller.set_manual_mode()
             sendMessage(topicName='engine.status', text='Heater set to manual mode!')
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_target_setpoint(self, temp):
-        with self.com_lock:
-            self.heater.set_target_setpoint(temp)
-            sendMessage(topicName='engine.status', text='Heater setpoint set to {:5.1f} °C!'.format(temp))
+        try:
+            self.controller.set_target_setpoint(temp)
+            sendMessage(topicName='engine.status', text='Heater setpoint set to {:5.1f}!'.format(temp))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_manual_output_power(self, power):
-        with self.com_lock:
-            self.heater.set_manual_output_power(power)
+        try:
+            self.controller.set_manual_output_power(power)
             sendMessage(topicName='engine.status', text='Heater power set to {:5.1f} %!'.format(power))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_rate(self, rate):
-        with self.com_lock:
-            self.heater.set_rate(rate)
-            sendMessage(topicName='engine.status', text='Heater rate set to {:5.1f} °C/min!'.format(rate))
+        try:
+            self.controller.set_rate(rate)
+            sendMessage(topicName='engine.status', text='Heater rate set to {:5.1f}!'.format(rate))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
-    def get_sensor_temp(self):
+    def get_sensor_value(self):
         try:
-            self.sensor_temperature = self.sensor.read_temperature()
-            sendMessage(topicName='engine.answer.sensor_temp', temp=self.sensor_temperature)
-        except (ValueError, SerialException, SerialTimeoutException):
-            sendMessage(topicName='engine.status', text='Sensor error!')
+            self.sensor_value = self.sensor.get_sensor_value()
+            sendMessage(topicName='engine.answer.sensor_value', value=self.sensor_value)
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_pid_p(self, p):
-        with self.com_lock:
-            self.heater.set_pid_p(p)
+        try:
+            self.controller.set_pid_p(p)
+            sendMessage(topicName='engine.status', text='PID P set to {:f}'.format(p))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_pid_i(self, i):
-        with self.com_lock:
-            self.heater.set_pid_p(i)
+        try:
+            self.controller.set_pid_p(i)
+            sendMessage(topicName='engine.status', text='PID I set to {:f}'.format(i))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
     def set_pid_d(self, d):
-        with self.com_lock:
-            self.heater.set_pid_p(d)
+        try:
+            self.controller.set_pid_p(d)
+            sendMessage(topicName='engine.status', text='PID D set to {:f}'.format(d))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
 
 
 class Datalogger:
@@ -189,15 +239,13 @@ class Datalogger:
 
     def write_log(self):
         abs_time = datetime.now()
-        timestring = abs_time.strftime('%d.%m.%Y - %H:%M:%S')
-        unixtime = int(time())
-
+        time_string = abs_time.strftime('%d.%m.%Y - %H:%M:%S')
+        unix_time = int(time.time())
         with open(self.logfile_path, 'a') as logfile:
-            logfile.write('{:s}\t{:d}\t{:5.1f}\t{:5.1f}\t{:5.2f}\n'.format(timestring, unixtime,
-                                                                         self.master.heater_temperature,
-                                                                         self.master.heater_working_output,
-                                                                         self.master.sensor_temperature))
-
+            logfile.write('{:s}\t{:d}\t{:5.1f}\t{:5.1f}\t{:5.2f}\n'.format(time_string, unix_time,
+                                                                           self.master.controller_process_value,
+                                                                           self.master.controller_working_output,
+                                                                           self.master.sensor_value))
         if self.is_logging:
             log_timer = Timer(interval=1, function=self.write_log)
             log_timer.start()
@@ -209,8 +257,7 @@ class Datalogger:
         if not self.is_logging:
             self.is_logging = True
             with open(self.logfile_path, 'a') as logfile:
-                logfile.write('Time\tUnixtime\tHeater Temperature (°C)\tHeater Power (%)\tSensor Temperature (°C)\n')
-
+                logfile.write('Time\tUnixtime\tProcess Variable\tOutput Power (%)\tSensor Value\n')
             log_timer = Timer(interval=1, function=self.write_log)
             log_timer.start()
 
@@ -224,4 +271,4 @@ class Datalogger:
 
 if __name__ == '__main__':
     a = HeaterControlEngine()
-    a.datalogger.start_log()
+    a.data_logger.start_log()

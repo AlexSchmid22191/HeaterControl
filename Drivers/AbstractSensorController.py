@@ -88,3 +88,20 @@ class AbstractController:
         """Set the D (Derivative time) for the PID controller"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
                                                                                       self.__class__.__name__))
+
+
+class AbstractSensor:
+    """
+    Abstract base class for sensors. Drivers for specific devices inherit this class and implement the read method.
+    Raises a NotImplementedException if the methods are not overwritten in derived subclasses.
+    """
+
+    def get_sensor_value(self):
+        """Return the current readout value of the sensor (e.g. pyrometer temperature)"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('get_sensor_value',
+                                                                                      self.__class__.__name__))
+
+    def close(self):
+        """Close the serial port"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('close',
+                                                                                      self.__class__.__name__))

@@ -1,6 +1,6 @@
 import threading
 import minimalmodbus
-from Drivers.AbstractController import AbstractController
+from Drivers.AbstractSensorController import AbstractController
 
 
 class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
@@ -162,7 +162,6 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
         """Get the rate of change for the working setpoint e.g. the heating/cooling rate"""
         with self.com_lock:
             return self.read_register(35, number_of_decimals=1)
-
 
 
 class Eurotherm3508(AbstractController, minimalmodbus.Instrument):

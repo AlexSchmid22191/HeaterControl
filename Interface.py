@@ -431,9 +431,8 @@ class DeviceMenu(wx.Menu):
 
         self.heater_type_menu = heater_menu = wx.Menu()
         self.heater_type_menu.Append(item='Eurotherm3216', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.heater_type_menu.Append(item='Eurotherm2408', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Eurotherm3508', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
-        self.heater_type_menu.Append(item='Eurotherm3200', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
-        self.heater_type_menu.Append(item='Eurotherm3210', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Omega Pt', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
 
         self.heater_com_menu = PortMenu()

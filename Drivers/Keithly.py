@@ -3,7 +3,7 @@ from threading import Lock
 from time import sleep
 
 
-class Keithly(Serial):
+class Keithly2000(Serial):
     def __init__(self, port):
         Serial.__init__(self, port, timeout=1.5)
         self.com_lock = Lock()

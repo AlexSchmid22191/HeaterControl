@@ -17,17 +17,17 @@ class engine:
         UNDOCUMENTED: created as parent without specification
         """
 
-        class oven_temp:
+        class process_variable:
             """
             UNDOCUMENTED: created without spec
             """
             
-            def msgDataSpec(temp):
+            def msgDataSpec(pv):
                 """
                 - temp: UNDOCUMENTED
                 """
 
-        class oven_working_output:
+        class working_output:
             """
             UNDOCUMENTED: created without spec
             """
@@ -37,7 +37,7 @@ class engine:
                 - output: UNDOCUMENTED
                 """
 
-        class oven_working_setpoint:
+        class working_setpoint:
             """
             UNDOCUMENTED: created without spec
             """
@@ -47,12 +47,12 @@ class engine:
                 - setpoint: UNDOCUMENTED
                 """
 
-        class sensor_temp:
+        class sensor_value:
             """
             UNDOCUMENTED: created without spec
             """
             
-            def msgDataSpec(temp):
+            def msgDataSpec(value):
                 """
                 - temp: UNDOCUMENTED
                 """
