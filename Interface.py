@@ -114,7 +114,7 @@ class LogginControl(wx.Panel):
 
     @staticmethod
     def pause_log(*args):
-        sendMessage(topicName='gui.log.continue')
+        sendMessage(topicName='gui.log.cont')
 
 
 class OvenControl(wx.Panel):
@@ -171,7 +171,7 @@ class OvenControl(wx.Panel):
 
     def set_temp(self, *args):
         temp = self.temp_entry.GetValue()
-        sendMessage(topicName='gui.set.target_setpoint', temp=temp)
+        sendMessage(topicName='gui.set.target_setpoint', setpoint=temp)
 
     def set_power(self, *args):
         power = self.power_entry.GetValue()
@@ -264,10 +264,10 @@ class StatusWindow(wx.Panel):
         self.set_temp_value = wx.StaticText(parent=self, label='625')
         self.power_value = wx.StaticText(parent=self, label='10.5')
 
-        subscribe(listener=self.update_oven_power, topicName='engine.answer.oven_working_output')
-        subscribe(listener=self.update_oven_setpoint, topicName='engine.answer.oven_working_setpoint')
-        subscribe(listener=self.update_oven_temperature, topicName='engine.answer.oven_temp')
-        subscribe(listener=self.update_sensor_temperature, topicName='engine.answer.sensor_temp')
+        subscribe(listener=self.update_oven_power, topicName='engine.answer.working_output')
+        subscribe(listener=self.update_oven_setpoint, topicName='engine.answer.working_setpoint')
+        subscribe(listener=self.update_oven_temperature, topicName='engine.answer.process_variable')
+        subscribe(listener=self.update_sensor_value, topicName='engine.answer.sensor_value')
 
         grid_sizer = wx.FlexGridSizer(rows=4, cols=2, vgap=10, hgap=20)
 
@@ -284,14 +284,14 @@ class StatusWindow(wx.Panel):
 
     @staticmethod
     def request_data(*args):
-        sendMessage(topicName='gui.request.oven_temp')
+        sendMessage(topicName='gui.request.process_variable')
         sendMessage(topicName='gui.request.working_output')
         sendMessage(topicName='gui.request.working_setpoint')
-        sendMessage(topicName='gui.request.sensor_temp')
+        sendMessage(topicName='gui.request.sensor_value')
 
     @in_main_thread
-    def update_oven_temperature(self, temp):
-        self.temp_oven_value.SetLabel(label='{:4.1f}'.format(temp))
+    def update_oven_temperature(self, pv):
+        self.temp_oven_value.SetLabel(label='{:4.1f}'.format(pv))
 
     @in_main_thread
     def update_oven_power(self, output):
@@ -302,8 +302,8 @@ class StatusWindow(wx.Panel):
         self.set_temp_value.SetLabel(label='{:4.1f}'.format(setpoint))
 
     @in_main_thread
-    def update_sensor_temperature(self, temp):
-        self.temp_sens_value.SetLabel(label='{:4.1f}'.format(temp))
+    def update_sensor_value(self, value):
+        self.temp_sens_value.SetLabel(label='{:4.1f}'.format(value))
 
 
 class PlottingControl(wx.Panel):
@@ -392,17 +392,21 @@ class MatplotWX(wx.Panel):
         if not self.is_plotting:
             self.is_plotting = True
             self.startime = datetime.now()
-            subscribe(topicName='engine.answer.sensor_temp', listener=self.add_sensor_temp_point)
-            subscribe(topicName='engine.answer.oven_temp', listener=self.add_oven_temp_point)
-            subscribe(topicName='engine.answer.oven_working_output', listener=self.add_oven_power_point)
+            subscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+            subscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
+            subscribe(topicName='engine.answer.working_output', listener=self.add_oven_power_point)
 
     def stop_plotting(self, *args):
         self.is_plotting = False
-        unsubscribe(topicName='engine.answer.sensor_temp', listener=self.add_sensor_temp_point)
+        unsubscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+        unsubscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
+        unsubscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
 
     def cont_plotting(self, *args):
         self.is_plotting = True
-        subscribe(topicName='engine.answer.sensor_temp', listener=self.add_sensor_temp_point)
+        subscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+        subscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
+        subscribe(topicName='engine.answer.working_output', listener=self.add_oven_power_point)
 
     def clear_plot(self, args):
         for plot in (self.sens_temp_plot, self.oven_temp_plot, self.oven_pwr_plot):
@@ -470,10 +474,10 @@ class DeviceMenu(wx.Menu):
                 if type_item.IsChecked():
                     heater_type = type_item.GetItemLabelText()
 
-            sendMessage(topicName='gui.con.connect_heater', heater_type=heater_type, heater_port=heater_port)
+            sendMessage(topicName='gui.con.connect_controller', controller_type=heater_type, controller_port=heater_port)
 
         else:
-            sendMessage(topicName='gui.con.disconnect_heater')
+            sendMessage(topicName='gui.con.disconnect_controller')
 
     def connect_sensor(self, event):
         item = self.FindItemById(event.GetId())

@@ -98,7 +98,10 @@ class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
 
 class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
     """Instrument class for Eurotherm 2408 process controller.
-    Experimental implementation: May or may not work, does not use the programmer but uses setpoint and max rate
+
+    Implementations for automatic mode need to be reworked, since the Eurotherm can only access the run list via comms,
+     not the prog list
+     #TODO: Rework automatic mode
     Args:
     * portname (str): port name
     * slaveadress (int): slave address in the range 1 to 247
@@ -107,6 +110,10 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
         super().__init__(portname, slaveadress)
         self.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
+
+        # Due to the wayx the programmer works, the driver needs to know ramp and setpoint
+        self.setpoint = 0
+        self.rate = 15
 
     def get_process_variable(self):
         """Return the current process variable"""
@@ -167,6 +174,7 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
 class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     """
     Instrument class for Eurotherm 3508 process controller.
+    The automatic mode is only setpoint controlled, no ramps
     Args:
     * portname (str): port name
     * slaveadress (int): slave address in the range 1 to 247
@@ -192,34 +200,34 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
         with self.com_lock:
             self.write_register(3, output, number_of_decimals=1, signed=True)
 
-    # def get_working_output(self):
-    #     """Return the current power output of the instrument"""
-    #     with self.com_lock:
-    #         return self.read_register(3, number_of_decimals=1)
-    #
-    # def get_working_setpoint(self):
-    #     """Get the current working setpoint of the instrument"""
-    #     with self.com_lock:
-    #         return self.read_register(5, number_of_decimals=4, signed=True)
-    #
-    # def set_automatic_mode(self):
-    #     """Set controller to automatic mode"""
-    #     with self.com_lock:
-    #         self.write_register(273, 0)
-    #
-    # def set_manual_mode(self):
-    #     """Set controller to manual mode"""
-    #     with self.com_lock:
-    #         self.write_register(273, 1)
-    #
-    # def set_pid_p(self, p):
-    #     with self.com_lock:
-    #         self.write_register(6, p)
-    #
-    # def set_pid_i(self, i):
-    #     with self.com_lock:
-    #         self.write_register(8, i)
-    #
-    # def set_pid_d(self, d):
-    #     with self.com_lock:
-    #         self.write_register(9, d)
+    def get_working_output(self):
+        """Return the current power output of the instrument"""
+        with self.com_lock:
+            return self.read_register(3, number_of_decimals=1)
+
+    def get_working_setpoint(self):
+        """Get the current working setpoint of the instrument"""
+        with self.com_lock:
+            return self.read_register(5, number_of_decimals=4, signed=True)
+
+    def set_automatic_mode(self):
+        """Set controller to automatic mode"""
+        with self.com_lock:
+            self.write_register(273, 0)
+
+    def set_manual_mode(self):
+        """Set controller to manual mode"""
+        with self.com_lock:
+            self.write_register(273, 1)
+
+    def set_pid_p(self, p):
+        with self.com_lock:
+            self.write_register(6, p)
+
+    def set_pid_i(self, i):
+        with self.com_lock:
+            self.write_register(8, i)
+
+    def set_pid_d(self, d):
+        with self.com_lock:
+            self.write_register(9, d)

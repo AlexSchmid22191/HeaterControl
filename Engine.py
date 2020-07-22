@@ -34,7 +34,7 @@ class HeaterControlEngine:
 
         self.data_logger = Datalogger(master=self)
 
-        subscribe(self.add_controller, 'gui.con.connect_heater')
+        subscribe(self.add_controller, 'gui.con.connect_controller')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
 
     def set_heater_port(self, port):
@@ -43,37 +43,38 @@ class HeaterControlEngine:
     def set_sensor_port(self, port):
         self.sensor_port = port
 
-    def add_controller(self, heater_type, heater_port):
+    def add_controller(self, controller_type, controller_port):
         try:
-            self.controller = self.controller_types[heater_type](portname=heater_port,
-                                                                 slaveadress=self.controller_slave_address)
+            self.controller = self.controller_types[controller_type](portname=controller_port,
+                                                                     slaveadress=self.controller_slave_address)
+
+            self.controller.set_manual_mode()
+
+            unsubscribe(self.add_controller, 'gui.con.connect_controller')
+            subscribe(self.remove_heater, 'gui.con.disconnect_controller')
+
+            subscribe(self.get_controller_process_variable, 'gui.request_process_variable')
+            subscribe(self.get_working_output, 'gui.request.working_output')
+            subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
+
+            subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
+            subscribe(self.set_manual_mode, 'gui.set.manual_mode')
+            subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
+            subscribe(self.set_manual_output_power, 'gui.set.manual_power')
+            subscribe(self.set_rate, 'gui.set.rate')
+            subscribe(self.set_pid_p, 'gui.set.pid_p')
+            subscribe(self.set_pid_i, 'gui.set.pid_i')
+            subscribe(self.set_pid_d, 'gui.set.pid_d')
+
         except SerialException:
             sendMessage(topicName='engine.status', text='Connection error!')
 
-        self.controller.set_manual_mode()
-
-        unsubscribe(self.add_controller, 'gui.con.connect_heater')
-        subscribe(self.remove_heater, 'gui.con.disconnect_heater')
-
-        subscribe(self.get_controller_process_variable, 'gui.request.oven_temp')
-        subscribe(self.get_working_output, 'gui.request.working_output')
-        subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
-
-        subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
-        subscribe(self.set_manual_mode, 'gui.set.manual_mode')
-        subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
-        subscribe(self.set_manual_output_power, 'gui.set.manual_power')
-        subscribe(self.set_rate, 'gui.set.rate')
-        subscribe(self.set_pid_p, 'gui.set.pid_p')
-        subscribe(self.set_pid_i, 'gui.set.pid_i')
-        subscribe(self.set_pid_d, 'gui.set.pid_d')
-
     def remove_heater(self):
 
-        subscribe(self.add_controller, 'gui.con.connect_heater')
-        unsubscribe(self.remove_heater, 'gui.con.disconnect_heater')
+        subscribe(self.add_controller, 'gui.con.connect_controller')
+        unsubscribe(self.remove_heater, 'gui.con.disconnect_controller')
 
-        unsubscribe(self.get_controller_process_variable, 'gui.request.oven_temp')
+        unsubscribe(self.get_controller_process_variable, 'gui.request_process_variable')
         unsubscribe(self.get_working_output, 'gui.request.working_output')
         unsubscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
 
@@ -94,13 +95,13 @@ class HeaterControlEngine:
         except SerialException:
             sendMessage(topicName='engine.status', text='Connection error!')
 
-        subscribe(self.get_sensor_value, 'gui.request.sensor_temp')
+        subscribe(self.get_sensor_value, 'gui.request.sensor_value')
         subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
         unsubscribe(self.add_sensor, 'gui.con.connect_sensor')
 
     def remove_sensor(self):
         self.sensor.close()
-        unsubscribe(self.get_sensor_value, 'gui.request.sensor_temp')
+        unsubscribe(self.get_sensor_value, 'gui.request.sensor_value')
         unsubscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
 
@@ -234,7 +235,7 @@ class Datalogger:
 
         subscribe(self.start_log, 'gui.log.start')
         subscribe(self.stop_log, 'gui.log.stop')
-        subscribe(self.continue_log, 'gui.log.continue')
+        subscribe(self.continue_log, 'gui.log.cont')
         subscribe(self.set_logfile, 'gui.log.filename')
 
     def write_log(self):

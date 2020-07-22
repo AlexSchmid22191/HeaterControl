@@ -1,13 +1,14 @@
 from threading import Timer, enumerate
 
 import wx
-from pubsub.pub import addTopicDefnProvider, TOPIC_TREE_FROM_CLASS
+from pubsub.pub import addTopicDefnProvider, TOPIC_TREE_FROM_CLASS, setTopicUnspecifiedFatal
 
 import Topic_Def
 from Engine import HeaterControlEngine
 from Interface import HeaterInterface
 
 addTopicDefnProvider(Topic_Def, TOPIC_TREE_FROM_CLASS)
+setTopicUnspecifiedFatal(True)
 
 
 def main():
