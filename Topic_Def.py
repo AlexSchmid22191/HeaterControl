@@ -128,6 +128,30 @@ class gui:
                 """
                 - setpoint: UNDOCUMENTED
                 """
+        class pid_p:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p):
+                """
+                - p: UNDOCUMENTED
+                """
+        class pid_i:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(i):
+                """
+                - i: UNDOCUMENTED
+                """
+        class pid_d:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(d):
+                """
+                - d: UNDOCUMENTED
+                """
 
     class request:
         """

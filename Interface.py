@@ -365,7 +365,7 @@ class MatplotWX(wx.Panel):
         self.axes.relim()
         self.axes.autoscale_view()
         self.figure.canvas.draw()
-        
+
     @in_main_thread
     def add_oven_temp_point(self, pv):
         time = (datetime.now() - self.startime).seconds
@@ -376,7 +376,7 @@ class MatplotWX(wx.Panel):
         self.axes.relim()
         self.axes.autoscale_view()
         self.figure.canvas.draw()
-    
+
     @in_main_thread
     def add_oven_power_point(self, output):
         time = (datetime.now() - self.startime).seconds
@@ -400,7 +400,7 @@ class MatplotWX(wx.Panel):
         self.is_plotting = False
         unsubscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
         unsubscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
-        unsubscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+        unsubscribe(topicName='engine.answer.working_output', listener=self.add_oven_power_point)
 
     def cont_plotting(self, *args):
         self.is_plotting = True
@@ -420,8 +420,6 @@ class Menubar(wx.MenuBar):
         super().__init__(*args, **kwargs)
 
         filemenu = wx.Menu()
-        filemenu.Append(item='New log', id=wx.ID_ANY)
-        filemenu.Append(item='Save plot', id=wx.ID_ANY)
         filemenu.Append(item='Quit', id=wx.ID_CLOSE)
 
         dev_menu = DeviceMenu()

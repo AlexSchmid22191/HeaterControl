@@ -53,7 +53,7 @@ class HeaterControlEngine:
             unsubscribe(self.add_controller, 'gui.con.connect_controller')
             subscribe(self.remove_heater, 'gui.con.disconnect_controller')
 
-            subscribe(self.get_controller_process_variable, 'gui.request_process_variable')
+            subscribe(self.get_controller_process_variable, 'gui.request.process_variable')
             subscribe(self.get_working_output, 'gui.request.working_output')
             subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
 
@@ -74,7 +74,7 @@ class HeaterControlEngine:
         subscribe(self.add_controller, 'gui.con.connect_controller')
         unsubscribe(self.remove_heater, 'gui.con.disconnect_controller')
 
-        unsubscribe(self.get_controller_process_variable, 'gui.request_process_variable')
+        unsubscribe(self.get_controller_process_variable, 'gui.request.process_variable')
         unsubscribe(self.get_working_output, 'gui.request.working_output')
         unsubscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
 
