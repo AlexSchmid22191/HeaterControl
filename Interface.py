@@ -356,22 +356,22 @@ class MatplotWX(wx.Panel):
         self.Fit()
 
     @in_main_thread
-    def add_sensor_temp_point(self, temp):
+    def add_sensor_temp_point(self, value):
         time = (datetime.now() - self.startime).seconds
 
         self.sens_temp_plot.set_xdata(append(self.sens_temp_plot.get_xdata(), time))
-        self.sens_temp_plot.set_ydata(append(self.sens_temp_plot.get_ydata(), temp))
+        self.sens_temp_plot.set_ydata(append(self.sens_temp_plot.get_ydata(), value))
 
         self.axes.relim()
         self.axes.autoscale_view()
         self.figure.canvas.draw()
         
     @in_main_thread
-    def add_oven_temp_point(self, temp):
+    def add_oven_temp_point(self, pv):
         time = (datetime.now() - self.startime).seconds
 
         self.oven_temp_plot.set_xdata(append(self.oven_temp_plot.get_xdata(), time))
-        self.oven_temp_plot.set_ydata(append(self.oven_temp_plot.get_ydata(), temp))
+        self.oven_temp_plot.set_ydata(append(self.oven_temp_plot.get_ydata(), pv))
 
         self.axes.relim()
         self.axes.autoscale_view()

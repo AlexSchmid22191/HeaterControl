@@ -8,7 +8,7 @@ from Engine import HeaterControlEngine
 from Interface import HeaterInterface
 
 addTopicDefnProvider(Topic_Def, TOPIC_TREE_FROM_CLASS)
-setTopicUnspecifiedFatal(True)
+#setTopicUnspecifiedFatal(True)
 
 
 def main():

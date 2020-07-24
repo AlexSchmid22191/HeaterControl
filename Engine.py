@@ -156,10 +156,10 @@ class HeaterControlEngine:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
-    def set_target_setpoint(self, temp):
+    def set_target_setpoint(self, setpoint):
         try:
-            self.controller.set_target_setpoint(temp)
-            sendMessage(topicName='engine.status', text='Heater setpoint set to {:5.1f}!'.format(temp))
+            self.controller.set_target_setpoint(setpoint)
+            sendMessage(topicName='engine.status', text='Heater setpoint set to {:5.1f}!'.format(setpoint))
         except NotImplementedError as exception:
             print(exception)
         except SerialException:
