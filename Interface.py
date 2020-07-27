@@ -194,6 +194,8 @@ class PIDFrame(wx.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        subscribe(listener=self.update_pid_values, topicName='engine.answer.pid')
+
         if os.name == 'nt':
             self.SetBackgroundColour('White')
 
@@ -210,8 +212,13 @@ class PIDFrame(wx.Frame):
                                 'GS': False, 'B12': False, 'B23': False}
 
         self.labels = {key: wx.StaticText(parent=self, label=value) for (key, value) in parameters.items()}
-        self.entries = {key: wx.SpinCtrl(parent=self, min=0, max=9999, initial=1) for key in parameters}
-        self.set_buttons = {key: wx.Button(parent=self, id=wx.ID_ANY, label='Set') for key in parameters}
+        self.entries = {key: wx.SpinCtrlDouble(parent=self, min=0, max=9999, initial=1) for key in parameters}
+        self.set_buttons = {key: wx.Button(parent=self, id=wx.ID_ANY, label='Set'+key) for key in parameters}
+        self.pid_getter_functions = {'P': self.set_pid_p, 'I': self.set_pid_i, 'D': self.set_pid_d}
+        
+        for parameter in parameters:
+            if self.param_is_simple[parameter]:
+                self.set_buttons[parameter].Bind(event=wx.EVT_BUTTON, handler=self.pid_getter_functions[parameter])
 
         grid_sizer = wx.FlexGridSizer(rows=15, cols=3, hgap=5, vgap=5)
         for parameter in parameters:
@@ -220,6 +227,7 @@ class PIDFrame(wx.Frame):
             grid_sizer.Add(self.set_buttons[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
 
         self.get_button = wx.Button(parent=self, label='Get current')
+        self.get_button.Bind(event=wx.EVT_BUTTON, handler=self.get_pid_parameters)
         self.adv_button = wx.ToggleButton(parent=self, label='Advanced mode')
         self.adv_button.Bind(event=wx.EVT_TOGGLEBUTTON, handler=self.toggle_advanced)
         buttonsizer = wx.BoxSizer(orient=wx.VERTICAL)
@@ -233,10 +241,24 @@ class PIDFrame(wx.Frame):
         self.toggle_advanced(state=False)
         self.Show()
 
-    def set_pid_parameters(self):
-        sendMessage(topicName='gui.set.pid_p', p=self.entries['P'].Getvalue())
-        sendMessage(topicName='gui.set.pid_i', i=self.entries['I'].Getvalue())
-        sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].Getvalue())
+    def set_pid_p(self, *args):
+        sendMessage(topicName='gui.set.pid_p', p=self.entries['P'].GetValue())
+    
+    def set_pid_i(self, *args):
+        sendMessage(topicName='gui.set.pid_i', i=self.entries['I'].GetValue())
+
+    def set_pid_d(self, *args):
+        sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].GetValue())
+
+    @staticmethod
+    def get_pid_parameters(*args):
+        sendMessage(topicName='gui.request.pid')
+
+    @in_main_thread
+    def update_pid_values(self, p, i, d):
+        self.entries['P'].SetValue(p)
+        self.entries['I'].SetValue(i)
+        self.entries['D'].SetValue(d)
 
     def toggle_advanced(self, *event, state=True):
         state = event[0].IsChecked() if event else state

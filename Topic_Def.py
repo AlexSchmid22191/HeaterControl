@@ -47,6 +47,16 @@ class engine:
                 """
                 - value: UNDOCUMENTED
                 """
+        class pid:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p, i, d):
+                """
+                - p: UNDOCUMENTED
+                - i: UNDOCUMENTED
+                - d: UNDOCUMENTED
+                """
     class status:
         """
         Class for all status messages emitted by the engine
@@ -170,6 +180,10 @@ class gui:
             UNDOCUMENTED: created without spec
             """
         class sensor_value:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class pid:
             """
             UNDOCUMENTED: created without spec
             """

@@ -89,6 +89,21 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
                                                                                       self.__class__.__name__))
 
+    def get_pid_p(self):
+        """Get the P (Proportional band) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_i(self):
+        """Get the I (Integral time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_d(self):
+        """Get the D (Derivative time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
 
 class AbstractSensor:
     """

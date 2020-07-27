@@ -83,17 +83,29 @@ class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
     def set_pid_p(self, p):
         """Set the P (Proportional band) for the PID controller"""
         with self.com_lock:
-            self.write_register(6, p)
+            self.write_register(6, p, number_of_decimals=1)
 
     def set_pid_i(self, i):
         """Set the I (Integral time) for the PID controller"""
         with self.com_lock:
-            self.write_register(8, i)
+            self.write_register(8, i, number_of_decimals=0)
 
     def set_pid_d(self, d):
         """Set the D (Derivative time) for the PID controller"""
         with self.com_lock:
-            self.write_register(9, d)
+            self.write_register(9, d, number_of_decimals=0)
+
+    def get_pid_p(self):
+        with self.com_lock:
+            return self.read_register(6, number_of_decimals=1)
+
+    def get_pid_i(self):
+        with self.com_lock:
+            return self.read_register(8, number_of_decimals=0)
+
+    def get_pid_d(self):
+        with self.com_lock:
+            return self.read_register(9, number_of_decimals=0)
 
 
 class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
@@ -221,13 +233,28 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
             self.write_register(273, 1)
 
     def set_pid_p(self, p):
+        """Set the P (Proportional band) for the PID controller"""
         with self.com_lock:
-            self.write_register(6, p)
+            self.write_register(6, p, number_of_decimals=1)
 
     def set_pid_i(self, i):
+        """Set the I (Integral time) for the PID controller"""
         with self.com_lock:
-            self.write_register(8, i)
+            self.write_register(8, i, number_of_decimals=0)
 
     def set_pid_d(self, d):
+        """Set the D (Derivative time) for the PID controller"""
         with self.com_lock:
-            self.write_register(9, d)
+            self.write_register(9, d, number_of_decimals=0)
+
+    def get_pid_p(self):
+        with self.com_lock:
+            return self.read_register(6, number_of_decimals=1)
+
+    def get_pid_i(self):
+        with self.com_lock:
+            return self.read_register(8, number_of_decimals=0)
+
+    def get_pid_d(self):
+        with self.com_lock:
+            return self.read_register(9, number_of_decimals=0)
