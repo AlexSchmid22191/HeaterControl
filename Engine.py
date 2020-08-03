@@ -5,9 +5,9 @@ from serial import SerialException, SerialTimeoutException
 from pubsub.pub import sendMessage, subscribe, unsubscribe
 
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
-from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408
+from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from Drivers.ElchWorks import Thermolino, Thermoplatino
-from Drivers.Keithly import Keithly2000
+from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Pyrometer import Pyrometer
 from Drivers.OmegaPt import OmegaPt
 
@@ -19,7 +19,8 @@ class HeaterControlEngine:
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
                                  'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
-                             'Keithly2000': Keithly2000}
+                             'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
+                             'Eurotherm3508': Eurotherm3508S}
 
         self.sensor = AbstractSensor()
         self.sensor_port = None
@@ -48,7 +49,7 @@ class HeaterControlEngine:
             self.controller = self.controller_types[controller_type](portname=controller_port,
                                                                      slaveadress=self.controller_slave_address)
 
-            self.controller.set_manual_mode()
+            self.controller.set_automatic_mode()
 
             unsubscribe(self.add_controller, 'gui.con.connect_controller')
             subscribe(self.remove_heater, 'gui.con.disconnect_controller')

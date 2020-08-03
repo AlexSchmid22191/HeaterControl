@@ -1,14 +1,14 @@
-from Drivers.AbstractSensorController import AbstractSensor
-from serial import Serial
+import time
+import serial
 from threading import Lock
-from time import sleep
+from Drivers.AbstractSensorController import AbstractSensor
 
 
-class Thermolino(AbstractSensor, Serial):
+class Thermolino(AbstractSensor, serial.Serial):
     def __init__(self, port):
-        Serial.__init__(self, port, timeout=1.5)
+        super().__init__(self, port, timeout=1.5)
         self.com_lock = Lock()
-        sleep(1)
+        time.sleep(1)
         with self.com_lock:
             self.write(":FUNC 'TEMP'\n".encode())
 
@@ -18,12 +18,15 @@ class Thermolino(AbstractSensor, Serial):
             self.write('\n'.encode())
             return float(self.readline().decode())
 
+    def close(self):
+        serial.Serial.close(self)
 
-class Thermoplatino(AbstractSensor, Serial):
+
+class Thermoplatino(AbstractSensor, serial.Serial):
     def __init__(self, port):
-        Serial.__init__(self, port, timeout=1.5, baudrate=115200)
+        super().__init__(self, port, timeout=1.5, baudrate=115200)
         self.com_lock = Lock()
-        sleep(1)
+        time.sleep(1)
         with self.com_lock:
             self.write(":FUNC 'TEMP'\n".encode())
 
@@ -36,3 +39,6 @@ class Thermoplatino(AbstractSensor, Serial):
                 return float(answer)
             except ValueError:
                 return answer
+
+    def close(self):
+        serial.Serial.close(self)

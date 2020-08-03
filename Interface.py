@@ -150,7 +150,7 @@ class OvenControl(wx.Panel):
         entry_box.Add(self.power_entry, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
         entry_box.Add(set_power_btn, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
 
-        self.mode_box = wx.RadioBox(parent=self, label='Operation Mode', choices=['Manual', 'Automatic'], majorDimension=1)
+        self.mode_box = wx.RadioBox(parent=self, label='Operation Mode', choices=['Automatic', 'Manual'], majorDimension=1)
         self.mode_box.Bind(event=wx.EVT_RADIOBOX, handler=self.set_mode, source=self.mode_box)
 
         pid_button = wx.Button(parent=self, id=wx.ID_ANY, label='P\nI\nD')
@@ -465,7 +465,9 @@ class DeviceMenu(wx.Menu):
         self.sensor_type_menu.Append(item='Thermolino', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.sensor_type_menu.Append(item='Thermoplatino', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.sensor_type_menu.Append(item='Pyrometer', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
-        self.sensor_type_menu.Append(item='Keithly 2000', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.sensor_type_menu.Append(item='Keithly2000 Temperature', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.sensor_type_menu.Append(item='Keithly2000 Voltage', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.sensor_type_menu.Append(item='Eurotherm3508', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
 
         self.sensor_com_menu = PortMenu()
 

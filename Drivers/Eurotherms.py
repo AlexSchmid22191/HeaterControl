@@ -1,6 +1,6 @@
 import threading
 import minimalmodbus
-from Drivers.AbstractSensorController import AbstractController
+from Drivers.AbstractSensorController import AbstractController, AbstractSensor
 
 
 class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
@@ -275,3 +275,22 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def get_pid_d(self):
         with self.com_lock:
             return self.read_register(9, number_of_decimals=0)
+
+
+class Eurotherm3508S(AbstractSensor, minimalmodbus.Instrument):
+    """
+        Instrument class for Eurotherm 3508 process controller.
+        The automatic mode is only setpoint controlled, no ramps
+        Args:
+        * portname (str): port name
+        * slaveadress (int): slave address in the range 1 to 247
+        """
+
+    def __init__(self, portname, slaveadress, baudrate=9600):
+        super().__init__(portname, slaveadress)
+        self.serial.baudrate = baudrate
+        self.com_lock = threading.Lock()
+
+    def get_sensor_value(self):
+        with self.com_lock:
+            return self.read_register(1, number_of_decimals=4, signed=True)
