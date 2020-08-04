@@ -1,3 +1,5 @@
+import time
+
 from threading import Timer, enumerate
 
 import wx
@@ -7,6 +9,7 @@ import Topic_Def
 from Engine import HeaterControlEngine
 from Interface import HeaterInterface
 
+
 addTopicDefnProvider(Topic_Def, TOPIC_TREE_FROM_CLASS)
 setTopicUnspecifiedFatal(True)
 
@@ -14,9 +17,9 @@ setTopicUnspecifiedFatal(True)
 def main():
     app = wx.App()
     app.locale = wx.Locale(wx.LANGUAGE_ENGLISH)
-    engine = HeaterInterface(None)
+    engine = HeaterControlEngine()
     print('Engine initilized: {:s}'.format(str(engine.__class__)))
-    gui = HeaterControlEngine()
+    gui = HeaterInterface(None)
     print('GUI initialized: {:s}'.format(str(gui.__class__)))
     app.MainLoop()
 

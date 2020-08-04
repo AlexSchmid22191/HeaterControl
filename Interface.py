@@ -286,10 +286,10 @@ class StatusWindow(wx.Panel):
         set_temp_label = wx.StaticText(parent=self, label='Set Temperature (°C)')
         power_label = wx.StaticText(parent=self, label='Oven Power (%)')
 
-        self.temp_oven_value = wx.StaticText(parent=self, label='23.5')
-        self.temp_sens_value = wx.StaticText(parent=self, label='42.24')
-        self.set_temp_value = wx.StaticText(parent=self, label='625')
-        self.power_value = wx.StaticText(parent=self, label='10.5')
+        self.temp_oven_value = wx.StaticText(parent=self, label='  -  ')
+        self.temp_sens_value = wx.StaticText(parent=self, label='  -  ')
+        self.set_temp_value = wx.StaticText(parent=self, label='  -  ')
+        self.power_value = wx.StaticText(parent=self, label='  -  ')
 
         subscribe(listener=self.update_oven_power, topicName='engine.answer.working_output')
         subscribe(listener=self.update_oven_setpoint, topicName='engine.answer.working_setpoint')
@@ -363,6 +363,7 @@ class MatplotWX(wx.Panel):
         self.figure.set_facecolor((230/255, 233/255, 237/255))
 
         self.axes = self.figure.add_subplot(111)
+        self.axes.set_facecolor(self.figure.get_facecolor())
         self.paxes = self.axes.twinx()
 
         self.paxes.set_ylabel('Power (%)')
@@ -374,7 +375,9 @@ class MatplotWX(wx.Panel):
         self.oven_pwr_plot, = self.paxes.plot([], marker='^', color='springgreen', label='Heater Power')
 
         self.figure.legend(handles=[self.sens_temp_plot, self.oven_temp_plot, self.oven_pwr_plot],
-                           loc='lower center', ncol=2)
+                           loc=(0.15, 0.85), ncol=1)
+
+        self.figure.tight_layout()
 
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
