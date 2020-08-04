@@ -36,11 +36,17 @@ class HeaterInterface(wx.Frame):
 
         self.Bind(event=wx.EVT_MENU, handler=self.on_quit, id=wx.ID_CLOSE)
 
-        self.status = StatusWindow(parent=self)
-        self.oven_ctrl = OvenControl(parent=self)
-        plot_ctrl = PlottingControl(parent=self)
-        log_ctrl = LogginControl(parent=self)
-        matplot = MatplotWX(parent=self)
+        panel = wx.Panel(parent=self)
+        panel.SetBackgroundColour((210, 212, 214))
+
+        self.status = StatusWindow(parent=panel)
+        oven_ctrl = OvenControl(parent=panel)
+        plot_ctrl = PlottingControl(parent=panel)
+        log_ctrl = LogginControl(parent=panel)
+        for widget in panel.GetChildren():
+            widget.SetBackgroundColour((230, 233, 237))
+
+        matplot = MatplotWX(parent=panel)
 
         self.Bind(wx.EVT_BUTTON, source=plot_ctrl.start_btn, handler=matplot.start_plotting)
         self.Bind(wx.EVT_BUTTON, source=plot_ctrl.stop_btn, handler=matplot.stop_plotting)
@@ -48,22 +54,21 @@ class HeaterInterface(wx.Frame):
         self.Bind(wx.EVT_BUTTON, source=plot_ctrl.resume_btn, handler=matplot.cont_plotting)
 
         hbox = wx.BoxSizer(orient=wx.HORIZONTAL)
-        hbox.Add(self.status, flag=wx.EXPAND | wx.RIGHT, border=10)
-        hbox.Add(log_ctrl, flag=wx.EXPAND | wx.RIGHT, border=10)
-        hbox.Add(plot_ctrl, flag=wx.EXPAND)
+        hbox.Add(oven_ctrl, flag=wx.EXPAND | wx.ALL, border=10)
+        hbox.Add(self.status, flag=wx.EXPAND | wx.TOP | wx.BOTTOM, border=10)
+        hbox.Add(log_ctrl, flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT, border=10)
+        hbox.Add(plot_ctrl, flag=wx.EXPAND | wx.ALL, border=10)
 
         vbox = wx.BoxSizer(orient=wx.VERTICAL)
-        vbox.Add(self.oven_ctrl, flag=wx.BOTTOM | wx.EXPAND, border=10)
-        vbox.Add(hbox)
+        vbox.Add(hbox, flag=wx.BOTTOM | wx.EXPAND)
+        vbox.Add(matplot, flag=wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT, proportion=1, border=10)
 
-        hbox_2 = wx.BoxSizer(orient=wx.HORIZONTAL)
-        hbox_2.Add(vbox, flag=wx.ALL, border=10)
-        hbox_2.Add(matplot, flag=wx.EXPAND | wx.FIXED_MINSIZE, proportion=1)
+        panel.SetSizerAndFit(vbox)
 
-        hbox_2.Fit(self)
-        self.SetSizer(hbox_2)
+        vbox.Fit(self)
+        self.SetSizer(vbox)
 
-        self.SetMinSize((800, self.GetSize()[1]))
+        self.SetMinSize((self.GetSize()))
         self.Show(True)
 
     @in_main_thread
@@ -354,7 +359,8 @@ class MatplotWX(wx.Panel):
 
         self.startime = datetime.now()
 
-        self.figure = Figure(figsize=(3, 2.5))
+        self.figure = Figure(figsize=(6, 5))
+        self.figure.set_facecolor((230/255, 233/255, 237/255))
 
         self.axes = self.figure.add_subplot(111)
         self.paxes = self.axes.twinx()
@@ -374,7 +380,6 @@ class MatplotWX(wx.Panel):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, flag=wx.GROW | wx.FIXED_MINSIZE, proportion=2)
         self.SetSizer(self.sizer)
-        self.figure.subplots_adjust(0.2, 0.275, 0.8, 0.95)
         self.Fit()
 
     @in_main_thread
