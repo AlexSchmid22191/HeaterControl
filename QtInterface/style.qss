@@ -1,2 +1,6 @@
 QPushButton{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
             font-family: "Segoe UI Semibold"; text-align:left; }
+QToolButton{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
+            font-family: "Segoe UI Semibold"; text-align:left; }
+QWidget{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
+            font-family: "Segoe UI Semibold"; text-align:left; }
