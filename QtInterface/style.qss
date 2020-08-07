@@ -1,6 +1,14 @@
-QPushButton{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
-            font-family: "Segoe UI Semibold"; text-align:left; }
-QToolButton{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
-            font-family: "Segoe UI Semibold"; text-align:left; }
-QWidget{background-color: #242537; color: #97f3ff; border:15px solid #242537; font-size: 18;
-            font-family: "Segoe UI Semibold"; text-align:left; }
+ElchMainWindow{background-color:#181C3F}
+
+ElchRibbon{background-color:#2A2D56;}
+
+ElchMenuPages{background-color: #2A2D56;}
+
+ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
+ElchStatusBar QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 12pt;}
+
+ElchTitlebar QLabel{background: #181C3F; color: aliceblue; font-family: Roboto; font-style: normal;font-size: 12pt;}
+ElchTitlebar QToolButton#Close{background: #181C3F url(../Icons/Quit.png) center center no-repeat; border:none;}
+ElchTitlebar QToolButton#Close:hover{background: #2A2D56 url(../Icons/Quit_Hover.png) center center no-repeat ; border: none}
+ElchTitlebar QToolButton#Minimize{background: #181C3F url(../Icons/Minimize.png) center center no-repeat; border:none;}
+ElchTitlebar QToolButton#Minimize:hover{background: #2A2D56 url(../Icons/Minimize_Hover.png) center center no-repeat ; border: none}
