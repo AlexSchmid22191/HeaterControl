@@ -2,10 +2,8 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QApplication, QButtonGroup, \
     QLabel, QToolButton, QSizeGrip
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.style
 from QtInterface.ElchMenuPages import ElchMenuPages
+from QtInterface.ElchPlot import ElchPlot
 
 
 class ElchMainWindow(QWidget):
@@ -18,7 +16,7 @@ class ElchMainWindow(QWidget):
 
         self.controlmenu = ElchMenuPages()
         self.ribbon = ElchRibbon(menus=self.controlmenu.menus)
-        self.matplotframe = ElchMatplot()
+        self.matplotframe = ElchPlot()
         self.titlebar = ElchTitlebar()
         self.statusbar = ElchStatusBar()
 
@@ -86,14 +84,6 @@ class ElchRibbon(QWidget):
         vbox.setSpacing(5)
         self.setMinimumWidth(80)
         self.setLayout(vbox)
-
-
-class ElchMatplot(FigureCanvas):
-    def __init__(self, *args, **kwargs):
-        matplotlib.style.use('App.mplstyle')
-        super().__init__(Figure(figsize=(7, 6)), *args, **kwargs)
-        self.ax = self.figure.subplots()
-        self.ax2 = self.ax.twinx()
 
 
 class ElchStatusBar(QWidget):
