@@ -1,113 +1,155 @@
-from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QFrame, QApplication, QGridLayout, QToolButton
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QIcon, QPixmap
-from PySide2.QtCore import QSize
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.figure import Figure
-import functools
-import matplotlib.pyplot as plt
-import mplcyberpunk
-import os
+from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QApplication, QButtonGroup, \
+    QLabel, QToolButton, QSizeGrip
+from QtInterface.ElchMenuPages import ElchMenuPages
+from QtInterface.ElchPlot import ElchPlot
 
 
-class Elchcontrol(QWidget):
+class ElchMainWindow(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        ribbon = ElchRibbon(parent=self)
-        matplotframe = ElchMatplot()
-        hbox = QHBoxLayout()
-        hbox.addWidget(ribbon, stretch=0)
-        hbox.addWidget(matplotframe, stretch=1)
-        hbox.setSpacing(0)
-        hbox.setContentsMargins(0, 0, 0, 0)
-
+        self.setWindowFlags(Qt.FramelessWindowHint)
         with open('style.qss') as stylefile:
             self.setStyleSheet(stylefile.read())
 
-        self.setLayout(hbox)
+        self.controlmenu = ElchMenuPages()
+        self.ribbon = ElchRibbon(menus=self.controlmenu.menus)
+        self.matplotframe = ElchPlot()
+        self.titlebar = ElchTitlebar()
+        self.statusbar = ElchStatusBar()
+
+        hbox_inner = QHBoxLayout()
+        hbox_inner.addWidget(self.matplotframe, stretch=1)
+        hbox_inner.addWidget(self.controlmenu, stretch=0)
+        hbox_inner.setSpacing(30)
+        hbox_inner.setContentsMargins(0, 0, 0, 0)
+
+        vbox_inner = QVBoxLayout()
+        vbox_inner.addWidget(self.statusbar, stretch=0)
+        vbox_inner.addLayout(hbox_inner, stretch=1)
+        vbox_inner.setSpacing(30)
+        vbox_inner.setContentsMargins(30, 30, 17, 30)
+
+        sizegrip = QSizeGrip(self)
+        hbox_mid = QHBoxLayout()
+        hbox_mid.addLayout(vbox_inner, stretch=1)
+        hbox_mid.addWidget(sizegrip, alignment=Qt.AlignBottom | Qt.AlignRight)
+        hbox_mid.setContentsMargins(0, 0, 0, 0)
+        hbox_mid.setSpacing(0)
+
+        vbox_outer = QVBoxLayout()
+        vbox_outer.addWidget(self.titlebar, stretch=0)
+        vbox_outer.addLayout(hbox_mid, stretch=1)
+        vbox_outer.setContentsMargins(0, 0, 0, 0)
+        vbox_outer.setSpacing(0)
+
+        hbox_outer = QHBoxLayout()
+        hbox_outer.addWidget(self.ribbon, stretch=0)
+        hbox_outer.addLayout(vbox_outer, stretch=1)
+        hbox_outer.setContentsMargins(0, 0, 0, 0)
+        hbox_outer.setSpacing(0)
+
+        self.ribbon.buttongroup.buttonToggled.connect(self.controlmenu.adjust_visibility)
+        self.ribbon.menu_buttons['Devices'].setChecked(True)
+        self.setLayout(hbox_outer)
         self.show()
 
 
-class ElchMatplot(FigureCanvas):
-    def __init__(self, *args, **kwargs):
-        super().__init__(Figure(figsize=(6, 6)), *args, **kwargs)
-        plt.style.use('cyberpunk')
-        self.ax = self.figure.subplots()
-        self.figure.set_facecolor('#242537')
-        self.ax.set_facecolor('#242537')
-        self.ax.plot([1, 2])
-        mplcyberpunk.add_glow_effects(self.ax)
-
-
 class ElchRibbon(QWidget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, menus=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.menus = ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
+
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.menus = menus if menus is not None else ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
         self.menu_buttons = {key: QPushButton(parent=self, text=key) for key in self.menus}
-        icons = {key: QIcon('../Icons/Logging.png') for key in self.menus}
+        self.buttongroup = QButtonGroup()
+        self.buttongroup.setExclusive(True)
+        elchicon = QLabel()
+        elchicon.setPixmap(QPixmap('../Icons/ElchiHead.png').scaled(100, 100))
 
-        self.menu_frames = {key: QFrame(parent=self) for key in self.menus}
         vbox = QVBoxLayout()
-
-        self.menu_frames['Plotting'] = ElchPlotMenu(parent=self)
-        self.menu_frames['Logging'] = ElchLogMenu(parent=self)
-
+        vbox.addWidget(elchicon)
         for key in self.menus:
             vbox.addWidget(self.menu_buttons[key])
-            vbox.addWidget(self.menu_frames[key])
-            self.menu_frames[key].setVisible(False)
-            self.menu_frames[key].setMinimumHeight(50)
-            self.menu_buttons[key].setIcon(icons[key])
-            self.menu_buttons[key].clicked.connect(functools.partial(self.select_menu, key))
+            self.buttongroup.addButton(self.menu_buttons[key])
+            self.menu_buttons[key].setCheckable(True)
+            self.menu_buttons[key].setFixedSize(200, 40)
+            self.menu_buttons[key].setStyleSheet('QPushButton{border-image: url(../Icons/Logging_Gray.png)}'
+                                                 'QPushButton:hover{border-image: url(../Icons/Logging_Glow.png)}')
 
         vbox.addStretch()
-        vbox.setContentsMargins(0, 0, 0, 0)
-        vbox.setSpacing(0)
-        self.setMinimumWidth(200)
+        vbox.setContentsMargins(30, 30, 30, 30)
+        vbox.setSpacing(5)
+        self.setMinimumWidth(80)
         self.setLayout(vbox)
 
-    def select_menu(self, menu):
-        for frame in self.menu_frames:
-            self.menu_frames[frame].setVisible(menu == frame)
 
-
-class ElchPlotMenu(QWidget):
+class ElchStatusBar(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        controls = ['Start', 'Stop', 'Resume', 'Clear']
-        self.buttons = {key: QPushButton(text=key, parent=self) for key in controls}
+        self.setAttribute(Qt.WA_StyledBackground, True)
 
-        grid = QGridLayout()
-        grid.setSpacing(0)
-        grid.setContentsMargins(0, 0, 0, 0)
-        for idx, control in enumerate(controls):
-            grid.addWidget(self.buttons[control], idx // 2, idx % 2)
+        self.labels = {key: QLabel(text='{:s}:'.format(key), objectName=key)
+                       for key in ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']}
+        self.icons = {key: QLabel() for key in self.labels}
 
-        self.setLayout(grid)
-        self.setMinimumHeight(100)
+        hbox = QHBoxLayout()
+        for label in self.labels:
+            hbox.addWidget(self.icons[label])
+            self.icons[label].setPixmap(QPixmap('../Icons/Ring_{:s}.png'.format(label)))
+            hbox.addWidget(self.labels[label])
+            hbox.addStretch()
+        hbox.setContentsMargins(10, 10, 10, 10)
+
+        self.setLayout(hbox)
 
 
-class ElchLogMenu(QWidget):
+class ElchTitlebar(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        controls = ['Start', 'Stop', 'Pause']
-        self.buttons = {key: QPushButton(parent=self, text=key) for key in controls}
 
-        grid = QGridLayout()
-        grid.setSpacing(0)
-        grid.setContentsMargins(0, 0, 0, 0)
-        for idx, control in enumerate(controls):
-            grid.addWidget(self.buttons[control], idx // 2, idx % 2)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setMinimumHeight(50)
+        label = QLabel(text='Elchi Control')
+        buttons = {key: QToolButton(self, objectName=key) for key in ['Minimize', 'Close']}
 
-        self.setLayout(grid)
-        self.setMinimumHeight(100)
+        hbox = QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(label)
+        hbox.addStretch(10)
+        for key in buttons:
+            buttons[key].setFixedSize(50, 50)
+            hbox.addWidget(buttons[key])
 
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.setSpacing(0)
+        self.setLayout(hbox)
 
-class ElchControlMenu(QWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        self.dragPosition = None
+        buttons['Minimize'].clicked.connect(self.minimize)
+        buttons['Close'].clicked.connect(self.close)
+
+    def mouseMoveEvent(self, event):
+        # Enable mouse dragging
+        if event.buttons() == Qt.LeftButton:
+            self.parent().move(event.globalPos() - self.dragPosition)
+            event.accept()
+
+    def mousePressEvent(self, event):
+        # Enable mouse dragging
+        if event.button() == Qt.LeftButton:
+            self.dragPosition = event.globalPos() - self.parent().frameGeometry().topLeft()
+            event.accept()
+
+    def minimize(self):
+        self.parent().showMinimized()
+
+    def close(self):
+        self.parent().close()
 
 
 app = QApplication()
-gui = Elchcontrol()
+gui = ElchMainWindow()
 app.exec_()
