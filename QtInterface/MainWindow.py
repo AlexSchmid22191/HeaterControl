@@ -82,7 +82,7 @@ class ElchRibbon(QWidget):
         vbox.addStretch()
         vbox.setContentsMargins(30, 30, 30, 30)
         vbox.setSpacing(5)
-        self.setMinimumWidth(80)
+        self.setMinimumWidth(300)
         self.setLayout(vbox)
 
 
@@ -91,16 +91,23 @@ class ElchStatusBar(QWidget):
         super().__init__(*args, **kwargs)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
-        self.labels = {key: QLabel(text='{:s}:'.format(key), objectName=key)
-                       for key in ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']}
-        self.icons = {key: QLabel() for key in self.labels}
+        parameters = ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']
+        icons = {key: QLabel() for key in parameters}
+        labels = {key: QLabel(text=key, objectName='label') for key in parameters}
+        self.values = {key: QLabel(text='0', objectName='value') for key in parameters}
+
+        vboxes = {key: QVBoxLayout() for key in parameters}
 
         hbox = QHBoxLayout()
-        for label in self.labels:
-            hbox.addWidget(self.icons[label])
-            self.icons[label].setPixmap(QPixmap('../Icons/Ring_{:s}.png'.format(label)))
-            hbox.addWidget(self.labels[label])
-            hbox.addStretch()
+        for key in parameters:
+            vboxes[key].addWidget(self.values[key])
+            vboxes[key].addWidget(labels[key])
+            vboxes[key].setContentsMargins(0, 0, 0, 0)
+            hbox.addWidget(icons[key])
+            hbox.addStretch(1)
+            hbox.addLayout(vboxes[key])
+            hbox.addStretch(10)
+            icons[key].setPixmap(QPixmap('../Icons/Ring_{:s}.png'.format(key)))
         hbox.setContentsMargins(10, 10, 10, 10)
 
         self.setLayout(hbox)

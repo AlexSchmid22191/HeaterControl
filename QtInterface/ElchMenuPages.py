@@ -9,11 +9,11 @@ class ElchMenuPages(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setMinimumWidth(200)
+        self.setMinimumWidth(250)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControllerMenu(), 'PID': ElchPidMenu(),
-                      'Logging': ElchLogMenu(), 'Plotting': ElchPlotMenu()}
+                      'Plotting': ElchPlotMenu()}
 
         vbox = QVBoxLayout()
 
@@ -34,7 +34,7 @@ class ElchMenuPages(QWidget):
 class ElchPlotMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        controls = ['Start', 'Stop', 'Resume', 'Clear']
+        controls = ['Start', 'Stop', 'Resume', 'Clear', 'Export']
         self.buttons = {key: QPushButton(text=key, parent=self) for key in controls}
 
         vbox = QVBoxLayout()
