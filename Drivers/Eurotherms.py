@@ -350,24 +350,24 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
             self.write_register(152, boundary, number_of_decimals=0)
 
     def get_boundary_12(self):
-        """Set the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
+        """Get the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
         with self.com_lock:
             return self.read_register(153, number_of_decimals=0)
 
     def get_boundary_23(self):
-        """Set the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
+        """Get the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
         with self.com_lock:
             return self.read_register(152, number_of_decimals=0)
 
     def set_gain_scheduling(self, mode):
         """Set the gain scheduling mode"""
-        mode_dict = {'Off': 0, 'Set': 1, 'Setpoint': 2, 'Process Variable': 3, 'output': }
+        mode_dict = {'Off': 0, 'Set': 1, 'Setpoint': 2, 'Process Variable': 3, 'Output': 5}
         with self.com_lock:
             self.write_register(15360, mode_dict[mode])
 
-    def get_gain_scheduling(self, mode):
+    def get_gain_scheduling(self):
         """Get the gain scheduling mode"""
-        mode_dict = {'Off': 0, 'Set': 1, 'Setpoint': 2, 'Process Variable': 3, 'output': }
+        mode_dict = {0: 'Off', 1: 'Set', 2: 'Setpoint', 3: 'Process Variable', 5: 'Output'}
         with self.com_lock:
             return mode_dict[self.read_register(15360)]
 

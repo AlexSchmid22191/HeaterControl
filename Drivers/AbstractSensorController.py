@@ -79,8 +79,28 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
                                                                                       self.__class__.__name__))
 
+    def set_pid_p2(self, p):
+        """Set the P2 (Proportional band) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
+                                                                                      self.__class__.__name__))
+
+    def set_pid_p3(self, p):
+        """Set the P3 (Proportional band) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
+                                                                                      self.__class__.__name__))
+
     def set_pid_i(self, i):
         """Set the I (Integral time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
+                                                                                      self.__class__.__name__))
+
+    def set_pid_i2(self, i):
+        """Set the I2 (Integral time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
+                                                                                      self.__class__.__name__))
+
+    def set_pid_i3(self, i):
+        """Set the I3 (Integral time) for the PID controller"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
                                                                                       self.__class__.__name__))
 
@@ -89,8 +109,28 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
                                                                                       self.__class__.__name__))
 
+    def set_pid_d2(self, d):
+        """Set the D2 (Derivative time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def set_pid_d3(self, d):
+        """Set the D3 (Derivative time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
     def get_pid_p(self):
         """Get the P (Proportional band) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_p2(self):
+        """Get the P2 (Proportional band) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_p3(self):
+        """Get the P3 (Proportional band) for the PID controller"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_p',
                                                                                       self.__class__.__name__))
 
@@ -99,8 +139,58 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
                                                                                       self.__class__.__name__))
 
+    def get_pid_i2(self):
+        """Get the I2 (Integral time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_i3(self):
+        """Get the I3 (Integral time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_i',
+                                                                                      self.__class__.__name__))
+
     def get_pid_d(self):
         """Get the D (Derivative time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_d2(self):
+        """Get the D2 (Derivative time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def get_pid_d3(self):
+        """Get the D3 (Derivative time) for the PID controller"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def set_boundary_12(self, boundary):
+        """Set the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def set_boundary_23(self, boundary):
+        """Set the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def get_boundary_12(self):
+        """Get the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def get_boundary_23(self):
+        """Get the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def set_gain_scheduling(self, mode):
+        """Set the gain scheduling mode"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
+                                                                                      self.__class__.__name__))
+
+    def get_gain_scheduling(self):
+        """Get the gain scheduling mode"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_pid_d',
                                                                                       self.__class__.__name__))
 

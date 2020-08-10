@@ -204,46 +204,40 @@ class PIDFrame(wx.Frame):
         if os.name == 'nt':
             self.SetBackgroundColour('White')
 
-        parameters = {'P': 'Proportional band', 'I': 'Integral time (s)', 'D': 'Derivative time (s)',
-                      'P1': 'Proportional band 1', 'I1': 'Integral time 1 (s)', 'D1': 'Derivative time 1 (s)',
+        parameters = {'P': 'Proportional band 1', 'I': 'Integral time 1 (s)', 'D': 'Derivative time 1 (s)',
                       'P2': 'Proportional band 2', 'I2': 'Integral time 2 (s)', 'D2': 'Derivative time 2 (s)',
                       'P3': 'Proportional band 3', 'I3': 'Integral time 3 (s)', 'D3': 'Derivative time 3 (s)',
                       'GS': 'Gain scheduling', 'B12': 'Boundary 1/2', 'B23': 'Boundary 2/3'}
 
-        self.param_is_simple = {'P': True, 'I': True, 'D': True,
-                                'P1': False, 'I1': False, 'D1': False,
-                                'P2': False, 'I2': False, 'D2': False,
-                                'P3': False, 'I3': False, 'D3': False,
-                                'GS': False, 'B12': False, 'B23': False}
-
         self.labels = {key: wx.StaticText(parent=self, label=value) for (key, value) in parameters.items()}
-        self.entries = {key: wx.SpinCtrlDouble(parent=self, min=0, max=9999, initial=1) for key in parameters}
+        self.entries = {key: wx.SpinCtrlDouble(parent=self, min=0, max=9999, initial=1) if not key == 'GS'
+                        else wx.Choice(parent=self, choices=['Off', 'Set', 'Setpoint', 'Process Variable', 'Output'])
+                        for key in parameters}
+
         self.set_buttons = {key: wx.Button(parent=self, id=wx.ID_ANY, label='Set'+key) for key in parameters}
-        self.pid_getter_functions = {'P': self.set_pid_p, 'I': self.set_pid_i, 'D': self.set_pid_d}
-        
-        for parameter in parameters:
-            if self.param_is_simple[parameter]:
-                self.set_buttons[parameter].Bind(event=wx.EVT_BUTTON, handler=self.pid_getter_functions[parameter])
+        self.pid_setter_functions = {'P': self.set_pid_p, 'I': self.set_pid_i, 'D': self.set_pid_d,
+                                     'P2': self.set_pid_p2, 'I2': self.set_pid_i2, 'D2': self.set_pid_d2,
+                                     'P3': self.set_pid_p3, 'I3': self.set_pid_i3, 'D3': self.set_pid_d3,
+                                     'B12': self.set_boundary_12, 'B23': self.set_boundary_23,
+                                     'GS': self.set_gain_scheduling}
 
         grid_sizer = wx.FlexGridSizer(rows=15, cols=3, hgap=5, vgap=5)
         for parameter in parameters:
+            self.set_buttons[parameter].Bind(event=wx.EVT_BUTTON, handler=self.pid_setter_functions[parameter])
             grid_sizer.Add(self.labels[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
             grid_sizer.Add(self.entries[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
             grid_sizer.Add(self.set_buttons[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
 
         self.get_button = wx.Button(parent=self, label='Get current')
         self.get_button.Bind(event=wx.EVT_BUTTON, handler=self.get_pid_parameters)
-        self.adv_button = wx.ToggleButton(parent=self, label='Advanced mode')
-        self.adv_button.Bind(event=wx.EVT_TOGGLEBUTTON, handler=self.toggle_advanced)
         buttonsizer = wx.BoxSizer(orient=wx.VERTICAL)
-        [buttonsizer.Add(button, flag=wx.EXPAND) for button in [self.get_button, self.adv_button]]
+        [buttonsizer.Add(button, flag=wx.EXPAND) for button in [self.get_button]]
 
         boxsizer = wx.BoxSizer(orient=wx.HORIZONTAL)
         boxsizer.Add(grid_sizer, flag=wx.EXPAND | wx.ALL, border=5)
         boxsizer.Add(buttonsizer, flag=wx.EXPAND | wx.ALL, border=5)
 
         self.SetSizerAndFit(boxsizer)
-        self.toggle_advanced(state=False)
         self.Show()
 
     def set_pid_p(self, *args):
@@ -255,22 +249,44 @@ class PIDFrame(wx.Frame):
     def set_pid_d(self, *args):
         sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].GetValue())
 
+    def set_pid_p2(self, *args):
+        sendMessage(topicName='gui.set.pid_p2', p=self.entries['P2'].GetValue())
+
+    def set_pid_i2(self, *args):
+        sendMessage(topicName='gui.set.pid_i2', i=self.entries['I2'].GetValue())
+
+    def set_pid_d2(self, *args):
+        sendMessage(topicName='gui.set.pid_d2', d=self.entries['D2'].GetValue())
+
+    def set_pid_p3(self, *args):
+        sendMessage(topicName='gui.set.pid_p3', p=self.entries['P3'].GetValue())
+
+    def set_pid_i3(self, *args):
+        sendMessage(topicName='gui.set.pid_i3', i=self.entries['I3'].GetValue())
+
+    def set_pid_d3(self, *args):
+        sendMessage(topicName='gui.set.pid_d3', d=self.entries['D3'].GetValue())
+
+    def set_boundary_12(self, *args):
+        sendMessage(topicName='gui.set.boundary12', boundary=self.entries['B12'].GetValue())
+
+    def set_boundary_23(self, *args):
+        sendMessage(topicName='gui.set.boundary23', boundary=self.entries['B23'].GetValue())
+
+    def set_gain_scheduling(self, *args):
+        sendMessage(topicName='gui.set.gs_mode', mode=self.entries['GS'].GetStringSelection())
+
     @staticmethod
     def get_pid_parameters(*args):
         sendMessage(topicName='gui.request.pid')
 
     @in_main_thread
-    def update_pid_values(self, p, i, d):
-        self.entries['P'].SetValue(p)
-        self.entries['I'].SetValue(i)
-        self.entries['D'].SetValue(d)
-
-    def toggle_advanced(self, *event, state=True):
-        state = event[0].IsChecked() if event else state
-        for (parameter, is_simple) in self.param_is_simple.items():
-            self.labels[parameter].Show(state != is_simple)
-            self.entries[parameter].Show(state != is_simple)
-            self.set_buttons[parameter].Show(state != is_simple)
+    def update_pid_values(self, pid_parameters):
+        for key in pid_parameters:
+            if key == 'GS':
+                self.entries[key].SetSelection(self.entries[key].FindString(pid_parameters[key]))
+            else:
+                self.entries[key].SetValue(pid_parameters[key])
 
 
 class StatusWindow(wx.Panel):

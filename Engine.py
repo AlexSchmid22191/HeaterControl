@@ -64,8 +64,17 @@ class HeaterControlEngine:
             subscribe(self.set_manual_output_power, 'gui.set.manual_power')
             subscribe(self.set_rate, 'gui.set.rate')
             subscribe(self.set_pid_p, 'gui.set.pid_p')
+            subscribe(self.set_pid_p2, 'gui.set.pid_p2')
+            subscribe(self.set_pid_p3, 'gui.set.pid_p3')
             subscribe(self.set_pid_i, 'gui.set.pid_i')
+            subscribe(self.set_pid_i2, 'gui.set.pid_i2')
+            subscribe(self.set_pid_i3, 'gui.set.pid_i3')
             subscribe(self.set_pid_d, 'gui.set.pid_d')
+            subscribe(self.set_pid_d2, 'gui.set.pid_d2')
+            subscribe(self.set_pid_d3, 'gui.set.pid_d3')
+            subscribe(self.set_boundary12, 'gui.set.boundary12')
+            subscribe(self.set_boundary23, 'gui.set.boundary23')
+            subscribe(self.set_gain_scheduling, 'gui.set.gs_mode')
             subscribe(self.get_pid_parameters, 'gui.request.pid')
 
         except SerialException:
@@ -86,8 +95,17 @@ class HeaterControlEngine:
         unsubscribe(self.set_manual_output_power, 'gui.set.manual_power')
         unsubscribe(self.set_rate, 'gui.set.rate')
         unsubscribe(self.set_pid_p, 'gui.set.pid_p')
+        unsubscribe(self.set_pid_p2, 'gui.set.pid_p2')
+        unsubscribe(self.set_pid_p3, 'gui.set.pid_p3')
         unsubscribe(self.set_pid_i, 'gui.set.pid_i')
+        unsubscribe(self.set_pid_i2, 'gui.set.pid_i2')
+        unsubscribe(self.set_pid_i3, 'gui.set.pid_i3')
         unsubscribe(self.set_pid_d, 'gui.set.pid_d')
+        unsubscribe(self.set_pid_d2, 'gui.set.pid_d2')
+        unsubscribe(self.set_pid_d3, 'gui.set.pid_d3')
+        unsubscribe(self.set_boundary12, 'gui.set.boundary12')
+        unsubscribe(self.set_boundary23, 'gui.set.boundary23')
+        unsubscribe(self.set_gain_scheduling, 'gui.set.gs_mode')
         unsubscribe(self.get_pid_parameters, 'gui.request.pid')
 
         self.controller = None
@@ -209,10 +227,50 @@ class HeaterControlEngine:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
+    def set_pid_p2(self, p):
+        try:
+            self.controller.set_pid_p2(p)
+            sendMessage(topicName='engine.status', text='PID P2 set to {:f}'.format(p))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_pid_p3(self, p):
+        try:
+            self.controller.set_pid_p3(p)
+            sendMessage(topicName='engine.status', text='PID P3 set to {:f}'.format(p))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
     def set_pid_i(self, i):
         try:
             self.controller.set_pid_i(i)
             sendMessage(topicName='engine.status', text='PID I set to {:f}'.format(i))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_pid_i2(self, i):
+        try:
+            self.controller.set_pid_i2(i)
+            sendMessage(topicName='engine.status', text='PID I2 set to {:f}'.format(i))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_pid_i3(self, i):
+        try:
+            self.controller.set_pid_i3(i)
+            sendMessage(topicName='engine.status', text='PID I3 set to {:f}'.format(i))
         except NotImplementedError as exception:
             print(exception)
         except SerialException:
@@ -229,10 +287,66 @@ class HeaterControlEngine:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
+    def set_pid_d2(self, d):
+        try:
+            self.controller.set_pid_d2(d)
+            sendMessage(topicName='engine.status', text='PID D2 set to {:f}'.format(d))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_pid_d3(self, d):
+        try:
+            self.controller.set_pid_d3(d)
+            sendMessage(topicName='engine.status', text='PID D3 set to {:f}'.format(d))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_boundary12(self, boundary):
+        try:
+            self.controller.set_boundary_12(boundary)
+            sendMessage(topicName='engine.status', text='Boundary 1/2 set to {:f}'.format(boundary))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_boundary23(self, boundary):
+        try:
+            self.controller.set_boundary_23(boundary)
+            sendMessage(topicName='engine.status', text='Boundary 2/3 set to {:f}'.format(boundary))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
+    def set_gain_scheduling(self, mode):
+        try:
+            self.controller.set_gain_scheduling(mode)
+            sendMessage(topicName='engine.status', text='Gain scheduling mode set to {:s}'.format(mode))
+        except NotImplementedError as exception:
+            print(exception)
+        except SerialException:
+            sendMessage(topicName='engine.status', text='Serial communication error!')
+
+    @in_new_thread
     def get_pid_parameters(self):
         try:
-            p, i, d = self.controller.get_pid_p(), self.controller.get_pid_i(), self.controller.get_pid_d()
-            sendMessage(topicName='engine.answer.pid', p=p, i=i, d=d)
+            pid_parameters = {'P': self.controller.get_pid_p(), 'P2': self.controller.get_pid_p2(),
+                              'P3': self.controller.get_pid_p3(), 'I': self.controller.get_pid_i(),
+                              'I2': self.controller.get_pid_i2(), 'I3': self.controller.get_pid_i3(),
+                              'D': self.controller.get_pid_d(), 'D2': self.controller.get_pid_d2(),
+                              'D3': self.controller.get_pid_d3(), 'B23': self.controller.get_boundary_23(),
+                              'B12': self.controller.get_boundary_12(), 'GS': self.controller.get_gain_scheduling()}
+
+            sendMessage(topicName='engine.answer.pid', pid_parameters=pid_parameters)
         except NotImplementedError as exception:
             print(exception)
         except SerialException:

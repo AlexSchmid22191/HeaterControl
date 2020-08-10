@@ -51,11 +51,9 @@ class engine:
             """
             UNDOCUMENTED: created without spec
             """
-            def msgDataSpec(p, i, d):
+            def msgDataSpec(pid_parameters):
                 """
-                - p: UNDOCUMENTED
-                - i: UNDOCUMENTED
-                - d: UNDOCUMENTED
+                - pid_parameters: UNDOCUMENTED
                 """
     class status:
         """
@@ -146,7 +144,39 @@ class gui:
                 """
                 - p: UNDOCUMENTED
                 """
+        class pid_p2:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p):
+                """
+                - p: UNDOCUMENTED
+                """
+        class pid_p3:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p):
+                """
+                - p: UNDOCUMENTED
+                """
         class pid_i:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(i):
+                """
+                - i: UNDOCUMENTED
+                """
+        class pid_i2:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(i):
+                """
+                - i: UNDOCUMENTED
+                """
+        class pid_i3:
             """
             UNDOCUMENTED: created without spec
             """
@@ -161,6 +191,46 @@ class gui:
             def msgDataSpec(d):
                 """
                 - d: UNDOCUMENTED
+                """
+        class pid_d2:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(d):
+                """
+                - d: UNDOCUMENTED
+                """
+        class pid_d3:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(d):
+                """
+                - d: UNDOCUMENTED
+                """
+        class boundary12:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(boundary):
+                """
+                - boundary: UNDOCUMENTED
+                """
+        class boundary23:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(boundary):
+                """
+                - boundary: UNDOCUMENTED
+                """
+        class gs_mode:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(mode):
+                """
+                - mode: UNDOCUMENTED
                 """
 
     class request:
