@@ -63,7 +63,7 @@ class ElchRibbon(QWidget):
 
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.menus = menus if menus is not None else ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
-        self.menu_buttons = {key: QPushButton(parent=self, text=key) for key in self.menus}
+        self.menu_buttons = {key: QPushButton(parent=self, objectName=key) for key in self.menus}
         self.buttongroup = QButtonGroup()
         self.buttongroup.setExclusive(True)
         elchicon = QLabel()
@@ -75,14 +75,12 @@ class ElchRibbon(QWidget):
             vbox.addWidget(self.menu_buttons[key])
             self.buttongroup.addButton(self.menu_buttons[key])
             self.menu_buttons[key].setCheckable(True)
-            self.menu_buttons[key].setFixedSize(200, 40)
-            self.menu_buttons[key].setStyleSheet('QPushButton{border-image: url(../Icons/Logging_Gray.png)}'
-                                                 'QPushButton:hover{border-image: url(../Icons/Logging_Glow.png)}')
+            self.menu_buttons[key].setFixedSize(150, 100)
 
         vbox.addStretch()
-        vbox.setContentsMargins(30, 30, 30, 30)
-        vbox.setSpacing(5)
-        self.setMinimumWidth(300)
+        vbox.setContentsMargins(0, 0, 0, 0)
+        vbox.setSpacing(0)
+        self.setMinimumWidth(150)
         self.setLayout(vbox)
 
 
@@ -94,7 +92,7 @@ class ElchStatusBar(QWidget):
         parameters = ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']
         icons = {key: QLabel() for key in parameters}
         labels = {key: QLabel(text=key, objectName='label') for key in parameters}
-        self.values = {key: QLabel(text='0', objectName='value') for key in parameters}
+        self.values = {key: QLabel(text='0.00 °C', objectName='value') for key in parameters}
 
         vboxes = {key: QVBoxLayout() for key in parameters}
 
@@ -119,12 +117,12 @@ class ElchTitlebar(QWidget):
 
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setMinimumHeight(50)
-        label = QLabel(text='Elchi Control')
+        #label = QLabel(text='Elchi Control')
         buttons = {key: QToolButton(self, objectName=key) for key in ['Minimize', 'Close']}
 
         hbox = QHBoxLayout()
         hbox.addStretch(1)
-        hbox.addWidget(label)
+        #hbox.addWidget(label)
         hbox.addStretch(10)
         for key in buttons:
             buttons[key].setFixedSize(50, 50)

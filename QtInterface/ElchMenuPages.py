@@ -27,7 +27,7 @@ class ElchMenuPages(QWidget):
         self.setLayout(vbox)
 
     def adjust_visibility(self, button, visibility):
-        menu = button.text()
+        menu = button.objectName()
         self.menus[menu].setVisible(visibility)
 
 
@@ -103,6 +103,13 @@ class ElchDeviceMenu(QWidget):
             vbox.addWidget(self.connect_buttons[key])
             vbox.addStretch(5)
         self.setLayout(vbox)
+
+        self.populate_menus(['Eurotherm3216']*4, ['Thermolino6']*4)
+
+    def populate_menus(self, controllers, sensors):
+        """Populate the controller and sensor menus with lists of device names"""
+        self.device_menus['Controller'].addItems(controllers)
+        self.device_menus['Sensor'].addItems(sensors)
 
 
 class ElchPidMenu(QWidget):
