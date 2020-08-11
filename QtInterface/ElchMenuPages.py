@@ -9,7 +9,7 @@ class ElchMenuPages(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setMinimumWidth(250)
+        self.setMinimumWidth(200)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControllerMenu(), 'PID': ElchPidMenu(),
@@ -122,7 +122,8 @@ class ElchPidMenu(QWidget):
                       'GS': 'Gain scheduling', 'B12': 'Boundary 1/2', 'B23': 'Boundary 2/3'}
 
         self.labels = {key: QLabel(text=parameters[key]) for key in parameters}
-        self.entries = {key: QComboBox() if key == 'GS' else QDoubleSpinBox() for key in parameters}
+        self.entries = {key: QComboBox() if key == 'GS' else QDoubleSpinBox(decimals=1, singleStep=10, minimum=0,
+                                                                            maximum=1000) for key in parameters}
 
         grid = QFormLayout()
         grid.setSpacing(5)

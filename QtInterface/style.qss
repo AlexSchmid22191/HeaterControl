@@ -15,7 +15,7 @@ ElchRibbon{background-color:#2A2D56;}
 ElchMenuPages{background-color: #2A2D56;}
 ElchMenuPages QLabel{color: #7b8ccb;}
 
-ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 11pt;}
+ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 8pt;}
 
 ElchRibbon QPushButton#Devices{border-image: url(../Icons/Control.png)}
 ElchRibbon QPushButton#Devices:hover{border-image: url(../Icons/Control_Hover.png)}

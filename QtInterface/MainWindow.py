@@ -101,6 +101,7 @@ class ElchStatusBar(QWidget):
             vboxes[key].addWidget(self.values[key])
             vboxes[key].addWidget(labels[key])
             vboxes[key].setContentsMargins(0, 0, 0, 0)
+            vboxes[key].setSpacing(5)
             hbox.addWidget(icons[key])
             hbox.addStretch(1)
             hbox.addLayout(vboxes[key])
