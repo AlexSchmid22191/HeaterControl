@@ -12,8 +12,8 @@ class ElchMenuPages(QWidget):
         self.setMinimumWidth(200)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
-        self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControllerMenu(), 'PID': ElchPidMenu(),
-                      'Plotting': ElchPlotMenu()}
+        self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControllerMenu(), 'Plotting': ElchPlotMenu(),
+                      'PID': ElchPidMenu()}
 
         vbox = QVBoxLayout()
 
