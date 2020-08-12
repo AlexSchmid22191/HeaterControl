@@ -65,7 +65,7 @@ class ElchRibbon(QWidget):
         self.menus = menus if menus is not None else ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
         self.menu_buttons = {key: QPushButton(parent=self, objectName=key) for key in self.menus}
         self.buttongroup = QButtonGroup()
-        self.buttongroup.setExclusive(True)
+        #self.buttongroup.setExclusive(True)
         elchicon = QLabel()
         elchicon.setPixmap(QPixmap('../Icons/ElchiHead.png').scaled(100, 100))
 
@@ -93,7 +93,6 @@ class ElchStatusBar(QWidget):
         icons = {key: QLabel() for key in parameters}
         labels = {key: QLabel(text=key, objectName='label') for key in parameters}
         self.values = {key: QLabel(text='0.00 °C', objectName='value') for key in parameters}
-
         vboxes = {key: QVBoxLayout() for key in parameters}
 
         hbox = QHBoxLayout()

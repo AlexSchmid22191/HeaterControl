@@ -8,6 +8,9 @@ class ElchPlot(FigureCanvas):
     def __init__(self, *args, **kwargs):
         matplotlib.style.use('App.mplstyle')
         super().__init__(Figure(figsize=(7, 6)), *args, **kwargs)
+
+        self.units = 'Temperature'
+
         self.ax = self.figure.subplots()
         self.ax2 = self.ax.twinx()
 
@@ -16,4 +19,8 @@ class ElchPlot(FigureCanvas):
         self.plots = {key: self.ax.plot(self.fake_data[key], color=self.colors[key])
                       for key in self.colors}
 
-        self.ax.autoscale()
+        self.ax.set_xlabel('Time (min)')
+        self.ax2.set_ylabel('Power (%)')
+        self.ax.set_ylabel('Temperature (°C)')
+
+        self.figure.tight_layout()

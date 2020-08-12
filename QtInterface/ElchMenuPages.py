@@ -2,7 +2,7 @@ import functools
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox, QLabel, QRadioButton, QComboBox, \
-    QFormLayout, QSizeGrip
+    QFormLayout, QButtonGroup
 
 
 class ElchMenuPages(QWidget):
@@ -34,12 +34,17 @@ class ElchMenuPages(QWidget):
 class ElchPlotMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        controls = ['Start', 'Stop', 'Resume', 'Clear', 'Export']
-        self.buttons = {key: QPushButton(text=key, parent=self) for key in controls}
+        controls = ['Start', 'Clear', 'Export']
+        self.buttons = {key: QPushButton(parent=self, objectName=key) for key in controls}
+        self.buttons['Start'].setCheckable(True)
 
         vbox = QVBoxLayout()
         for key in controls:
-            vbox.addWidget(self.buttons[key])
+            vbox.addWidget(self.buttons[key], alignment=Qt.AlignHCenter)
+            self.buttons[key].setFixedSize(160, 40)
+
+        vbox.setContentsMargins(20, 20, 20, 20)
+        vbox.setSpacing(20)
 
         self.setLayout(vbox)
 
@@ -94,9 +99,14 @@ class ElchDeviceMenu(QWidget):
         self.device_menus = {key: QComboBox() for key in self.labels}
         self.port_menus = {key: QComboBox() for key in self.labels}
         self.connect_buttons = {key: QPushButton(text='Connect', objectName=key) for key in self.labels}
+        self.buttongroup = QButtonGroup()
+        self.buttongroup.setExclusive(False)
 
         vbox = QVBoxLayout()
+        vbox.addStretch(5)
         for key in self.labels:
+            self.buttongroup.addButton(self.connect_buttons[key])
+            self.connect_buttons[key].setCheckable(True)
             vbox.addWidget(self.labels[key])
             vbox.addWidget(self.device_menus[key])
             vbox.addWidget(self.port_menus[key])
@@ -104,12 +114,24 @@ class ElchDeviceMenu(QWidget):
             vbox.addStretch(5)
         self.setLayout(vbox)
 
-        self.populate_menus(['Eurotherm3216']*4, ['Thermolino6']*4)
+        self.buttongroup.buttonToggled.connect(self.tell_me)
 
-    def populate_menus(self, controllers, sensors):
+        self.populate_menus(['COM Test']*3, **{'Sensor': ['Sensor Test']*3, 'Controller': ['Controller Test']*3})
+
+    def populate_menus(self, ports, **kwargs):
         """Populate the controller and sensor menus with lists of device names"""
-        self.device_menus['Controller'].addItems(controllers)
-        self.device_menus['Sensor'].addItems(sensors)
+        for key in self.port_menus:
+            self.port_menus[key].clear()
+            self.device_menus[key].clear()
+            self.port_menus[key].addItems(ports)
+            self.device_menus[key].addItems(kwargs[key])
+
+    def tell_me(self, source, state):
+        key = source.objectName()
+        port = self.port_menus[key].currentText()
+        device = self.device_menus[key].currentText()
+        print(device, port, state)
+
 
 
 class ElchPidMenu(QWidget):

@@ -1,34 +1,71 @@
 ElchMainWindow{background-color:#181C3F}
 
+
+/*Stylinmg of the Status Bar*/
 ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
 ElchStatusBar QLabel#label{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 8pt;}
 ElchStatusBar QLabel#value{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 16pt;}
 
-ElchTitlebar QLabel{background: #181C3F; color: aliceblue; font-family: Roboto; font-style: normal; font-size: 12pt;}
-ElchTitlebar QToolButton#Close{background: #181C3F url(../Icons/Quit.png) center center no-repeat; border:none;}
-ElchTitlebar QToolButton#Close:hover{background: #181C3F url(../Icons/Quit_Hover.png) center center no-repeat ; border: none}
-ElchTitlebar QToolButton#Minimize{background: #181C3F url(../Icons/Minimize.png) center center no-repeat; border:none;}
-ElchTitlebar QToolButton#Minimize:hover{background: #181C3F url(../Icons/Minimize_Hover.png) center center no-repeat ; border: none}
 
+/*Styliong of the Title Bar*/
+ElchTitlebar QToolButton#Close{background: url(../Icons/Quit.png) center no-repeat; border:none;}
+ElchTitlebar QToolButton#Close:hover{background:url(../Icons/Quit_Hover.png) center no-repeat ; border: none}
+ElchTitlebar QToolButton#Minimize{background: url(../Icons/Minimize.png) center no-repeat; border:none;}
+ElchTitlebar QToolButton#Minimize:hover{background: url(../Icons/Minimize_Hover.png) center no-repeat ; border: none}
+
+
+/*Styliong of the Ribbon*/
 ElchRibbon{background-color:#2A2D56;}
-
-ElchMenuPages{background-color: #2A2D56;}
-ElchMenuPages QLabel{color: #7b8ccb;}
-
-ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 8pt;}
+ElchRibbon QPushButton:checked{background-color: #181C3F}
 
 ElchRibbon QPushButton#Devices{border-image: url(../Icons/Devices.png)}
 ElchRibbon QPushButton#Devices:hover{border-image: url(../Icons/Devices_Glow.png)}
-ElchRibbon QPushButton#Devices:checked{border-image: url(../Icons/Devices_Glow.png); background-color: #181C3F}
+ElchRibbon QPushButton#Devices:checked{border-image: url(../Icons/Devices_Glow.png)}
 
 ElchRibbon QPushButton#Control{border-image: url(../Icons/Control.png)}
 ElchRibbon QPushButton#Control:hover{border-image: url(../Icons/Control_Glow.png)}
-ElchRibbon QPushButton#Control:checked{border-image: url(../Icons/Control_Glow.png); background-color: #181C3F}
+ElchRibbon QPushButton#Control:checked{border-image: url(../Icons/Control_Glow.png)}
 
 ElchRibbon QPushButton#PID{border-image: url(../Icons/PID.png)}
 ElchRibbon QPushButton#PID:hover{border-image: url(../Icons/PID_Glow.png)}
-ElchRibbon QPushButton#PID:checked{border-image: url(../Icons/PID_Glow.png); background-color: #181C3F}
+ElchRibbon QPushButton#PID:checked{border-image: url(../Icons/PID_Glow.png)}
 
 ElchRibbon QPushButton#Plotting{border-image: url(../Icons/Plotting.png)}
 ElchRibbon QPushButton#Plotting:hover{border-image: url(../Icons/Plotting_Glow.png)}
-ElchRibbon QPushButton#Plotting:checked{border-image: url(../Icons/Plotting_Glow.png); background-color: #181C3F}
+ElchRibbon QPushButton#Plotting:checked{border-image: url(../Icons/Plotting_Glow.png)}
+
+
+/*Styling of the Elchmenupages*/
+ElchMenuPages{background-color: #2A2D56;}
+ElchMenuPages QLabel{color: #7b8ccb; font: 14pt "Roboto"}
+
+/*Comboboxes*/
+ElchMenuPages QComboBox{background-color:#2A2D56; border: 1px solid #15183b; color: #7b8ccb; font: 11pt "Roboto Light";}
+ElchMenuPages QComboBox:on{background-color: #252a4e; color: #7f8ab7;}
+ElchMenuPages QComboBox::drop-down{border:none}
+ElchMenuPages QComboBox::down-arrow{image: url(../Icons/Down.png); width: 10px}
+ElchMenuPages QComboBox::down-arrow:on{image: url(../Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QComboBox::down-arrow:hover{image: url(../Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QComboBox QAbstractItemView {border:1px solid #15183b; background-color: #2A2D56; color: #7b8ccb;
+    selection-background-color: #393b67; outline: 0}
+
+/*Spinboxes*/
+ElchMenuPages QDoubleSpinBox{background-color:#2A2D56; border: 1px solid #15183b;  ; color: #7b8ccb; font: 11pt "Roboto Light";}
+
+/*Buttons*/
+ElchDeviceMenu QPushButton{background:#2A2D56; border:1px solid #15183b; color:#7b8ccb; icon: url(../Icons/Connect.png);
+    padding: 2px}
+ElchDeviceMenu QPushButton:hover{background: #373a62; border:1px solid #15183b; color: #7b8ccb}
+ElchDeviceMenu QPushButton:checked{background: #373a62; border:1px solid #15183b; color: #7b8ccb}
+
+/*Styling of the ElchPlotMenu*/
+ElchPlotMenu QPushButton#Start{border-image: url(../Icons/Start.png)}
+ElchPlotMenu QPushButton#Start:hover{border-image: url(../Icons/Start_Glow.png)}
+ElchPlotMenu QPushButton#Clear{border-image: url(../Icons/Clear.png)}
+ElchPlotMenu QPushButton#Clear:hover{border-image: url(../Icons/Clear_Glow.png)}
+ElchPlotMenu QPushButton#Export{border-image: url(../Icons/Export.png)}
+ElchPlotMenu QPushButton#Export:hover{border-image: url(../Icons/Export_Glow.png)}
+
+ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 8pt;}
+
+
