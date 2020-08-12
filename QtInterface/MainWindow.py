@@ -1,5 +1,5 @@
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QIcon, QPixmap
+from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QApplication, QButtonGroup, \
     QLabel, QToolButton, QSizeGrip
 from QtInterface.ElchMenuPages import ElchMenuPages
@@ -65,7 +65,6 @@ class ElchRibbon(QWidget):
         self.menus = menus if menus is not None else ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
         self.menu_buttons = {key: QPushButton(parent=self, objectName=key) for key in self.menus}
         self.buttongroup = QButtonGroup()
-        #self.buttongroup.setExclusive(True)
         elchicon = QLabel()
         elchicon.setPixmap(QPixmap('../Icons/ElchiHead.png').scaled(100, 100))
 
@@ -117,12 +116,10 @@ class ElchTitlebar(QWidget):
 
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setMinimumHeight(50)
-        #label = QLabel(text='Elchi Control')
         buttons = {key: QToolButton(self, objectName=key) for key in ['Minimize', 'Close']}
 
         hbox = QHBoxLayout()
         hbox.addStretch(1)
-        #hbox.addWidget(label)
         hbox.addStretch(10)
         for key in buttons:
             buttons[key].setFixedSize(50, 50)
