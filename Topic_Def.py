@@ -9,57 +9,55 @@
 
 class engine:
     """
-    UNDOCUMENTED: created as parent without specification
+    Superclass for all messages emitted by the engine
     """
-
     class answer:
         """
-        UNDOCUMENTED: created as parent without specification
+        Class for all answers to requests from the GUI
         """
-
-        class oven_temp:
+        class process_variable:
             """
             UNDOCUMENTED: created without spec
             """
-            
-            def msgDataSpec(temp):
+            def msgDataSpec(pv):
                 """
-                - temp: UNDOCUMENTED
+                - pv: float
                 """
-
-        class oven_working_output:
+        class working_output:
             """
             UNDOCUMENTED: created without spec
             """
-            
             def msgDataSpec(output):
                 """
                 - output: UNDOCUMENTED
                 """
-
-        class oven_working_setpoint:
+        class working_setpoint:
             """
             UNDOCUMENTED: created without spec
             """
-            
             def msgDataSpec(setpoint):
                 """
                 - setpoint: UNDOCUMENTED
                 """
-
-        class sensor_temp:
+        class sensor_value:
             """
             UNDOCUMENTED: created without spec
             """
-            
-            def msgDataSpec(temp):
+            def msgDataSpec(value):
                 """
-                - temp: UNDOCUMENTED
+                - value: UNDOCUMENTED
                 """
-
+        class pid:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(pid_parameters):
+                """
+                - pid_parameters: UNDOCUMENTED
+                """
     class status:
         """
-
+        Class for all status messages emitted by the engine
         """
         def msgDataSpec(text):
             """
@@ -68,81 +66,221 @@ class engine:
 
 class gui:
     """
-    UNDOCUMENTED: created as parent without specification
+    Superclass for all messages emitted by the GUI
     """
-
     class con:
         """
         UNDOCUMENTED: created as parent without specification
         """
-
-        class connect_heater:
+        class connect_controller:
             """
             UNDOCUMENTED: created without spec
             """
-            
-            def msgDataSpec(heater_type, heater_port):
+            def msgDataSpec(controller_type, controller_port):
                 """
-                - heater_port: UNDOCUMENTED
-                - heater_type: UNDOCUMENTED
+                - controller_type: UNDOCUMENTED
+                - controller_port: UNDOCUMENTED
                 """
-
         class connect_sensor:
             """
             UNDOCUMENTED: created without spec
             """
-            
             def msgDataSpec(sensor_type, sensor_port):
                 """
                 - sensor_port: UNDOCUMENTED
                 - sensor_type: UNDOCUMENTED
                 """
+        class disconnect_controller:
+            """
+            UNDOCUMENTED: created without spec
+            """
+
+        class disconnect_sensor:
+            """
+            UNDOCUMENTED: created without spec
+            """
 
     class set:
         """
-        UNDOCUMENTED: created as parent without specification
+        UNDOCUMENTED: Class for all set command from the GUI (i.e. unidirectional commands wirthout expected repsonse)
         """
-
         class automatic_mode:
             """
             UNDOCUMENTED: created without spec
             """
-
         class manual_mode:
             """
             UNDOCUMENTED: created without spec
             """
-
         class manual_power:
             """
             UNDOCUMENTED: created without spec
             """
-            
             def msgDataSpec(power):
                 """
                 - power: UNDOCUMENTED
                 """
-
         class rate:
             """
             UNDOCUMENTED: created without spec
             """
-            
             def msgDataSpec(rate):
                 """
                 - rate: UNDOCUMENTED
                 """
-
         class target_setpoint:
             """
             UNDOCUMENTED: created without spec
             """
-            
-            def msgDataSpec(temp):
+            def msgDataSpec(setpoint):
                 """
-                - temp: UNDOCUMENTED
+                - setpoint: UNDOCUMENTED
+                """
+        class pid_p:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p):
+                """
+                - p: UNDOCUMENTED
+                """
+        class pid_p2:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p):
+                """
+                - p: UNDOCUMENTED
+                """
+        class pid_p3:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(p):
+                """
+                - p: UNDOCUMENTED
+                """
+        class pid_i:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(i):
+                """
+                - i: UNDOCUMENTED
+                """
+        class pid_i2:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(i):
+                """
+                - i: UNDOCUMENTED
+                """
+        class pid_i3:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(i):
+                """
+                - i: UNDOCUMENTED
+                """
+        class pid_d:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(d):
+                """
+                - d: UNDOCUMENTED
+                """
+        class pid_d2:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(d):
+                """
+                - d: UNDOCUMENTED
+                """
+        class pid_d3:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(d):
+                """
+                - d: UNDOCUMENTED
+                """
+        class boundary12:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(boundary):
+                """
+                - boundary: UNDOCUMENTED
+                """
+        class boundary23:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(boundary):
+                """
+                - boundary: UNDOCUMENTED
+                """
+        class gs_mode:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(mode):
+                """
+                - mode: UNDOCUMENTED
                 """
 
+    class request:
+        """
+        Class for all requests from the GUI, i.e. an answer is expected
+        """
+        class process_variable:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class working_output:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class working_setpoint:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class sensor_value:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class pid:
+            """
+            UNDOCUMENTED: created without spec
+            """
 
+    class log:
+        """
+        A class for everthing related to the logging module
+        """
+        class start:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class stop:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class cont:
+            """
+            UNDOCUMENTED: created without spec
+            """
+        class filename:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(filename):
+                """
+                - filename: UNDOCUMENTED
+                """
 # End of topic tree definition. Note that application may load
 # more than one definitions provider.

@@ -1,22 +1,35 @@
-from serial import Serial
-from threading import Lock
-from time import sleep
+import time
+import serial
+import threading
+from Drivers.AbstractSensorController import AbstractSensor
 
 
-class Keithly(Serial):
+class Keithly2000(AbstractSensor, serial.Serial):
     def __init__(self, port):
-        Serial.__init__(self, port, timeout=1.5)
-        self.com_lock = Lock()
+        super().__init__(port, timeout=1.5)
+        self.com_lock = threading.Lock()
+        time.sleep(1)
+        self.write('*RST\n'.encode())
 
-        sleep(1)
+    def get_sensor_value(self):
+        with self.com_lock:
+            self.write(':read?\n'.encode())
 
+            return float(self.read(16).decode())
+
+    def close(self):
+        serial.Serial.close(self)
+
+
+class Keithly2000Temp(Keithly2000):
+    def __init__(self, port):
+        super().__init__(port)
         with self.com_lock:
             self.write(":FUNC 'TEMP'\n".encode())
 
-    def read_temperature(self):
-        print('test')
-        with self.com_lock:
-            self.write(':read?'.encode())
-            self.write('\n'.encode())
 
-            return float(self.read(16).decode())
+class Keithly2000Volt(Keithly2000):
+    def __init__(self, port):
+        super().__init__(port)
+        with self.com_lock:
+            self.write(":FUNC 'VOLT'\n".encode())

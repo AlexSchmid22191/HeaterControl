@@ -11,7 +11,7 @@ class OmegaPt(minimalmodbus.Instrument):
         self.rate = 15  # In °C per minute
         self.setpoint = 0  # In °C
 
-        # Set SP1 to be controleld by ramp soak cycle
+        # Set SP1 to be controlled by ramp soak cycle
         self.write_register(736, 4)
         # Select constant soak time mode
         self.write_register(615, 1)
@@ -20,7 +20,7 @@ class OmegaPt(minimalmodbus.Instrument):
 
     def adjust_ramp_soak(self):
         current_temp = self.get_oven_temp()
-        # Calculate ramping time is ms from difference between real and set temp., multiply by 60 for s and 1000 for ms
+        # Calculate ramp time is ms from difference between real and set temp., multiply by 60 for s and 1000 for ms
         time = int(abs((self.setpoint-current_temp)/self.rate)*60*1000)
 
         with self.com_lock:
@@ -40,12 +40,12 @@ class OmegaPt(minimalmodbus.Instrument):
             self.write_register(614, 1)
             # Select soak profile 99 to use
             self.write_register(609, 99)
-            # Stop and resstart soak profile
+            # Stop and restart soak profile
             self.write_register(576, 8)
             self.write_register(576, 6)
 
     def set_target_setpoint(self, temperature):
-        """Set the tagert setpoint, in degree Celsius. Start heating to this setpoint with the set rate"""
+        """Set the target setpoint, in degree Celsius. Start heating to this setpoint with the set rate"""
         self.setpoint = temperature
         self.adjust_ramp_soak()
 
@@ -71,16 +71,3 @@ class OmegaPt(minimalmodbus.Instrument):
         with self.com_lock:
             setpoint = self.read_float(548)
         return setpoint
-
-    @staticmethod
-    def set_automatic_mode(self):
-        print('Manual mode is not supported for omega devices')
-
-    @staticmethod
-    def set_manual_mode():
-        """Set controller to manual mode"""
-        print('Manual mode is not supported for omega devices')
-
-    @staticmethod
-    def set_manual_output_power(output):
-        print('Manual mode is not supported for omega devices')
