@@ -51,7 +51,7 @@ ElchMenuPages QComboBox::drop-down{border:none}
 ElchMenuPages QComboBox::down-arrow{image: url(../Icons/Down.png); width: 10px}
 ElchMenuPages QComboBox::down-arrow:on{image: url(../Icons/Down_Glow.png); width: 10px}
 ElchMenuPages QComboBox::down-arrow:hover{image: url(../Icons/Down_Glow.png); width: 10px}
-ElchMenuPages QAbstractItemView {background-color: #2A2D56;border:1px solid #15183b; color: #7b8ccb;
+ElchMenuPages QAbstractItemView {background-color: #2A2D56; border:1px solid #15183b; color: #7b8ccb;
     selection-background-color: #393b67; outline: 0}
 
 /*Spinboxes*/
@@ -83,6 +83,4 @@ ElchPlotMenu QPushButton#Clear:hover{icon: url(../Icons/Clear_Glow.png)}
 ElchPlotMenu QPushButton#Export{icon: url(../Icons/Export.png)}
 ElchPlotMenu QPushButton#Export:hover{icon: url(../Icons/Export_Glow.png)}
 
-ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 8pt;}
-
-
+ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 11pt;}

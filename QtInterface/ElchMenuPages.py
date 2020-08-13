@@ -14,12 +14,12 @@ class ElchMenuPages(QWidget):
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
                       'PID': ElchPidMenu()}
 
-        vbox = QVBoxLayout()
+        self.setMinimumWidth(220)
 
+        vbox = QVBoxLayout()
         for menu in self.menus:
             self.menus[menu].setVisible(False)
             vbox.addWidget(self.menus[menu])
-        vbox.addStretch()
         vbox.setSpacing(0)
         vbox.setContentsMargins(0, 0, 0, 0)
 
@@ -42,7 +42,8 @@ class ElchDeviceMenu(QWidget):
         self.buttongroup.setExclusive(False)
 
         vbox = QVBoxLayout()
-        vbox.addStretch(5)
+        vbox.setSpacing(10)
+        vbox.setContentsMargins(10, 10, 10, 10)
         for key in self.labels:
             self.buttongroup.addButton(self.connect_buttons[key])
             self.connect_buttons[key].setCheckable(True)
@@ -50,7 +51,8 @@ class ElchDeviceMenu(QWidget):
             vbox.addWidget(self.device_menus[key])
             vbox.addWidget(self.port_menus[key])
             vbox.addWidget(self.connect_buttons[key])
-            vbox.addStretch(5)
+            vbox.addSpacing(20)
+        vbox.addStretch()
         self.setLayout(vbox)
 
         self.buttongroup.buttonToggled.connect(self.tell_me)
@@ -81,20 +83,21 @@ class ElchControlMenu(QWidget):
         self.buttons = {key: QRadioButton(text=key) for key in ['Automatic', 'Manual']}
 
         vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.setContentsMargins(10, 10, 10, 10)
         for label in self.labels:
             self.entries[label].setKeyboardTracking(False)
             self.entries[label].valueChanged.connect(functools.partial(self.dispaly_value, control=label))
             vbox.addWidget(self.labels[label], stretch=0)
             vbox.addWidget(self.entries[label], stretch=0, alignment=Qt.AlignLeft)
-            vbox.addStretch(2)
-
-        self.buttons['Automatic'].setChecked(True)
+            vbox.addSpacing(10)
         vbox.addWidget(QLabel(text='Control mode'))
         for button in self.buttons:
             vbox.addWidget(self.buttons[button])
-
-        vbox.setSpacing(5)
+        vbox.addStretch()
         self.setLayout(vbox)
+
+        self.buttons['Automatic'].setChecked(True)
 
     @staticmethod
     def dispaly_value(*args, **kwargs):
@@ -111,10 +114,9 @@ class ElchPlotMenu(QWidget):
         vbox = QVBoxLayout()
         for key in controls:
             vbox.addWidget(self.buttons[key])
-
-        vbox.setContentsMargins(20, 20, 20, 20)
-        vbox.setSpacing(20)
-
+        vbox.addStretch()
+        vbox.setSpacing(10)
+        vbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(vbox)
 
 
@@ -131,9 +133,9 @@ class ElchPidMenu(QWidget):
         self.entries = {key: QComboBox() if key == 'GS' else QDoubleSpinBox(decimals=1, singleStep=10, minimum=0,
                                                                             maximum=10000) for key in parameters}
 
-        grid = QFormLayout()
-        grid.setSpacing(5)
-        grid.setContentsMargins(10, 10, 10, 10)
+        form = QFormLayout()
+        form.setSpacing(10)
+        form.setContentsMargins(10, 10, 10, 10)
         for key in parameters:
-            grid.addRow(parameters[key], self.entries[key])
-        self.setLayout(grid)
+            form.addRow(parameters[key], self.entries[key])
+        self.setLayout(form)
