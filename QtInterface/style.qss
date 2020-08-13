@@ -3,8 +3,8 @@ ElchMainWindow{background-color:#181C3F}
 
 /*Stylinmg of the Status Bar*/
 ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
-ElchStatusBar QLabel#label{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 8pt;}
-ElchStatusBar QLabel#value{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 16pt;}
+ElchStatusBar QLabel#label{color: #7b8ccb; font: 8pt "Roboto Light";}
+ElchStatusBar QLabel#value{color: #7b8ccb; font: 14pt "Roboto";}
 
 
 /*Styliong of the Title Bar*/
@@ -42,7 +42,8 @@ ElchMenuPages QLabel{color: #7b8ccb; font: 14pt "Roboto"}
 /*Buttons*/
 ElchMenuPages QPushButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
 ElchMenuPages QPushButton:hover{background: #373a62; color: #7b8ccb}
-ElchMenuPages QPushButton:checked{background: #373a62; color: #7b8ccb}
+ElchMenuPages QPushButton:checked:hover{background: #373a62; color: #7b8ccb}
+ElchMenuPages QPushButton:checked{background: #343760; color: #7b8ccb}
 
 /*Comboboxes*/
 ElchMenuPages QComboBox{background-color:#2A2D56; border: 1px solid #15183b; color: #7b8ccb; font: 11pt "Roboto Light";}
@@ -56,11 +57,11 @@ ElchMenuPages QAbstractItemView {background-color: #2A2D56; border:1px solid #15
 
 /*Spinboxes*/
 ElchMenuPages QDoubleSpinBox{background-color:#2A2D56; border: 1px solid #15183b;  ; color: #7b8ccb; font: 11pt "Roboto Light";}
+ElchMenuPages QDoubleSpinBox:focus{selection-background-color:#393b67; selection-color: #7b8ccb;}
 ElchMenuPages QDoubleSpinBox::up-button {image: url(../Icons/Up.png); width: 10px}
 ElchMenuPages QDoubleSpinBox::up-button:hover {image: url(../Icons/Up_Glow.png); width: 10px}
 ElchMenuPages QDoubleSpinBox::down-button {image: url(../Icons/Down.png); width: 10px}
 ElchMenuPages QDoubleSpinBox::down-button:hover {image: url(../Icons/Down_Glow.png); width: 10px}
-ElchMenuPages QDoubleSpinBox:focus{selection-background-color:#393b67; selection-color: #7b8ccb;}
 
 /*Radiobuttons*/
 ElchMenuPages QRadioButton{color: #7b8ccb; font: 11pt "Roboto Light"}
