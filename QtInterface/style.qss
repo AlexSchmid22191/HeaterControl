@@ -37,7 +37,9 @@ ElchRibbon QPushButton#Plotting:checked{border-image: url(../Icons/Plotting_Glow
 
 /*Styling of the Elchmenupages*/
 ElchMenuPages{background-color: #2A2D56;}
-ElchMenuPages QLabel{color: #7b8ccb; font: 14pt "Roboto"}
+ElchMenuPages QLabel{color: #7b8ccb; font: 11pt "Roboto Light";}
+ElchMenuPages QLabel#Header{font: 14pt "Roboto"}
+
 
 /*Buttons*/
 ElchMenuPages QPushButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
@@ -56,12 +58,12 @@ ElchMenuPages QAbstractItemView {background-color: #2A2D56; border:1px solid #15
     selection-background-color: #393b67; outline: 0}
 
 /*Spinboxes*/
-ElchMenuPages QDoubleSpinBox{background-color:#2A2D56; border: 1px solid #15183b;  ; color: #7b8ccb; font: 11pt "Roboto Light";}
-ElchMenuPages QDoubleSpinBox:focus{selection-background-color:#393b67; selection-color: #7b8ccb;}
-ElchMenuPages QDoubleSpinBox::up-button {image: url(../Icons/Up.png); width: 10px}
-ElchMenuPages QDoubleSpinBox::up-button:hover {image: url(../Icons/Up_Glow.png); width: 10px}
-ElchMenuPages QDoubleSpinBox::down-button {image: url(../Icons/Down.png); width: 10px}
-ElchMenuPages QDoubleSpinBox::down-button:hover {image: url(../Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QAbstractSpinBox{background-color:#2A2D56; border: 1px solid #15183b;  ; color: #7b8ccb; font: 11pt "Roboto Light";}
+ElchMenuPages QAbstractSpinBox:focus{selection-background-color:#393b67; selection-color: #7b8ccb;}
+ElchMenuPages QAbstractSpinBox::up-button {image: url(../Icons/Up.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::up-button:hover {image: url(../Icons/Up_Glow.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::down-button {image: url(../Icons/Down.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::down-button:hover {image: url(../Icons/Down_Glow.png); width: 10px}
 
 /*Radiobuttons*/
 ElchMenuPages QRadioButton{color: #7b8ccb; font: 11pt "Roboto Light"}
@@ -83,5 +85,3 @@ ElchPlotMenu QPushButton#Clear{icon: url(../Icons/Clear.png)}
 ElchPlotMenu QPushButton#Clear:hover{icon: url(../Icons/Clear_Glow.png)}
 ElchPlotMenu QPushButton#Export{icon: url(../Icons/Export.png)}
 ElchPlotMenu QPushButton#Export:hover{icon: url(../Icons/Export_Glow.png)}
-
-ElchPidMenu QLabel{color: #7b8ccb; font-family: Roboto; font-style: normal;font-size: 11pt;}

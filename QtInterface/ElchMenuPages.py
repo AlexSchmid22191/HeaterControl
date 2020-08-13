@@ -1,7 +1,7 @@
 import functools
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox, QLabel, QRadioButton, QComboBox, \
-    QFormLayout, QButtonGroup
+    QFormLayout, QButtonGroup, QSpinBox
 
 
 class ElchMenuPages(QWidget):
@@ -34,7 +34,7 @@ class ElchDeviceMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.labels = {key: QLabel(text=key) for key in ['Controller', 'Sensor']}
+        self.labels = {key: QLabel(text=key, objectName='Header') for key in ['Controller', 'Sensor']}
         self.device_menus = {key: QComboBox() for key in self.labels}
         self.port_menus = {key: QComboBox() for key in self.labels}
         self.connect_buttons = {key: QPushButton(text='Connect', objectName=key) for key in self.labels}
@@ -57,7 +57,7 @@ class ElchDeviceMenu(QWidget):
 
         self.buttongroup.buttonToggled.connect(self.tell_me)
 
-        self.populate_menus(['COM Test']*3, **{'Sensor': ['Sensor Test']*3, 'Controller': ['Controller Test']*3})
+        self.populate_menus(['COM Test'] * 3, **{'Sensor': ['Sensor Test'] * 3, 'Controller': ['Controller Test'] * 3})
 
     def populate_menus(self, ports, **kwargs):
         """Populate the controller and sensor menus with lists of device names"""
@@ -81,7 +81,7 @@ class ElchControlMenu(QWidget):
         self.suffixes = {'Temperature': {'Setpoint': ' °C', 'Rate': ' °C/min', 'Power': ' %'},
                          'Voltage': {'Setpoint': ' mV', 'Rate': ' mV/min', 'Power': ' %'}}
 
-        self.labels = {key: QLabel(text=key) for key in ['Setpoint', 'Rate', 'Power']}
+        self.labels = {key: QLabel(text=key, objectName='Header') for key in ['Setpoint', 'Rate', 'Power']}
         self.entries = {key: QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000) for key in self.labels}
         self.entries['Power'].setMaximum(100)
         self.buttons = {key: QRadioButton(text=key) for key in ['Automatic', 'Manual']}
@@ -95,7 +95,7 @@ class ElchControlMenu(QWidget):
             vbox.addWidget(self.labels[label], stretch=0)
             vbox.addWidget(self.entries[label], stretch=0)
             vbox.addSpacing(10)
-        vbox.addWidget(QLabel(text='Control mode'))
+        vbox.addWidget(QLabel(text='Control mode', objectName='Header'))
         for button in self.buttons:
             vbox.addWidget(self.buttons[button])
             self.buttons[button].toggled.connect(functools.partial(self.broadcast_control_mode, mode=button))
@@ -150,28 +150,41 @@ class ElchPlotMenu(QWidget):
 class ElchPidMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # TODO: Split into 4 parts and use headings
         self.suffixes = {'Temperature': ' °C', 'Voltage': ' mV'}
-        parameters = {'P1': 'Proportional 1', 'I1': 'Integral 1 (s)', 'D1': 'Derivative 1 (s)',
-                      'P2': 'Proportional 2', 'I2': 'Integral 2 (s)', 'D2': 'Derivative 2 (s)',
-                      'P3': 'Proportional 3', 'I3': 'Integral 3 (s)', 'D3': 'Derivative 3 (s)',
-                      'B12': 'Boundary 1/2', 'B23': 'Boundary 2/3', 'GS': 'Gain scheduling'}
+        parameters = {'Gain Scheduling': {'GS': 'Gain scheduling', 'AS': 'Active Set', 'B12': 'Boundary 1/2',
+                                          'B23': 'Boundary 2/3'},
+                      'Set 1': {'P1': 'Proportional 1', 'I1': 'Integral 1 (s)', 'D1': 'Derivative 1 (s)'},
+                      'Set 2': {'P2': 'Proportional 2', 'I2': 'Integral 2 (s)', 'D2': 'Derivative 2 (s)'},
+                      'Set 3': {'P3': 'Proportional 3', 'I3': 'Integral 3 (s)', 'D3': 'Derivative 3 (s)'}}
 
-        self.labels = {key: QLabel(text=parameters[key]) for key in parameters}
-        self.entries = {key: QComboBox() if key == 'GS' else QDoubleSpinBox(decimals=1, singleStep=10, minimum=0,
-                                                                            maximum=10000) for key in parameters}
+        self.entries = {key: QComboBox() if key == 'GS' else QSpinBox(minimum=1, maximum=3) if key == 'AS'
+                        else QDoubleSpinBox(decimals=1, singleStep=10, minimum=0, maximum=10000)
+                        for subset in parameters for key in parameters[subset]}
         self.entries['GS'].addItems(['None', 'Set', 'PV', 'Setpoint'])
 
-        form = QFormLayout()
-        form.setSpacing(10)
-        form.setContentsMargins(10, 10, 10, 10)
-        for key in parameters:
-            form.addRow(parameters[key], self.entries[key])
+        vbox = QVBoxLayout()
+        vbox.setSpacing(0)
+        vbox.setContentsMargins(10, 10, 10, 10)
+        for subset in parameters:
+            label = QLabel(text=subset, objectName='Header')
+            vbox.addWidget(label)
+            vbox.addSpacing(10)
+            form = QFormLayout()
+            form.setSpacing(5)
+            form.setHorizontalSpacing(20)
+            form.setContentsMargins(0, 0, 0, 0)
+            for key in parameters[subset]:
+                form.addRow(parameters[subset][key], self.entries[key])
+            vbox.addLayout(form)
+            vbox.addSpacing(20)
+        vbox.addStretch()
+        self.setLayout(vbox)
+
+        for key in self.entries:
             if key == 'GS':
                 self.entries[key].currentTextChanged.connect(functools.partial(self.broadcast_pid_param, control=key))
             else:
                 self.entries[key].valueChanged.connect(functools.partial(self.broadcast_pid_param, control=key))
-        self.setLayout(form)
 
     @staticmethod
     def broadcast_pid_param(value, control):
