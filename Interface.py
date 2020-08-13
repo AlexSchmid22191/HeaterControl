@@ -36,34 +36,39 @@ class HeaterInterface(wx.Frame):
 
         self.Bind(event=wx.EVT_MENU, handler=self.on_quit, id=wx.ID_CLOSE)
 
-        self.status = StatusWindow(parent=self)
-        self.oven_ctrl = OvenControl(parent=self)
-        plot_ctrl = PlottingControl(parent=self)
-        log_ctrl = LogginControl(parent=self)
-        #matplot = MatplotWX(parent=self)
+        panel = wx.Panel(parent=self)
+        panel.SetBackgroundColour((210, 212, 214))
 
-        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.start_btn, handler=matplot.start_plotting)
-        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.stop_btn, handler=matplot.stop_plotting)
-        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.clear_btn, handler=matplot.clear_plot)
-        #self.Bind(wx.EVT_BUTTON, source=plot_ctrl.resume_btn, handler=matplot.cont_plotting)
+        self.status = StatusWindow(parent=panel)
+        oven_ctrl = OvenControl(parent=panel)
+        plot_ctrl = PlottingControl(parent=panel)
+        log_ctrl = LogginControl(parent=panel)
+        for widget in panel.GetChildren():
+            widget.SetBackgroundColour((230, 233, 237))
+
+        matplot = MatplotWX(parent=panel)
+
+        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.start_btn, handler=matplot.start_plotting)
+        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.stop_btn, handler=matplot.stop_plotting)
+        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.clear_btn, handler=matplot.clear_plot)
+        self.Bind(wx.EVT_BUTTON, source=plot_ctrl.resume_btn, handler=matplot.cont_plotting)
 
         hbox = wx.BoxSizer(orient=wx.HORIZONTAL)
-        hbox.Add(self.status, flag=wx.EXPAND | wx.RIGHT, border=10)
-        hbox.Add(log_ctrl, flag=wx.EXPAND | wx.RIGHT, border=10)
-        hbox.Add(plot_ctrl, flag=wx.EXPAND)
+        hbox.Add(oven_ctrl, flag=wx.EXPAND | wx.ALL, border=10)
+        hbox.Add(self.status, flag=wx.EXPAND | wx.TOP | wx.BOTTOM, border=10)
+        hbox.Add(log_ctrl, flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT, border=10)
+        hbox.Add(plot_ctrl, flag=wx.EXPAND | wx.ALL, border=10)
 
         vbox = wx.BoxSizer(orient=wx.VERTICAL)
-        vbox.Add(self.oven_ctrl, flag=wx.BOTTOM | wx.EXPAND, border=10)
-        vbox.Add(hbox)
+        vbox.Add(hbox, flag=wx.BOTTOM | wx.EXPAND)
+        vbox.Add(matplot, flag=wx.EXPAND | wx.BOTTOM | wx.RIGHT | wx.LEFT, proportion=1, border=10)
 
-        hbox_2 = wx.BoxSizer(orient=wx.HORIZONTAL)
-        hbox_2.Add(vbox, flag=wx.ALL, border=10)
-        #hbox_2.Add(matplot, flag=wx.EXPAND | wx.FIXED_MINSIZE, proportion=1)
+        panel.SetSizerAndFit(vbox)
 
-        hbox_2.Fit(self)
-        self.SetSizer(hbox_2)
+        vbox.Fit(self)
+        self.SetSizer(vbox)
 
-        #self.SetMinSize((800, self.GetSize()[1]))
+        self.SetMinSize((self.GetSize()))
         self.Show(True)
 
     @in_main_thread
@@ -114,58 +119,72 @@ class LogginControl(wx.Panel):
 
     @staticmethod
     def pause_log(*args):
-        sendMessage(topicName='gui.log.continue')
+        sendMessage(topicName='gui.log.cont')
 
 
 class OvenControl(wx.Panel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Create entries and labels for setpoint, rate and pid output
-        input_box = wx.StaticBoxSizer(orient=wx.HORIZONTAL, parent=self, label='Input')
-        parameters = ['Setpoint', 'Rate', 'Output']
-        self.labels = {parameter: wx.StaticText(parent=input_box.GetStaticBox(), label=parameter)
-                       for parameter in parameters}
-        self.entries = {parameter: wx.SpinCtrlDouble(parent=input_box.GetStaticBox(), style=wx.SP_ARROW_KEYS,
-                                                     inc=1, size=(70, -1)) for parameter in parameters}
-        grid = wx.FlexGridSizer(rows=2, cols=3, hgap=5, vgap=5)
-        [grid.Add(widgets[parameter], proportion=0, flag=wx.ALIGN_CENTER_VERTICAL)
-         for widgets in (self.labels, self.entries) for parameter in parameters]
-        self.set_button = wx.Button(parent=input_box.GetStaticBox(), label='Set')
-        [input_box.Add(widget, flag=wx.EXPAND | wx.ALL, proportion=1) for widget in (grid, self.set_button)]
+        temp_label = wx.StaticText(parent=self, label='Temperature')
+        ramp_label = wx.StaticText(parent=self, label='Ramp')
+        power_label = wx.StaticText(parent=self, label='Power')
+        self.temp_entry = wx.SpinCtrlDouble(parent=self, value='0', min=0, max=1200, inc=1, style=wx.SP_ARROW_KEYS,
+                                            size=(70, -1))
+        self.ramp_entry = wx.SpinCtrlDouble(parent=self, value='15', min=0, max=480, inc=1, style=wx.SP_ARROW_KEYS,
+                                            size=(70, -1))
+        self.power_entry = wx.SpinCtrlDouble(parent=self, value='0', min=0, max=100, inc=1, style=wx.SP_ARROW_KEYS,
+                                             size=(70, -1))
 
-        self.mode_box = wx.RadioBox(parent=self, label='Mode', choices=['Manual', 'Automatic'], majorDimension=1)
+        set_power_btn = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
+        set_temp_btn = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
+        set_ramp_btn = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
+
+        set_power_btn.Bind(event=wx.EVT_BUTTON, handler=self.set_power, source=set_power_btn)
+        set_temp_btn.Bind(event=wx.EVT_BUTTON, handler=self.set_temp, source=set_temp_btn)
+        set_ramp_btn.Bind(event=wx.EVT_BUTTON, handler=self.set_ramp, source=set_ramp_btn)
+
+        entry_box = wx.FlexGridSizer(rows=3, cols=3, hgap=5, vgap=5)
+        entry_box.Add(temp_label, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(self.temp_entry, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(set_temp_btn, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(ramp_label, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(self.ramp_entry, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(set_ramp_btn, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(power_label, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(self.power_entry, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        entry_box.Add(set_power_btn, proportion=1, flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+
+        self.mode_box = wx.RadioBox(parent=self, label='Operation Mode', choices=['Automatic', 'Manual'], majorDimension=1)
         self.mode_box.Bind(event=wx.EVT_RADIOBOX, handler=self.set_mode, source=self.mode_box)
-        self.set_mode()
 
         pid_button = wx.Button(parent=self, id=wx.ID_ANY, label='P\nI\nD')
         pid_button.Bind(wx.EVT_BUTTON, handler=self.show_pid)
 
-        controlbox = wx.StaticBoxSizer(parent=self, label='Controller', orient=wx.HORIZONTAL)
+        box = wx.StaticBox(parent=self, label='Oven Control')
+        boxsizer = wx.StaticBoxSizer(box, orient=wx.HORIZONTAL)
 
-        controlbox.Add(self.mode_box, flag=wx.ALL | wx.EXPAND, border=5, proportion=1)
-        controlbox.Add(input_box, flag=wx.ALL | wx.EXPAND, border=5, proportion=1)
-        controlbox.Add(pid_button, flag=wx.ALL | wx.EXPAND, border=5, proportion=1)
+        boxsizer.Add(entry_box, flag=wx.ALL, border=5)
+        boxsizer.Add(self.mode_box, flag=wx.ALL | wx.EXPAND, border=5)
+        boxsizer.Add(pid_button, flag=wx.ALL | wx.EXPAND, border=5)
 
-        self.SetSizerAndFit(controlbox)
+        self.SetSizerAndFit(boxsizer)
 
     def set_ramp(self, *args):
         rate = self.ramp_entry.GetValue()
         sendMessage(topicName='gui.set.rate', rate=rate)
 
-    def set_setpoint(self, *args):
-        event, = args
-        print(event.GetValue())
-#        temp = self.temp_entry.GetValue()
-     #   sendMessage(topicName='gui.set.target_setpoint', temp=temp)
+    def set_temp(self, *args):
+        temp = self.temp_entry.GetValue()
+        sendMessage(topicName='gui.set.target_setpoint', setpoint=temp)
 
     def set_power(self, *args):
         power = self.power_entry.GetValue()
         sendMessage(topicName='gui.set.manual_power', power=power)
 
     def set_mode(self, *args):
-        mode = self.mode_box.GetStringSelection()
-        if mode == 'Automatic':
+        label = self.mode_box.GetStringSelection()
+        if label == 'Automatic':
             sendMessage(topicName='gui.set.automatic_mode')
         else:
             sendMessage(topicName='gui.set.manual_mode')
@@ -176,33 +195,98 @@ class OvenControl(wx.Panel):
         pid.Show()
 
 
-
 class PIDFrame(wx.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        subscribe(listener=self.update_pid_values, topicName='engine.answer.pid')
+
         if os.name == 'nt':
             self.SetBackgroundColour('White')
 
-        parameters = {'P': 'Proportional band', 'I': 'Integral time (s)', 'D': 'Derivative time (s)'}
-        self.labels = {key: wx.StaticText(parent=self, label=value) for (key, value) in parameters.items()}
-        self.entries = {key: wx.SpinCtrl(parent=self, min=0, max=9999, initial=1) for key in parameters}
-        self.set_button = wx.Button(parent=self, id=wx.ID_ANY, label='Set')
+        parameters = {'P': 'Proportional band 1', 'I': 'Integral time 1 (s)', 'D': 'Derivative time 1 (s)',
+                      'P2': 'Proportional band 2', 'I2': 'Integral time 2 (s)', 'D2': 'Derivative time 2 (s)',
+                      'P3': 'Proportional band 3', 'I3': 'Integral time 3 (s)', 'D3': 'Derivative time 3 (s)',
+                      'GS': 'Gain scheduling', 'B12': 'Boundary 1/2', 'B23': 'Boundary 2/3'}
 
-        grid_sizer = wx.FlexGridSizer(rows=3, cols=2, hgap=5, vgap=5)
-        [(grid_sizer.Add(self.labels[parameter]),grid_sizer.Add(self.entries[parameter])) for parameter in parameters]
+        self.labels = {key: wx.StaticText(parent=self, label=value) for (key, value) in parameters.items()}
+        self.entries = {key: wx.SpinCtrlDouble(parent=self, min=0, max=9999, initial=1) if not key == 'GS'
+                        else wx.Choice(parent=self, choices=['Off', 'Set', 'Setpoint', 'Process Variable', 'Output'])
+                        for key in parameters}
+
+        self.set_buttons = {key: wx.Button(parent=self, id=wx.ID_ANY, label='Set'+key) for key in parameters}
+        self.pid_setter_functions = {'P': self.set_pid_p, 'I': self.set_pid_i, 'D': self.set_pid_d,
+                                     'P2': self.set_pid_p2, 'I2': self.set_pid_i2, 'D2': self.set_pid_d2,
+                                     'P3': self.set_pid_p3, 'I3': self.set_pid_i3, 'D3': self.set_pid_d3,
+                                     'B12': self.set_boundary_12, 'B23': self.set_boundary_23,
+                                     'GS': self.set_gain_scheduling}
+
+        grid_sizer = wx.FlexGridSizer(rows=15, cols=3, hgap=5, vgap=5)
+        for parameter in parameters:
+            self.set_buttons[parameter].Bind(event=wx.EVT_BUTTON, handler=self.pid_setter_functions[parameter])
+            grid_sizer.Add(self.labels[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
+            grid_sizer.Add(self.entries[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
+            grid_sizer.Add(self.set_buttons[parameter], flag=wx.ALIGN_CENTER_VERTICAL)
+
+        self.get_button = wx.Button(parent=self, label='Get current')
+        self.get_button.Bind(event=wx.EVT_BUTTON, handler=self.get_pid_parameters)
+        buttonsizer = wx.BoxSizer(orient=wx.VERTICAL)
+        [buttonsizer.Add(button, flag=wx.EXPAND) for button in [self.get_button]]
 
         boxsizer = wx.BoxSizer(orient=wx.HORIZONTAL)
         boxsizer.Add(grid_sizer, flag=wx.EXPAND | wx.ALL, border=5)
-        boxsizer.Add(self.set_button, flag=wx.EXPAND | wx.ALL, border=5)
+        boxsizer.Add(buttonsizer, flag=wx.EXPAND | wx.ALL, border=5)
 
         self.SetSizerAndFit(boxsizer)
         self.Show()
 
-    def set_pid_parameters(self):
-        sendMessage(topicName='gui.set.pid_p', p=self.entries['P'].Getvalue())
-        sendMessage(topicName='gui.set.pid_i', i=self.entries['I'].Getvalue())
-        sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].Getvalue())
+    def set_pid_p(self, *args):
+        sendMessage(topicName='gui.set.pid_p', p=self.entries['P'].GetValue())
+
+    def set_pid_i(self, *args):
+        sendMessage(topicName='gui.set.pid_i', i=self.entries['I'].GetValue())
+
+    def set_pid_d(self, *args):
+        sendMessage(topicName='gui.set.pid_d', d=self.entries['D'].GetValue())
+
+    def set_pid_p2(self, *args):
+        sendMessage(topicName='gui.set.pid_p2', p=self.entries['P2'].GetValue())
+
+    def set_pid_i2(self, *args):
+        sendMessage(topicName='gui.set.pid_i2', i=self.entries['I2'].GetValue())
+
+    def set_pid_d2(self, *args):
+        sendMessage(topicName='gui.set.pid_d2', d=self.entries['D2'].GetValue())
+
+    def set_pid_p3(self, *args):
+        sendMessage(topicName='gui.set.pid_p3', p=self.entries['P3'].GetValue())
+
+    def set_pid_i3(self, *args):
+        sendMessage(topicName='gui.set.pid_i3', i=self.entries['I3'].GetValue())
+
+    def set_pid_d3(self, *args):
+        sendMessage(topicName='gui.set.pid_d3', d=self.entries['D3'].GetValue())
+
+    def set_boundary_12(self, *args):
+        sendMessage(topicName='gui.set.boundary12', boundary=self.entries['B12'].GetValue())
+
+    def set_boundary_23(self, *args):
+        sendMessage(topicName='gui.set.boundary23', boundary=self.entries['B23'].GetValue())
+
+    def set_gain_scheduling(self, *args):
+        sendMessage(topicName='gui.set.gs_mode', mode=self.entries['GS'].GetStringSelection())
+
+    @staticmethod
+    def get_pid_parameters(*args):
+        sendMessage(topicName='gui.request.pid')
+
+    @in_main_thread
+    def update_pid_values(self, pid_parameters):
+        for key in pid_parameters:
+            if key == 'GS':
+                self.entries[key].SetSelection(self.entries[key].FindString(pid_parameters[key]))
+            else:
+                self.entries[key].SetValue(pid_parameters[key])
 
 
 class StatusWindow(wx.Panel):
@@ -218,15 +302,15 @@ class StatusWindow(wx.Panel):
         set_temp_label = wx.StaticText(parent=self, label='Set Temperature (°C)')
         power_label = wx.StaticText(parent=self, label='Oven Power (%)')
 
-        self.temp_oven_value = wx.StaticText(parent=self, label='23.5')
-        self.temp_sens_value = wx.StaticText(parent=self, label='42.24')
-        self.set_temp_value = wx.StaticText(parent=self, label='625')
-        self.power_value = wx.StaticText(parent=self, label='10.5')
+        self.temp_oven_value = wx.StaticText(parent=self, label='  -  ')
+        self.temp_sens_value = wx.StaticText(parent=self, label='  -  ')
+        self.set_temp_value = wx.StaticText(parent=self, label='  -  ')
+        self.power_value = wx.StaticText(parent=self, label='  -  ')
 
-        subscribe(listener=self.update_oven_power, topicName='engine.answer.oven_working_output')
-        subscribe(listener=self.update_oven_setpoint, topicName='engine.answer.oven_working_setpoint')
-        subscribe(listener=self.update_oven_temperature, topicName='engine.answer.oven_temp')
-        subscribe(listener=self.update_sensor_temperature, topicName='engine.answer.sensor_temp')
+        subscribe(listener=self.update_oven_power, topicName='engine.answer.working_output')
+        subscribe(listener=self.update_oven_setpoint, topicName='engine.answer.working_setpoint')
+        subscribe(listener=self.update_oven_temperature, topicName='engine.answer.process_variable')
+        subscribe(listener=self.update_sensor_value, topicName='engine.answer.sensor_value')
 
         grid_sizer = wx.FlexGridSizer(rows=4, cols=2, vgap=10, hgap=20)
 
@@ -243,14 +327,14 @@ class StatusWindow(wx.Panel):
 
     @staticmethod
     def request_data(*args):
-        sendMessage(topicName='gui.request.oven_temp')
+        sendMessage(topicName='gui.request.process_variable')
         sendMessage(topicName='gui.request.working_output')
         sendMessage(topicName='gui.request.working_setpoint')
-        sendMessage(topicName='gui.request.sensor_temp')
+        sendMessage(topicName='gui.request.sensor_value')
 
     @in_main_thread
-    def update_oven_temperature(self, temp):
-        self.temp_oven_value.SetLabel(label='{:4.1f}'.format(temp))
+    def update_oven_temperature(self, pv):
+        self.temp_oven_value.SetLabel(label='{:4.1f}'.format(pv))
 
     @in_main_thread
     def update_oven_power(self, output):
@@ -261,8 +345,8 @@ class StatusWindow(wx.Panel):
         self.set_temp_value.SetLabel(label='{:4.1f}'.format(setpoint))
 
     @in_main_thread
-    def update_sensor_temperature(self, temp):
-        self.temp_sens_value.SetLabel(label='{:4.1f}'.format(temp))
+    def update_sensor_value(self, value):
+        self.temp_sens_value.SetLabel(label='{:4.1f}'.format(value))
 
 
 class PlottingControl(wx.Panel):
@@ -291,9 +375,11 @@ class MatplotWX(wx.Panel):
 
         self.startime = datetime.now()
 
-        self.figure = Figure(figsize=(3, 2.5))
+        self.figure = Figure(figsize=(6, 5))
+        self.figure.set_facecolor((230/255, 233/255, 237/255))
 
         self.axes = self.figure.add_subplot(111)
+        self.axes.set_facecolor(self.figure.get_facecolor())
         self.paxes = self.axes.twinx()
 
         self.paxes.set_ylabel('Power (%)')
@@ -305,37 +391,38 @@ class MatplotWX(wx.Panel):
         self.oven_pwr_plot, = self.paxes.plot([], marker='^', color='springgreen', label='Heater Power')
 
         self.figure.legend(handles=[self.sens_temp_plot, self.oven_temp_plot, self.oven_pwr_plot],
-                           loc='lower center', ncol=2)
+                           loc=(0.15, 0.85), ncol=1)
+
+        self.figure.tight_layout()
 
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, flag=wx.GROW | wx.FIXED_MINSIZE, proportion=2)
         self.SetSizer(self.sizer)
-        self.figure.subplots_adjust(0.2, 0.275, 0.8, 0.95)
         self.Fit()
 
     @in_main_thread
-    def add_sensor_temp_point(self, temp):
+    def add_sensor_temp_point(self, value):
         time = (datetime.now() - self.startime).seconds
 
         self.sens_temp_plot.set_xdata(append(self.sens_temp_plot.get_xdata(), time))
-        self.sens_temp_plot.set_ydata(append(self.sens_temp_plot.get_ydata(), temp))
+        self.sens_temp_plot.set_ydata(append(self.sens_temp_plot.get_ydata(), value))
 
         self.axes.relim()
         self.axes.autoscale_view()
         self.figure.canvas.draw()
-        
+
     @in_main_thread
-    def add_oven_temp_point(self, temp):
+    def add_oven_temp_point(self, pv):
         time = (datetime.now() - self.startime).seconds
 
         self.oven_temp_plot.set_xdata(append(self.oven_temp_plot.get_xdata(), time))
-        self.oven_temp_plot.set_ydata(append(self.oven_temp_plot.get_ydata(), temp))
+        self.oven_temp_plot.set_ydata(append(self.oven_temp_plot.get_ydata(), pv))
 
         self.axes.relim()
         self.axes.autoscale_view()
         self.figure.canvas.draw()
-    
+
     @in_main_thread
     def add_oven_power_point(self, output):
         time = (datetime.now() - self.startime).seconds
@@ -351,17 +438,21 @@ class MatplotWX(wx.Panel):
         if not self.is_plotting:
             self.is_plotting = True
             self.startime = datetime.now()
-            subscribe(topicName='engine.answer.sensor_temp', listener=self.add_sensor_temp_point)
-            subscribe(topicName='engine.answer.oven_temp', listener=self.add_oven_temp_point)
-            subscribe(topicName='engine.answer.oven_working_output', listener=self.add_oven_power_point)
+            subscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+            subscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
+            subscribe(topicName='engine.answer.working_output', listener=self.add_oven_power_point)
 
     def stop_plotting(self, *args):
         self.is_plotting = False
-        unsubscribe(topicName='engine.answer.sensor_temp', listener=self.add_sensor_temp_point)
+        unsubscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+        unsubscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
+        unsubscribe(topicName='engine.answer.working_output', listener=self.add_oven_power_point)
 
     def cont_plotting(self, *args):
         self.is_plotting = True
-        subscribe(topicName='engine.answer.sensor_temp', listener=self.add_sensor_temp_point)
+        subscribe(topicName='engine.answer.sensor_value', listener=self.add_sensor_temp_point)
+        subscribe(topicName='engine.answer.process_variable', listener=self.add_oven_temp_point)
+        subscribe(topicName='engine.answer.working_output', listener=self.add_oven_power_point)
 
     def clear_plot(self, args):
         for plot in (self.sens_temp_plot, self.oven_temp_plot, self.oven_pwr_plot):
@@ -375,8 +466,6 @@ class Menubar(wx.MenuBar):
         super().__init__(*args, **kwargs)
 
         filemenu = wx.Menu()
-        filemenu.Append(item='New log', id=wx.ID_ANY)
-        filemenu.Append(item='Save plot', id=wx.ID_ANY)
         filemenu.Append(item='Quit', id=wx.ID_CLOSE)
 
         dev_menu = DeviceMenu()
@@ -390,8 +479,8 @@ class DeviceMenu(wx.Menu):
 
         self.heater_type_menu = heater_menu = wx.Menu()
         self.heater_type_menu.Append(item='Eurotherm3216', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
-        self.heater_type_menu.Append(item='Eurotherm3200', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
-        self.heater_type_menu.Append(item='Eurotherm3210', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.heater_type_menu.Append(item='Eurotherm2408', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.heater_type_menu.Append(item='Eurotherm3508', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.heater_type_menu.Append(item='Omega Pt', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
 
         self.heater_com_menu = PortMenu()
@@ -400,7 +489,9 @@ class DeviceMenu(wx.Menu):
         self.sensor_type_menu.Append(item='Thermolino', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.sensor_type_menu.Append(item='Thermoplatino', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
         self.sensor_type_menu.Append(item='Pyrometer', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
-        self.sensor_type_menu.Append(item='Keithly 2000', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.sensor_type_menu.Append(item='Keithly2000 Temperature', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.sensor_type_menu.Append(item='Keithly2000 Voltage', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
+        self.sensor_type_menu.Append(item='Eurotherm3508', id=wx.ID_ANY, kind=wx.ITEM_RADIO)
 
         self.sensor_com_menu = PortMenu()
 
@@ -429,10 +520,10 @@ class DeviceMenu(wx.Menu):
                 if type_item.IsChecked():
                     heater_type = type_item.GetItemLabelText()
 
-            sendMessage(topicName='gui.con.connect_heater', heater_type=heater_type, heater_port=heater_port)
+            sendMessage(topicName='gui.con.connect_controller', controller_type=heater_type, controller_port=heater_port)
 
         else:
-            sendMessage(topicName='gui.con.disconnect_heater')
+            sendMessage(topicName='gui.con.disconnect_controller')
 
     def connect_sensor(self, event):
         item = self.FindItemById(event.GetId())
