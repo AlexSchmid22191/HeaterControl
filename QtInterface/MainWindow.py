@@ -52,7 +52,7 @@ class ElchMainWindow(QWidget):
         hbox_outer.setSpacing(0)
 
         self.ribbon.buttongroup.buttonToggled.connect(self.controlmenu.adjust_visibility)
-        self.ribbon.menu_buttons['Control'].setChecked(True)
+        self.ribbon.menu_buttons['Devices'].setChecked(True)
         self.setLayout(hbox_outer)
         self.show()
 
@@ -111,7 +111,8 @@ class ElchRibbon(QWidget):
         elchicon.setPixmap(QPixmap('../Icons/ElchiHead.png').scaled(100, 100))
 
         vbox = QVBoxLayout()
-        vbox.addWidget(elchicon)
+        vbox.addWidget(elchicon, alignment=Qt.AlignHCenter)
+        vbox.addSpacing(73)
         for key in self.menus:
             vbox.addWidget(self.menu_buttons[key])
             self.buttongroup.addButton(self.menu_buttons[key])
@@ -130,10 +131,13 @@ class ElchStatusBar(QWidget):
         super().__init__(*args, **kwargs)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
+        self.mode = 'Temperature'
+        self.units = {'Temperature': (1, '°C'), 'Voltage': (1000, 'mV')}
+
         parameters = ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']
         icons = {key: QLabel() for key in parameters}
         labels = {key: QLabel(text=key, objectName='label') for key in parameters}
-        self.values = {key: QLabel(text='0.00 °C', objectName='value') for key in parameters}
+        self.values = {key: QLabel(text='- - -', objectName='value') for key in parameters}
         vboxes = {key: QVBoxLayout() for key in parameters}
 
         hbox = QHBoxLayout()
@@ -148,8 +152,18 @@ class ElchStatusBar(QWidget):
             hbox.addStretch(10)
             icons[key].setPixmap(QPixmap('../Icons/Ring_{:s}.png'.format(key)))
         hbox.setContentsMargins(10, 10, 10, 10)
-
         self.setLayout(hbox)
+
+    def update_values(self, status_values):
+        assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
+
+        for key in status_values:
+            assert key in self.values, 'Illegal key recieved: {:s}'.format(key)
+            if key == 'Power':
+                self.values[key].setText('{:.1f} %'.format(status_values[key]))
+            else:
+                self.values[key].setText('{:.1f} {:s}'.format(status_values[key] * (self.units[self.mode][0]),
+                                                              self.units[self.mode][1]))
 
 
 app = QApplication()
