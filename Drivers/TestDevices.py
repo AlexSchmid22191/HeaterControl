@@ -1,16 +1,19 @@
 import time
+import threading
 from Drivers.AbstractSensorController import AbstractSensor, AbstractController
 
 
 class TestSensor(AbstractSensor):
     """Mock Sensor to test engine to GUI connection"""
     def __init__(self, *args, **kwargs):
-        print('Test Sensor connected!')
+        print('Test Sensor connected!')#
+        self.com_lock = threading.Lock()
         print(kwargs)
 
     def get_sensor_value(self):
-        time.sleep(5)
-        return time.time() % 60
+        with self.com_lock:
+            time.sleep(2)
+            return time.time() % 60
 
     def close(self):
         pass

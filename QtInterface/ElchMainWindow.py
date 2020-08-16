@@ -176,8 +176,8 @@ class ElchStatusBar(QWidget):
                                                               self.units[self.mode][1]))
 
     def spam_test(self, sens):
-        print('Coming from thread:', threading.get_ident())
         print(sens)
+        self.values['Sensor PV'].setText(str(sens))
 
 
 

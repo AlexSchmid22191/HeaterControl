@@ -1,4 +1,4 @@
-from PySide2.QtCore import QTimer, QThread, Signal
+from PySide2.QtCore import QTimer, QThread, Signal, QRunnable, QObject, QThreadPool
 from threading import Thread
 import wx
 import functools
@@ -41,11 +41,21 @@ class OtherThread(QThread):
         self.over.emit(x)
 
 
-def in_qthread(func):
-    def wrapper(*args, **kwargs):
-        thread = QThread()
-        thread.start()
-        thread.over.connect(lambda: print('ff'))
-    return wrapper
+class Signals(QObject):
+    over = Signal(object)
+
+
+class Worker(QRunnable):
+    def __init__(self, fn, *args, **kwargs):
+        super().__init__()
+        self.sig = Signals()
+        self.over = self.sig.over
+        self.fn = fn
+
+
+    def run(self):
+        x = self.fn()
+        self.sig.over.emit(x)
+
 
 

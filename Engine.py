@@ -13,7 +13,9 @@ from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Pyrometer import Pyrometer
 from Drivers.Omega import OmegaPt
 
-from ThreadDecorators import in_new_thread, in_qthread, OtherThread
+from PySide2.QtCore import QThreadPool
+
+from ThreadDecorators import in_new_thread, OtherThread, Worker
 
 
 class HeaterControlEngine:
@@ -39,8 +41,11 @@ class HeaterControlEngine:
 
         subscribe(self.add_controller, 'gui.con.connect_controller')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
-
+        self.threads = []
         self.broadcast_available_devices()
+
+        self.pool = QThreadPool()
+
 
     def broadcast_available_devices(self):
         pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
@@ -95,6 +100,8 @@ class HeaterControlEngine:
         unsubscribe(self.set_gain_scheduling, 'gui.set.gs_mode')
         unsubscribe(self.get_pid_parameters, 'gui.request.pid')
 
+
+
         self.controller = None
 
     def add_sensor(self, sensor_type, sensor_port):
@@ -103,6 +110,8 @@ class HeaterControlEngine:
         except SerialException:
             sendMessage(topicName='engine.status', text='Connection error!')
 
+        self.get_sensor_status()
+        self.get_sensor_status()
         self.get_sensor_status()
 
         subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
@@ -128,9 +137,12 @@ class HeaterControlEngine:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     def get_sensor_status(self):
-        self.thread = OtherThread(self.sensor.get_sensor_value)
-        self.thread.start()
-        self.thread.over.connect(lambda res: sendMessage(topicName='engine.spam', sens=res))
+        # self.thread = OtherThread(self.sensor.get_sensor_value)
+        # self.thread.start()
+        # self.thread.over.connect(lambda res: sendMessage(topicName='engine.spam', sens=res))
+        worker = Worker(self.sensor.get_sensor_value)
+        self.pool.start(worker)
+        worker.over.connect(lambda res: sendMessage(topicName='engine.spam', sens=res))
 
 
     @in_new_thread
