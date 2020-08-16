@@ -13,7 +13,7 @@ from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Pyrometer import Pyrometer
 from Drivers.Omega import OmegaPt
 
-from ThreadDecorators import in_new_thread
+from ThreadDecorators import in_new_thread, in_qthread, OtherThread
 
 
 class HeaterControlEngine:
@@ -21,9 +21,9 @@ class HeaterControlEngine:
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
                                  'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Test Controller': TestController}
 
-        self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
+        self.sensor_types = { 'Test Sensor': TestSensor, 'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
-                             'Eurotherm3508': Eurotherm3508S, 'Test Sensor': TestSensor}
+                             'Eurotherm3508': Eurotherm3508S,}
 
         self.available_ports = ['COM Test']
 
@@ -127,15 +127,11 @@ class HeaterControlEngine:
         except SerialException:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
-    @in_new_thread
     def get_sensor_status(self):
-        try:
-            sens = self.sensor.get_sensor_value()
-            pubsub.pub.sendMessage('engine.spam', sens=sens)
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
+        self.thread = OtherThread(self.sensor.get_sensor_value)
+        self.thread.start()
+        self.thread.over.connect(lambda res: sendMessage(topicName='engine.spam', sens=res))
+
 
     @in_new_thread
     def set_control_mode(self, mode):

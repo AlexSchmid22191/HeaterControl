@@ -9,6 +9,7 @@ class TestSensor(AbstractSensor):
         print(kwargs)
 
     def get_sensor_value(self):
+        time.sleep(5)
         return time.time() % 60
 
     def close(self):

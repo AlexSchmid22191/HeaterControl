@@ -1,7 +1,8 @@
-from PySide2.QtCore import QTimer
+from PySide2.QtCore import QTimer, QThread, Signal
 from threading import Thread
 import wx
 import functools
+import pubsub.pub
 
 
 def in_new_thread(target_func):
@@ -26,3 +27,25 @@ def in_qt_main_thread(func):
         QTimer.singleShot(1, func)
 
     return wrapper
+
+
+class OtherThread(QThread):
+    def __init__(self, fn, *args, **kwargs):
+        super().__init__()
+        self.fn = fn
+
+    over = Signal(object)
+
+    def run(self):
+        x = self.fn()
+        self.over.emit(x)
+
+
+def in_qthread(func):
+    def wrapper(*args, **kwargs):
+        thread = QThread()
+        thread.start()
+        thread.over.connect(lambda: print('ff'))
+    return wrapper
+
+

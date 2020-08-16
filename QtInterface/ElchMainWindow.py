@@ -4,6 +4,7 @@ from PySide2.QtCore import QTimer
 
 from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QButtonGroup, \
     QLabel, QToolButton, QSizeGrip
+from PySide2.QtCore import Signal, QObject
 import pubsub.pub
 import threading
 
@@ -160,8 +161,8 @@ class ElchStatusBar(QWidget):
         hbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(hbox)
 
+        print(threading.get_ident())
         pubsub.pub.subscribe(self.spam_test, topicName='engine.spam')
-        pubsub.pub.sendMessage('engine.spam', sens=3)
 
     def update_values(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
@@ -174,10 +175,9 @@ class ElchStatusBar(QWidget):
                 self.values[key].setText('{:.1f} {:s}'.format(status_values[key] * (self.units[self.mode][0]),
                                                               self.units[self.mode][1]))
 
-    @staticmethod
-    def printme():
-        print('gg', threading.get_ident())
-
     def spam_test(self, sens):
-        print('ss', threading.get_ident())
-        QTimer.singleShot(10, self.printme)
+        print('Coming from thread:', threading.get_ident())
+        print(sens)
+
+
+

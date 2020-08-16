@@ -7,7 +7,7 @@ import math
 class ElchPlot(FigureCanvas):
     def __init__(self, *args, **kwargs):
         matplotlib.style.use('QtInterface/App.mplstyle')
-        super().__init__(Figure(figsize=(7, 6)), *args, **kwargs)
+        super().__init__(Figure(figsize=(8, 6)), *args, **kwargs)
 
         self.units = 'Temperature'
 
