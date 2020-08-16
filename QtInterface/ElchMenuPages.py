@@ -1,4 +1,5 @@
 import functools
+import pubsub.pub
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox, QLabel, QRadioButton, QComboBox, \
     QFormLayout, QButtonGroup, QSpinBox
@@ -38,8 +39,10 @@ class ElchDeviceMenu(QWidget):
         self.device_menus = {key: QComboBox() for key in self.labels}
         self.port_menus = {key: QComboBox() for key in self.labels}
         self.connect_buttons = {key: QPushButton(text='Connect', objectName=key) for key in self.labels}
+
         self.buttongroup = QButtonGroup()
         self.buttongroup.setExclusive(False)
+        self.buttongroup.buttonToggled.connect(self.connect_device)
 
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
@@ -55,23 +58,31 @@ class ElchDeviceMenu(QWidget):
         vbox.addStretch()
         self.setLayout(vbox)
 
-        self.buttongroup.buttonToggled.connect(self.tell_me)
+        pubsub.pub.subscribe(listener=self.populate_menus, topicName='engine.broadcast.devices')
 
-        self.populate_menus(['COM Test'] * 3, **{'Sensor': ['Sensor Test'] * 3, 'Controller': ['Controller Test'] * 3})
-
-    def populate_menus(self, ports, **kwargs):
-        """Populate the controller and sensor menus with lists of device names"""
+    def populate_menus(self, ports, devices):
+        """Populate the controller and sensor menus with lists of device names and ports"""
         for key in self.port_menus:
             self.port_menus[key].clear()
             self.device_menus[key].clear()
             self.port_menus[key].addItems(ports)
-            self.device_menus[key].addItems(kwargs[key])
+            self.device_menus[key].addItems(devices[key])
 
-    def tell_me(self, source, state):
+    def connect_device(self, source, state):
         key = source.objectName()
         port = self.port_menus[key].currentText()
         device = self.device_menus[key].currentText()
-        print(device, port, state)
+
+        if state:
+            if key == 'Controller':
+                pubsub.pub.sendMessage('gui.con.connect_controller', controller_type=device, controller_port=port)
+            elif key == 'Sensor':
+                pubsub.pub.sendMessage('gui.con.connect_sensor', sensor_type=device, sensor_port=port)
+        else:
+            if key == 'Controller':
+                pubsub.pub.sendMessage('gui.con.disconnect_controller')
+            elif key == 'Sensor':
+                pubsub.pub.sendMessage('gui.con.disconnect_sensor')
 
 
 class ElchControlMenu(QWidget):

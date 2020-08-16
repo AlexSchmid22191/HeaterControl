@@ -1,15 +1,17 @@
 from datetime import datetime
 from threading import Timer
 import time
+import pubsub.pub
 from serial import SerialException, SerialTimeoutException
 from pubsub.pub import sendMessage, subscribe, unsubscribe
 
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
+from Drivers.TestDevices import TestSensor, TestController
 from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from Drivers.ElchWorks import Thermolino, Thermoplatino
 from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Pyrometer import Pyrometer
-from Drivers.OmegaPt import OmegaPt
+from Drivers.Omega import OmegaPt
 
 from ThreadDecorators import in_new_thread
 
@@ -17,10 +19,13 @@ from ThreadDecorators import in_new_thread
 class HeaterControlEngine:
     def __init__(self):
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
-                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
+                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Test Controller': TestController}
+
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
-                             'Eurotherm3508': Eurotherm3508S}
+                             'Eurotherm3508': Eurotherm3508S, 'Test Sensor': TestSensor}
+
+        self.available_ports = ['COM Test']
 
         self.sensor = AbstractSensor()
         self.sensor_port = None
@@ -28,38 +33,27 @@ class HeaterControlEngine:
         self.controller_port = None
         self.controller_slave_address = 1
 
-        self.sensor_value = 0
-        self.controller_process_value = 0
-        self.controller_working_output = 0
-        self.controller_working_setpoint = 0
+        self.status_values = {'Sensor PV': None, 'Controller PV': None, 'Setpoint': None, 'Power': None}
 
-        self.data_logger = Datalogger(master=self)
+        self.is_logging = False
 
         subscribe(self.add_controller, 'gui.con.connect_controller')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
 
-    def set_heater_port(self, port):
-        self.sensor_port = port
+        self.broadcast_available_devices()
 
-    def set_sensor_port(self, port):
-        self.sensor_port = port
+    def broadcast_available_devices(self):
+        pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
+                               devices={'Controller': self.controller_types.keys(), 'Sensor': self.sensor_types.keys()})
 
     def add_controller(self, controller_type, controller_port):
         try:
             self.controller = self.controller_types[controller_type](portname=controller_port,
                                                                      slaveadress=self.controller_slave_address)
 
-            self.controller.set_automatic_mode()
-
             unsubscribe(self.add_controller, 'gui.con.connect_controller')
             subscribe(self.remove_heater, 'gui.con.disconnect_controller')
 
-            subscribe(self.get_controller_process_variable, 'gui.request.process_variable')
-            subscribe(self.get_working_output, 'gui.request.working_output')
-            subscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
-
-            subscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
-            subscribe(self.set_manual_mode, 'gui.set.manual_mode')
             subscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
             subscribe(self.set_manual_output_power, 'gui.set.manual_power')
             subscribe(self.set_rate, 'gui.set.rate')
@@ -84,13 +78,6 @@ class HeaterControlEngine:
 
         subscribe(self.add_controller, 'gui.con.connect_controller')
         unsubscribe(self.remove_heater, 'gui.con.disconnect_controller')
-
-        unsubscribe(self.get_controller_process_variable, 'gui.request.process_variable')
-        unsubscribe(self.get_working_output, 'gui.request.working_output')
-        unsubscribe(self.get_working_setpoint, 'gui.request.working_setpoint')
-
-        unsubscribe(self.set_automatic_mode, 'gui.set.automatic_mode')
-        unsubscribe(self.set_manual_mode, 'gui.set.manual_mode')
         unsubscribe(self.set_target_setpoint, 'gui.set.target_setpoint')
         unsubscribe(self.set_manual_output_power, 'gui.set.manual_power')
         unsubscribe(self.set_rate, 'gui.set.rate')
@@ -116,61 +103,45 @@ class HeaterControlEngine:
         except SerialException:
             sendMessage(topicName='engine.status', text='Connection error!')
 
-        subscribe(self.get_sensor_value, 'gui.request.sensor_value')
+        self.get_sensor_status()
+
         subscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
         unsubscribe(self.add_sensor, 'gui.con.connect_sensor')
 
     def remove_sensor(self):
         self.sensor.close()
-        unsubscribe(self.get_sensor_value, 'gui.request.sensor_value')
         unsubscribe(self.remove_sensor, 'gui.con.disconnect_sensor')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
 
+    def broadcast_status_values(self):
+        pubsub.pub.sendMessage(topicName='engine.broadcast.status', status=self.status_values)
+
     @in_new_thread
-    def get_controller_process_variable(self):
+    def get_controller_status(self):
         try:
-            self.controller_process_value = self.controller.get_process_variable()
-            sendMessage(topicName='engine.answer.process_variable', pv=self.controller_process_value)
+            self.status_values['Controller PV'] = self.controller.get_process_variable()
+            self.status_values['Setpoint'] = self.controller.get_working_setpoint()
+            self.status_values['Power'] = self.controller.get_working_output()
         except NotImplementedError as exception:
             print(exception)
         except SerialException:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
-    def get_working_output(self):
+    def get_sensor_status(self):
         try:
-            self.controller_working_output = self.controller.get_working_output()
-            sendMessage(topicName='engine.answer.working_output', output=self.controller_working_output)
+            sens = self.sensor.get_sensor_value()
+            pubsub.pub.sendMessage('engine.spam', sens=sens)
         except NotImplementedError as exception:
             print(exception)
         except SerialException:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
-    def get_working_setpoint(self):
+    def set_control_mode(self, mode):
         try:
-            self.controller_working_setpoint = self.controller.get_working_setpoint()
-            sendMessage(topicName='engine.answer.working_setpoint', setpoint=self.controller_working_setpoint)
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_automatic_mode(self):
-        try:
-            self.controller.set_automatic_mode()
-            sendMessage(topicName='engine.status', text='Heater set to automatic mode!')
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_manual_mode(self):
-        try:
-            self.controller.set_manual_mode()
-            sendMessage(topicName='engine.status', text='Heater set to manual mode!')
+            self.controller.set_manual_mode() if mode == 'Manual' else self.controller.set_automatic_mode()
+            sendMessage(topicName='engine.status', text='Heater set to {:s} mode!'.format(mode.lower()))
         except NotImplementedError as exception:
             print(exception)
         except SerialException:
@@ -201,16 +172,6 @@ class HeaterControlEngine:
         try:
             self.controller.set_rate(rate)
             sendMessage(topicName='engine.status', text='Heater rate set to {:5.1f}!'.format(rate))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def get_sensor_value(self):
-        try:
-            self.sensor_value = self.sensor.get_sensor_value()
-            sendMessage(topicName='engine.answer.sensor_value', value=self.sensor_value)
         except NotImplementedError as exception:
             print(exception)
         except SerialException:
@@ -337,6 +298,10 @@ class HeaterControlEngine:
             sendMessage(topicName='engine.status', text='Serial communication error!')
 
     @in_new_thread
+    def set_pid_parameter(self, parameteter, value):
+        pass
+
+    @in_new_thread
     def get_pid_parameters(self):
         try:
             pid_parameters = {'P': self.controller.get_pid_p(), 'P2': self.controller.get_pid_p2(),
@@ -395,8 +360,3 @@ class Datalogger:
     def continue_log(self):
         self.is_logging = True
         self.write_log()
-
-
-if __name__ == '__main__':
-    a = HeaterControlEngine()
-    a.data_logger.start_log()

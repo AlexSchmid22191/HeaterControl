@@ -1,9 +1,15 @@
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
-from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QApplication, QButtonGroup, \
+from PySide2.QtCore import QTimer
+
+from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QButtonGroup, \
     QLabel, QToolButton, QSizeGrip
+import pubsub.pub
+import threading
+
 from QtInterface.ElchMenuPages import ElchMenuPages
 from QtInterface.ElchPlot import ElchPlot
+from ThreadDecorators import in_qt_main_thread
 
 
 class ElchMainWindow(QWidget):
@@ -11,7 +17,7 @@ class ElchMainWindow(QWidget):
         super().__init__(*args, **kwargs)
 
         self.setWindowFlags(Qt.FramelessWindowHint)
-        with open('style.qss') as stylefile:
+        with open('QtInterface/style.qss') as stylefile:
             self.setStyleSheet(stylefile.read())
 
         self.controlmenu = ElchMenuPages()
@@ -108,7 +114,7 @@ class ElchRibbon(QWidget):
         self.menu_buttons = {key: QPushButton(parent=self, objectName=key) for key in self.menus}
         self.buttongroup = QButtonGroup()
         elchicon = QLabel()
-        elchicon.setPixmap(QPixmap('../Icons/ElchiHead.png').scaled(100, 100))
+        elchicon.setPixmap(QPixmap('Icons/ElchiHead.png').scaled(100, 100))
 
         vbox = QVBoxLayout()
         vbox.addWidget(elchicon, alignment=Qt.AlignHCenter)
@@ -150,9 +156,12 @@ class ElchStatusBar(QWidget):
             hbox.addStretch(1)
             hbox.addLayout(vboxes[key])
             hbox.addStretch(10)
-            icons[key].setPixmap(QPixmap('../Icons/Ring_{:s}.png'.format(key)))
+            icons[key].setPixmap(QPixmap('Icons/Ring_{:s}.png'.format(key)))
         hbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(hbox)
+
+        pubsub.pub.subscribe(self.spam_test, topicName='engine.spam')
+        pubsub.pub.sendMessage('engine.spam', sens=3)
 
     def update_values(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
@@ -165,7 +174,10 @@ class ElchStatusBar(QWidget):
                 self.values[key].setText('{:.1f} {:s}'.format(status_values[key] * (self.units[self.mode][0]),
                                                               self.units[self.mode][1]))
 
+    @staticmethod
+    def printme():
+        print('gg', threading.get_ident())
 
-app = QApplication()
-gui = ElchMainWindow()
-app.exec_()
+    def spam_test(self, sens):
+        print('ss', threading.get_ident())
+        QTimer.singleShot(10, self.printme)

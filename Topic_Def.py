@@ -11,41 +11,35 @@ class engine:
     """
     Superclass for all messages emitted by the engine
     """
-    class answer:
+    class spam:
+        """
+        UNDOCUMENTED: created without spec
+        """
+        def msgDataSpec(sens):
+            """
+            - sens: float
+            """
+
+    class broadcast:
         """
         Class for all answers to requests from the GUI
         """
-        class process_variable:
+        class devices:
             """
             UNDOCUMENTED: created without spec
             """
-            def msgDataSpec(pv):
+            def msgDataSpec(ports, devices):
                 """
-                - pv: float
+                - ports: list
+                - devices: dict
                 """
-        class working_output:
+        class status:
             """
             UNDOCUMENTED: created without spec
             """
-            def msgDataSpec(output):
+            def msgDataSpec(status):
                 """
-                - output: UNDOCUMENTED
-                """
-        class working_setpoint:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(setpoint):
-                """
-                - setpoint: UNDOCUMENTED
-                """
-        class sensor_value:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(value):
-                """
-                - value: UNDOCUMENTED
+                - status: dict
                 """
         class pid:
             """
@@ -53,16 +47,8 @@ class engine:
             """
             def msgDataSpec(pid_parameters):
                 """
-                - pid_parameters: UNDOCUMENTED
+                - pid_parameters: dict
                 """
-    class status:
-        """
-        Class for all status messages emitted by the engine
-        """
-        def msgDataSpec(text):
-            """
-            - text: UNDOCUMENTED
-            """
 
 class gui:
     """
@@ -104,15 +90,15 @@ class gui:
         """
         UNDOCUMENTED: Class for all set command from the GUI (i.e. unidirectional commands wirthout expected repsonse)
         """
-        class automatic_mode:
+        class control_mode:
             """
             UNDOCUMENTED: created without spec
             """
-        class manual_mode:
-            """
-            UNDOCUMENTED: created without spec
-            """
-        class manual_power:
+            def msgDataSpec(mode):
+                """
+                - mode: UNDOCUMENTED
+                """
+        class power:
             """
             UNDOCUMENTED: created without spec
             """
@@ -128,7 +114,7 @@ class gui:
                 """
                 - rate: UNDOCUMENTED
                 """
-        class target_setpoint:
+        class setpoint:
             """
             UNDOCUMENTED: created without spec
             """
@@ -136,129 +122,17 @@ class gui:
                 """
                 - setpoint: UNDOCUMENTED
                 """
-        class pid_p:
+        class pid_parameter:
             """
             UNDOCUMENTED: created without spec
             """
-            def msgDataSpec(p):
+            def msgDataSpec(parameter, value):
                 """
-                - p: UNDOCUMENTED
-                """
-        class pid_p2:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(p):
-                """
-                - p: UNDOCUMENTED
-                """
-        class pid_p3:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(p):
-                """
-                - p: UNDOCUMENTED
-                """
-        class pid_i:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(i):
-                """
-                - i: UNDOCUMENTED
-                """
-        class pid_i2:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(i):
-                """
-                - i: UNDOCUMENTED
-                """
-        class pid_i3:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(i):
-                """
-                - i: UNDOCUMENTED
-                """
-        class pid_d:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(d):
-                """
-                - d: UNDOCUMENTED
-                """
-        class pid_d2:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(d):
-                """
-                - d: UNDOCUMENTED
-                """
-        class pid_d3:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(d):
-                """
-                - d: UNDOCUMENTED
-                """
-        class boundary12:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(boundary):
-                """
-                - boundary: UNDOCUMENTED
-                """
-        class boundary23:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(boundary):
-                """
-                - boundary: UNDOCUMENTED
-                """
-        class gs_mode:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(mode):
-                """
-                - mode: UNDOCUMENTED
+                - parameter: string
+                - value: float or string
                 """
 
-    class request:
-        """
-        Class for all requests from the GUI, i.e. an answer is expected
-        """
-        class process_variable:
-            """
-            UNDOCUMENTED: created without spec
-            """
-        class working_output:
-            """
-            UNDOCUMENTED: created without spec
-            """
-        class working_setpoint:
-            """
-            UNDOCUMENTED: created without spec
-            """
-        class sensor_value:
-            """
-            UNDOCUMENTED: created without spec
-            """
-        class pid:
-            """
-            UNDOCUMENTED: created without spec
-            """
-
-    class log:
+    class plot:
         """
         A class for everthing related to the logging module
         """
@@ -270,17 +144,18 @@ class gui:
             """
             UNDOCUMENTED: created without spec
             """
-        class cont:
+        class clear:
             """
             UNDOCUMENTED: created without spec
             """
-        class filename:
+        class export:
             """
             UNDOCUMENTED: created without spec
             """
-            def msgDataSpec(filename):
+            def msgDataSpec(filepath):
                 """
                 - filename: UNDOCUMENTED
                 """
+
 # End of topic tree definition. Note that application may load
 # more than one definitions provider.

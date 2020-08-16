@@ -8,31 +8,31 @@ ElchStatusBar QLabel#value{color: #7b8ccb; font: 14pt "Roboto";}
 
 
 /*Styliong of the Title Bar*/
-ElchTitlebar QToolButton#Close{background: url(../Icons/Quit.png) center no-repeat; border:none;}
-ElchTitlebar QToolButton#Close:hover{background:url(../Icons/Quit_Hover.png) center no-repeat ; border: none}
-ElchTitlebar QToolButton#Minimize{background: url(../Icons/Minimize.png) center no-repeat; border:none;}
-ElchTitlebar QToolButton#Minimize:hover{background: url(../Icons/Minimize_Hover.png) center no-repeat ; border: none}
+ElchTitlebar QToolButton#Close{background: url(Icons/Quit.png) center no-repeat; border:none;}
+ElchTitlebar QToolButton#Close:hover{background:url(Icons/Quit_Hover.png) center no-repeat ; border: none}
+ElchTitlebar QToolButton#Minimize{background: url(Icons/Minimize.png) center no-repeat; border:none;}
+ElchTitlebar QToolButton#Minimize:hover{background: url(Icons/Minimize_Hover.png) center no-repeat ; border: none}
 
 
 /*Styling of the Ribbon*/
 ElchRibbon{background-color:#2A2D56;}
 ElchRibbon QPushButton:checked{background-color: #181C3F}
 
-ElchRibbon QPushButton#Devices{border-image: url(../Icons/Devices.png)}
-ElchRibbon QPushButton#Devices:hover{border-image: url(../Icons/Devices_Glow.png)}
-ElchRibbon QPushButton#Devices:checked{border-image: url(../Icons/Devices_Glow.png)}
+ElchRibbon QPushButton#Devices{border-image: url(Icons/Devices.png)}
+ElchRibbon QPushButton#Devices:hover{border-image: url(Icons/Devices_Glow.png)}
+ElchRibbon QPushButton#Devices:checked{border-image: url(Icons/Devices_Glow.png)}
 
-ElchRibbon QPushButton#Control{border-image: url(../Icons/Control.png)}
-ElchRibbon QPushButton#Control:hover{border-image: url(../Icons/Control_Glow.png)}
-ElchRibbon QPushButton#Control:checked{border-image: url(../Icons/Control_Glow.png)}
+ElchRibbon QPushButton#Control{border-image: url(Icons/Control.png)}
+ElchRibbon QPushButton#Control:hover{border-image: url(Icons/Control_Glow.png)}
+ElchRibbon QPushButton#Control:checked{border-image: url(Icons/Control_Glow.png)}
 
-ElchRibbon QPushButton#PID{border-image: url(../Icons/PID.png)}
-ElchRibbon QPushButton#PID:hover{border-image: url(../Icons/PID_Glow.png)}
-ElchRibbon QPushButton#PID:checked{border-image: url(../Icons/PID_Glow.png)}
+ElchRibbon QPushButton#PID{border-image: url(Icons/PID.png)}
+ElchRibbon QPushButton#PID:hover{border-image: url(Icons/PID_Glow.png)}
+ElchRibbon QPushButton#PID:checked{border-image: url(Icons/PID_Glow.png)}
 
-ElchRibbon QPushButton#Plotting{border-image: url(../Icons/Plotting.png)}
-ElchRibbon QPushButton#Plotting:hover{border-image: url(../Icons/Plotting_Glow.png)}
-ElchRibbon QPushButton#Plotting:checked{border-image: url(../Icons/Plotting_Glow.png)}
+ElchRibbon QPushButton#Plotting{border-image: url(Icons/Plotting.png)}
+ElchRibbon QPushButton#Plotting:hover{border-image: url(Icons/Plotting_Glow.png)}
+ElchRibbon QPushButton#Plotting:checked{border-image: url(Icons/Plotting_Glow.png)}
 
 
 /*Styling of the Elchmenupages*/
@@ -51,37 +51,37 @@ ElchMenuPages QPushButton:checked{background: #343760; color: #7b8ccb}
 ElchMenuPages QComboBox{background-color:#2A2D56; border: 1px solid #15183b; color: #7b8ccb; font: 11pt "Roboto Light";}
 ElchMenuPages QComboBox:on{background-color: #252a4e; color: #7f8ab7;}
 ElchMenuPages QComboBox::drop-down{border:none}
-ElchMenuPages QComboBox::down-arrow{image: url(../Icons/Down.png); width: 10px}
-ElchMenuPages QComboBox::down-arrow:on{image: url(../Icons/Down_Glow.png); width: 10px}
-ElchMenuPages QComboBox::down-arrow:hover{image: url(../Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QComboBox::down-arrow{image: url(Icons/Down.png); width: 10px}
+ElchMenuPages QComboBox::down-arrow:on{image: url(Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QComboBox::down-arrow:hover{image: url(Icons/Down_Glow.png); width: 10px}
 ElchMenuPages QAbstractItemView {background-color: #2A2D56; border:1px solid #15183b; color: #7b8ccb;
     selection-background-color: #393b67; outline: 0}
 
 /*Spinboxes*/
 ElchMenuPages QAbstractSpinBox{background-color:#2A2D56; border: 1px solid #15183b;  ; color: #7b8ccb; font: 11pt "Roboto Light";}
 ElchMenuPages QAbstractSpinBox:focus{selection-background-color:#393b67; selection-color: #7b8ccb;}
-ElchMenuPages QAbstractSpinBox::up-button {image: url(../Icons/Up.png); width: 10px}
-ElchMenuPages QAbstractSpinBox::up-button:hover {image: url(../Icons/Up_Glow.png); width: 10px}
-ElchMenuPages QAbstractSpinBox::down-button {image: url(../Icons/Down.png); width: 10px}
-ElchMenuPages QAbstractSpinBox::down-button:hover {image: url(../Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::up-button {image: url(Icons/Up.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::up-button:hover {image: url(Icons/Up_Glow.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::down-button {image: url(Icons/Down.png); width: 10px}
+ElchMenuPages QAbstractSpinBox::down-button:hover {image: url(Icons/Down_Glow.png); width: 10px}
 
 /*Radiobuttons*/
 ElchMenuPages QRadioButton{color: #7b8ccb; font: 11pt "Roboto Light"}
 ElchMenuPages QRadioButton::indicator{width:15px; height: 15px}
-ElchMenuPages QRadioButton::indicator:unchecked{image: url(../Icons/Radio_Off.png)}
-ElchMenuPages QRadioButton::indicator:unchecked:hover{image: url(../Icons/Radio_Off_Glow.png)}
-ElchMenuPages QRadioButton::indicator:checked{image: url(../Icons/Radio_On.png)}
-ElchMenuPages QRadioButton::indicator:checked:hover{image: url(../Icons/Radio_On_Glow.png)}
+ElchMenuPages QRadioButton::indicator:unchecked{image: url(Icons/Radio_Off.png)}
+ElchMenuPages QRadioButton::indicator:unchecked:hover{image: url(Icons/Radio_Off_Glow.png)}
+ElchMenuPages QRadioButton::indicator:checked{image: url(Icons/Radio_On.png)}
+ElchMenuPages QRadioButton::indicator:checked:hover{image: url(Icons/Radio_On_Glow.png)}
 
 /* Menu specific icons on buttons*/
-ElchDeviceMenu QPushButton{icon: url(../Icons/Connect.png)}
-ElchDeviceMenu QPushButton:hover{icon: url(../Icons/Connect_Glow.png)}
-ElchDeviceMenu QPushButton:checked{icon: url(../Icons/Connect_Glow.png)}
+ElchDeviceMenu QPushButton{icon: url(Icons/Connect.png)}
+ElchDeviceMenu QPushButton:hover{icon: url(Icons/Connect_Glow.png)}
+ElchDeviceMenu QPushButton:checked{icon: url(Icons/Connect_Glow.png)}
 
-ElchPlotMenu QPushButton#Start{icon: url(../Icons/Start.png)}
-ElchPlotMenu QPushButton#Start:hover{icon: url(../Icons/Start_Glow.png)}
-ElchPlotMenu QPushButton#Start:checked{icon: url(../Icons/Start_Glow.png)}
-ElchPlotMenu QPushButton#Clear{icon: url(../Icons/Clear.png)}
-ElchPlotMenu QPushButton#Clear:hover{icon: url(../Icons/Clear_Glow.png)}
-ElchPlotMenu QPushButton#Export{icon: url(../Icons/Export.png)}
-ElchPlotMenu QPushButton#Export:hover{icon: url(../Icons/Export_Glow.png)}
+ElchPlotMenu QPushButton#Start{icon: url(Icons/Start.png)}
+ElchPlotMenu QPushButton#Start:hover{icon: url(Icons/Start_Glow.png)}
+ElchPlotMenu QPushButton#Start:checked{icon: url(Icons/Start_Glow.png)}
+ElchPlotMenu QPushButton#Clear{icon: url(Icons/Clear.png)}
+ElchPlotMenu QPushButton#Clear:hover{icon: url(Icons/Clear_Glow.png)}
+ElchPlotMenu QPushButton#Export{icon: url(Icons/Export.png)}
+ElchPlotMenu QPushButton#Export:hover{icon: url(Icons/Export_Glow.png)}
