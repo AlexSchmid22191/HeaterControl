@@ -1,7 +1,7 @@
 from pubsub.pub import addTopicDefnProvider, TOPIC_TREE_FROM_CLASS, setTopicUnspecifiedFatal
 
-import Topic_Def
-from Engine import HeaterControlEngine
+from Engine import Topic_Def
+from Engine.Engine import HeaterControlEngine
 from PySide2.QtWidgets import QApplication
 from QtInterface.ElchMainWindow import ElchMainWindow
 

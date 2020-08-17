@@ -1,16 +1,12 @@
+import pubsub.pub
+from PySide2.QtCore import QTimer
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
-from PySide2.QtCore import QTimer
-
 from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QButtonGroup, \
     QLabel, QToolButton, QSizeGrip
-from PySide2.QtCore import Signal, QObject
-import pubsub.pub
-import threading
 
 from QtInterface.ElchMenuPages import ElchMenuPages
 from QtInterface.ElchPlot import ElchPlot
-from ThreadDecorators import in_qt_main_thread
 
 
 class ElchMainWindow(QWidget):
@@ -161,8 +157,10 @@ class ElchStatusBar(QWidget):
         hbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(hbox)
 
-        print(threading.get_ident())
-        pubsub.pub.subscribe(self.spam_test, topicName='engine.spam')
+        self.timer = QTimer(parent=self)
+        self.timer.timeout.connect(lambda: pubsub.pub.sendMessage(topicName='gui.request.status'))
+        self.timer.start(1000)
+        pubsub.pub.subscribe(self.update_values, topicName='engine.answer.status')
 
     def update_values(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
@@ -174,10 +172,3 @@ class ElchStatusBar(QWidget):
             else:
                 self.values[key].setText('{:.1f} {:s}'.format(status_values[key] * (self.units[self.mode][0]),
                                                               self.units[self.mode][1]))
-
-    def spam_test(self, sens):
-        print(sens)
-        self.values['Sensor PV'].setText(str(sens))
-
-
-

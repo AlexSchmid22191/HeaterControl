@@ -10,7 +10,7 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.style import use
-from ThreadDecorators import in_main_thread
+from Engine.ThreadDecorators import in_main_thread
 from numpy import append
 
 use('App.mplstyle')

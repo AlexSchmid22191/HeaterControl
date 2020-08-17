@@ -1,12 +1,10 @@
-import time
-
 from threading import Timer, enumerate
 
 import wx
 from pubsub.pub import addTopicDefnProvider, TOPIC_TREE_FROM_CLASS, setTopicUnspecifiedFatal
 
-import Topic_Def
-from Engine import HeaterControlEngine
+from Engine import Topic_Def
+from Engine.Engine import HeaterControlEngine
 from Interface import HeaterInterface
 
 

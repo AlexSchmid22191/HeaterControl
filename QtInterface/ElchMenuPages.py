@@ -115,12 +115,15 @@ class ElchControlMenu(QWidget):
 
     @staticmethod
     def broadcast_control_value(value, control):
-        print(control, value)
+        functions = {'Rate': functools.partial(pubsub.pub.sendMessage, 'gui.set.rate', rate=value),
+                     'Power': functools.partial(pubsub.pub.sendMessage, 'gui.set.power', power=value),
+                     'Setpoint': functools.partial(pubsub.pub.sendMessage, 'gui.set.setpoint', setpoint=value)}
+        functions[control]()
 
     @staticmethod
     def broadcast_control_mode(checked, mode):
         if checked:
-            print(mode)
+            pubsub.pub.sendMessage('gui.set.control_mode', mode=mode)
 
     def change_mode(self, mode):
         for entry in self.entries:

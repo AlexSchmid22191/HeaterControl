@@ -15,14 +15,14 @@ class engine:
         """
         UNDOCUMENTED: created without spec
         """
-        def msgDataSpec(sens):
+        def msgDataSpec(status_values):
             """
-            - sens: float
+            - status_values: float
             """
 
     class broadcast:
         """
-        Class for all answers to requests from the GUI
+        Class for all briadcasts from the engine (typically done at initialization)
         """
         class devices:
             """
@@ -33,13 +33,17 @@ class engine:
                 - ports: list
                 - devices: dict
                 """
+    class answer:
+        """
+        Class for all answers to requests from the GUI
+        """
         class status:
             """
             UNDOCUMENTED: created without spec
             """
-            def msgDataSpec(status):
+            def msgDataSpec(status_values):
                 """
-                - status: dict
+                - status_values: dict
                 """
         class pid:
             """
@@ -156,6 +160,14 @@ class gui:
                 """
                 - filename: UNDOCUMENTED
                 """
+
+    class request:
+        """
+        Class for all requests from the gui
+        """
+        class status:
+            """
+            """
 
 # End of topic tree definition. Note that application may load
 # more than one definitions provider.
