@@ -2,13 +2,13 @@ import functools
 import pubsub.pub
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox, QLabel, QRadioButton, QComboBox, \
-    QFormLayout, QButtonGroup, QSpinBox
+    QFormLayout, QButtonGroup, QSpinBox, QFileDialog
 
 
 class ElchMenuPages(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # TODO:Implement this with a stackedlayout
+        # TODO: Implement this with a stackedlayout
         self.setMinimumWidth(200)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
@@ -144,6 +144,7 @@ class ElchControlMenu(QWidget):
                 self.entries[key].setValue(control_parameters[key])
                 self.entries[key].blockSignals(False)
 
+
 class ElchPlotMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -153,8 +154,9 @@ class ElchPlotMenu(QWidget):
 
         vbox = QVBoxLayout()
         for key in controls:
-            self.buttons[key].clicked.connect(functools.partial(self.broadcast_plot_command, key))
             vbox.addWidget(self.buttons[key])
+            self.buttons[key].clicked.connect({'Start': functools.partial(self.start_stop_plotting),
+                                               'Clear': self.clear_pplot, 'Export': self.export_data}[key])
         vbox.addStretch()
         vbox.setSpacing(10)
         vbox.setContentsMargins(10, 10, 10, 10)
@@ -162,7 +164,20 @@ class ElchPlotMenu(QWidget):
 
     def broadcast_plot_command(self, button):
         state = self.buttons[button].isChecked()
-        print(button, state)
+        if button == 'Clear' and self.buttons['Start'].isChecked():
+            self.buttons['Start'].click()
+
+    def start_stop_plotting(self):
+        pubsub.pub.sendMessage('gui.plot.start' if self.buttons['Start'].isChecked() else 'gui.plot.stop')
+
+    def clear_pplot(self):
+        pubsub.pub.sendMessage('gui.plot.clear')
+        if self.buttons['Start'].isChecked():
+            self.buttons['Start'].click()
+
+    def export_data(self):
+        if (file_path := QFileDialog.getSaveFileName(self, 'Save as...', 'Logs/Log.csv', 'CSV (*.csv)')[0]) != '':
+            pubsub.pub.sendMessage('gui.plot.export', filepath=file_path)
 
 
 class ElchPidMenu(QWidget):

@@ -1,7 +1,7 @@
 import time
 import threading
+import datetime
 import serial.tools.list_ports
-from datetime import datetime
 from threading import Timer
 import functools
 
@@ -53,12 +53,14 @@ class HeaterControlEngine:
         self.controller_slave_address = 1
 
         self.is_logging = False
-        self.status_values = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
+        self.log_start_time = datetime.datetime.now()
+        self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
         subscribe(self.add_controller, 'gui.con.connect_controller')
         subscribe(self.add_sensor, 'gui.con.connect_sensor')
         self.broadcast_available_devices()
         self.pool = QThreadPool()
+        self.start_logging()
 
     def broadcast_available_devices(self):
         pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
@@ -107,17 +109,22 @@ class HeaterControlEngine:
         self.sensor.close()
 
     def get_sensor_status(self):
+        runtime = (datetime.datetime.now() - self.log_start_time).seconds
         worker = Worker(self.sensor.get_sensor_value)
-        worker.signals.over.connect(lambda val: sendMessage('engine.answer.status', status_values={'Sensor PV': val}))
+        worker.signals.over.connect(lambda val: sendMessage('engine.answer.status',
+                                                            status_values={'Sensor PV': (val, runtime)}))
         self.pool.start(worker)
 
     def get_controller_status(self):
+        runtime = (datetime.datetime.now() - self.log_start_time).seconds
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
                                     'Setpoint': self.controller.get_working_setpoint,
                                     'Power': self.controller.get_working_output}.items():
+
             worker = Worker(function)
-            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.status',
-                                                                               status_values={par: val}))
+            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.status', status_values={
+                par: (val, runtime)}))
+            worker.signals.over.connect(lambda val, par=parameter: self.add_log_data_point(data={par: val}))
             self.pool.start(worker)
 
     def set_control_mode(self, mode):
@@ -148,6 +155,20 @@ class HeaterControlEngine:
             self.pool.start(worker)
 
     # TODO: Implement PID functionality properly
+
+    def start_logging(self):
+        self.is_logging = True
+        self.log_start_time = datetime.datetime.now()
+
+    def clear_log(self):
+        self.data = None
+
+    def export_log(self):
+        pass
+
+    def add_log_data_point(self, data):
+        for parameter, value in data.items():
+            self.data[parameter].append((datetime.datetime.now(), value))
 
     @in_new_thread
     def set_pid_p(self, p):

@@ -56,6 +56,10 @@ class ElchMainWindow(QWidget):
 
         self.ribbon.buttongroup.buttonToggled.connect(self.controlmenu.adjust_visibility)
         self.ribbon.menu_buttons['Devices'].setChecked(True)
+
+        self.controlmenu.menus['Plotting'].buttons['Start'].clicked.connect(self.matplotframe.start_plotting)
+        self.controlmenu.menus['Plotting'].buttons['Clear'].clicked.connect(self.matplotframe.clear_plot)
+
         self.setLayout(hbox_outer)
         self.show()
 
@@ -165,10 +169,10 @@ class ElchStatusBar(QWidget):
     def update_values(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
 
-        for key in status_values:
+        for key, value in status_values.items():
             assert key in self.values, 'Illegal key recieved: {:s}'.format(key)
             if key == 'Power':
-                self.values[key].setText('{:.1f} %'.format(status_values[key]))
+                self.values[key].setText('{:.1f} %'.format(value[0]))
             else:
-                self.values[key].setText('{:.1f} {:s}'.format(status_values[key] * (self.units[self.mode][0]),
+                self.values[key].setText('{:.1f} {:s}'.format(value[0] * (self.units[self.mode][0]),
                                                               self.units[self.mode][1]))
