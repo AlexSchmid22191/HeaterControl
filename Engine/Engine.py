@@ -20,6 +20,7 @@ from Drivers.TestDevices import TestSensor, TestController
 from Engine.ThreadDecorators import in_new_thread, Worker, WorkThread
 
 # TODO: Implement some notification system for serial failures and not implemented functions
+TEST_MODE = True
 
 
 class HeaterControlEngine:
@@ -29,7 +30,7 @@ class HeaterControlEngine:
                                  'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Test Controller': TestController}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
-                             'Eurotherm3508': Eurotherm3508S, 'Test Sensor': TestSensor}
+                             'Eurotherm3508': Eurotherm3508S}
 
         self.controller_functions = {'gui.request.status': (self.get_controller_status, True),
                                      'gui.con.disconnect_controller': (self.remove_controller, True),
@@ -41,6 +42,11 @@ class HeaterControlEngine:
         self.sensor_functions = {'gui.request.status': (self.get_sensor_status, True),
                                  'gui.con.disconnect_sensor': (self.remove_sensor, True),
                                  'gui.con.connect_sensor': (self.add_sensor, False)}
+
+        if TEST_MODE:
+            self.sensor_types['Test Sensor'] = TestSensor
+            self.controller_types['Test Controller'] = TestController
+            self.available_ports['COM Test'] = 'Test Port'
 
         self.sensor = AbstractSensor()
         self.controller = AbstractController()
@@ -63,6 +69,7 @@ class HeaterControlEngine:
             self.controller = self.controller_types[controller_type](portname=self.available_ports[controller_port],
                                                                      slaveadress=self.controller_slave_address)
 
+            self.get_controller_parameters()
             for topic, function in self.controller_functions.items():
                 if function[1]:
                     pubsub.pub.subscribe(function[0], topic)
@@ -129,6 +136,18 @@ class HeaterControlEngine:
     def set_rate(self, rate):
         worker = Worker(lambda rat=rate: self.controller.set_rate(rat))
         self.pool.start(worker)
+
+    def get_controller_parameters(self):
+        for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
+                                    'Power': self.controller.get_working_output,
+                                    'Rate': self.controller.get_rate,
+                                    'Mode': self.controller.get_control_mode}.items():
+            worker = Worker(function)
+            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.control_parameters',
+                                                                               control_parameters={par: val}))
+            self.pool.start(worker)
+
+    # TODO: Implement PID functionality properly
 
     @in_new_thread
     def set_pid_p(self, p):

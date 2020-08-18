@@ -14,7 +14,7 @@ class AbstractController:
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_target_setpoint',
                                                                                       self.__class__.__name__))
 
-    def get_target_setpoint(self, setpoint):
+    def get_target_setpoint(self):
         """Get the target setpoint (this is not always the working setpoint"""
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('get_target_setpoint',
                                                                                       self.__class__.__name__))

@@ -45,6 +45,14 @@ class engine:
                 """
                 - status_values: dict
                 """
+        class control_parameters:
+            """
+            UNDOCUMENTED: created without spec
+            """
+            def msgDataSpec(control_parameters):
+                """
+                - control_parameters: dict
+                """
         class pid:
             """
             UNDOCUMENTED: created without spec

@@ -113,6 +113,8 @@ class ElchControlMenu(QWidget):
         vbox.addStretch()
         self.setLayout(vbox)
 
+        pubsub.pub.subscribe(self.update_control_values, 'engine.answer.control_parameters')
+
     @staticmethod
     def broadcast_control_value(value, control):
         functions = {'Rate': functools.partial(pubsub.pub.sendMessage, 'gui.set.rate', rate=value),
@@ -125,20 +127,22 @@ class ElchControlMenu(QWidget):
         if checked:
             pubsub.pub.sendMessage('gui.set.control_mode', mode=mode)
 
-    def change_mode(self, mode):
+    def change_units(self, mode):
         for entry in self.entries:
             self.entries[entry].setSuffix(self.suffixes[mode][entry])
 
-    def update_control_values(self, values, control_mode):
-        assert isinstance(values, dict), 'Illegal data type recieved: {:s}'.format(str(type(values)))
-        for key in values:
-            assert key in self.entries, 'Illegal key recieved: {:s}'.format(key)
-            if not self.entries[key].hasFocus():
-                self.entries[key].setValue(values[key])
-
-        assert control_mode in self.buttons, 'Illegal control mode recieved: {:s}'.format(control_mode)
-        self.buttons[control_mode].setChecked(True)
-
+    def update_control_values(self, control_parameters):
+        assert isinstance(control_parameters, dict), 'Illegal type recieved: {:s}'.format(str(type(control_parameters)))
+        for key in control_parameters:
+            assert key in self.entries or key == 'Mode', 'Illegal key recieved: {:s}'.format(key)
+            if key == 'Mode':
+                self.buttons[control_parameters[key]].blockSignals(True)
+                self.buttons[control_parameters[key]].setChecked(True)
+                self.buttons[control_parameters[key]].blockSignals(False)
+            elif not self.entries[key].hasFocus():
+                self.entries[key].blockSignals(True)
+                self.entries[key].setValue(control_parameters[key])
+                self.entries[key].blockSignals(False)
 
 class ElchPlotMenu(QWidget):
     def __init__(self, *args, **kwargs):

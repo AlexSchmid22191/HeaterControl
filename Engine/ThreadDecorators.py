@@ -26,9 +26,9 @@ def in_main_thread(func):
 
 class Signals(QObject):
     over = Signal(object)
-    started = Signal()
-    con_fail = Signal()
-    imp_fail = Signal()
+    started = Signal(object)
+    con_fail = Signal(object)
+    imp_fail = Signal(object)
 
 
 class Worker(QRunnable):

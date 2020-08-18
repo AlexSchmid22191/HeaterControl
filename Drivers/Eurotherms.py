@@ -25,7 +25,7 @@ class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
         with self.com_lock:
             self.write_register(2, setpoint, number_of_decimals=0)
 
-    def get_target_setpoint(self, setpoint):
+    def get_target_setpoint(self):
         """Get the target setpoint"""
         with self.com_lock:
             return self.read_register(2, number_of_decimals=0)
@@ -224,10 +224,20 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
         with self.com_lock:
             self.write_register(2, setpoint, number_of_decimals=4, signed=True)
 
+    def get_target_setpoint(self):
+        """Get the target setpoint"""
+        with self.com_lock:
+            return self.read_register(2, number_of_decimals=0)
+
     def set_manual_output_power(self, output):
         """Set the power output of the instrument in percent"""
         with self.com_lock:
             self.write_register(3, output, number_of_decimals=1, signed=True)
+
+    def get_rate(self):
+        """Get the rate of change for the working setpoint i.e. the heating/cooling rate"""
+        with self.com_lock:
+            return self.read_register(35, number_of_decimals=1)
 
     def get_working_output(self):
         """Return the current power output of the instrument"""
@@ -248,6 +258,11 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
         """Set controller to manual mode"""
         with self.com_lock:
             self.write_register(273, 1)
+
+    def get_control_mode(self):
+        """get the active control mode"""
+        with self.com_lock:
+            return {0: 'Automatic', 1: 'Manual'}[self.read_register(273, 1)]
 
     def set_pid_p(self, p):
         """Set the P (Proportional band) for the PID controller, Set 1"""

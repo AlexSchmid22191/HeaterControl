@@ -31,7 +31,7 @@ class TestController(AbstractController):
             time.sleep(0.01)
             return time.time() % 60 + 1
 
-    def get_target_setpoint(self, setpoint):
+    def get_target_setpoint(self):
         with self.com_lock:
             time.sleep(0.01)
             return time.time() % 60 + 2
