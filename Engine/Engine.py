@@ -1,9 +1,6 @@
-import time
-import threading
 import datetime
+import numpy as np
 import serial.tools.list_ports
-from threading import Timer
-import functools
 
 import pubsub.pub
 from PySide2.QtCore import QThreadPool
@@ -17,7 +14,7 @@ from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Omega import OmegaPt
 from Drivers.Pyrometer import Pyrometer
 from Drivers.TestDevices import TestSensor, TestController
-from Engine.ThreadDecorators import in_new_thread, Worker, WorkThread
+from Engine.ThreadDecorators import in_new_thread, Worker
 
 # TODO: Implement some notification system for serial failures and not implemented functions
 TEST_MODE = True
@@ -56,6 +53,9 @@ class HeaterControlEngine:
         self.log_start_time = None
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
+        self.mode = 'Temperature'
+        self.units = {'Temperature': (1, '°C'), 'Voltage': (1000, 'mV')}
+
         pubsub.pub.subscribe(self.add_controller, 'gui.con.connect_controller')
         pubsub.pub.subscribe(self.add_sensor, 'gui.con.connect_sensor')
         pubsub.pub.subscribe(self.start_logging, 'gui.plot.start')
@@ -91,6 +91,7 @@ class HeaterControlEngine:
                 pubsub.pub.subscribe(function[0], topic)
             else:
                 pubsub.pub.unsubscribe(function[0], topic)
+        self.sensor = AbstractSensor()
 
     def add_sensor(self, sensor_type, sensor_port):
         try:
@@ -110,12 +111,15 @@ class HeaterControlEngine:
             else:
                 pubsub.pub.unsubscribe(function[0], topic)
         self.sensor.close()
+        self.sensor = AbstractSensor()
 
     def get_sensor_status(self):
         runtime = (datetime.datetime.now() - self.log_start_time).seconds if self.log_start_time else None
         worker = Worker(self.sensor.get_sensor_value)
         worker.signals.over.connect(lambda val: sendMessage('engine.answer.status',
                                                             status_values={'Sensor PV': (val, runtime)}))
+        if self.is_logging:
+            worker.signals.over.connect(lambda val, par='Sensor PV': self.add_log_data_point(data={par: val}))
         self.pool.start(worker)
 
     def get_controller_status(self):
@@ -127,7 +131,8 @@ class HeaterControlEngine:
             worker = Worker(function)
             worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.status', status_values={
                 par: (val, runtime)}))
-            worker.signals.over.connect(lambda val, par=parameter: self.add_log_data_point(data={par: val}))
+            if self.is_logging:
+                worker.signals.over.connect(lambda val, par=parameter: self.add_log_data_point(data={par: val}))
             self.pool.start(worker)
 
     def set_control_mode(self, mode):
@@ -169,7 +174,29 @@ class HeaterControlEngine:
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
     def export_log(self, filepath):
-        pass
+        def _work():
+            sorted_data = {}
+            for parameter, series in self.data.items():
+                for time, value in series:
+                    timestamp = int(time.timestamp())
+                    if timestamp not in sorted_data.keys():
+                        sorted_data[timestamp] = {parameter: value}
+                    else:
+                        sorted_data[timestamp].update({parameter: value})
+
+            factor = self.units[self.mode][0]
+            unit = self.units[self.mode][1]
+
+            with open(filepath, 'w+') as file:
+                file.write('Time, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.
+                           format(unit, unit))
+                for timestamp, data in sorted_data.items():
+                    timestring = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+                    file.write('{:s}, {:d}, {:.1f}, {:.1f}, {:.1f}\n'.format(timestring, timestamp,
+                               data['Controller PV']*factor, data['Power'], data['Sensor PV']*factor))
+
+        worker = Worker(_work)
+        self.pool.start(worker)
 
     def add_log_data_point(self, data):
         for parameter, value in data.items():
@@ -314,47 +341,3 @@ class HeaterControlEngine:
             print(exception)
         except SerialException:
             sendMessage(topicName='engine.status', text='Serial communication error!')
-
-
-class Datalogger:
-    def __init__(self, master):
-        self.master = master
-
-        self.logfile_path = 'Default.txt'
-        self.is_logging = False
-
-        subscribe(self.start_log, 'gui.log.start')
-        subscribe(self.stop_log, 'gui.log.stop')
-        subscribe(self.continue_log, 'gui.log.cont')
-        subscribe(self.set_logfile, 'gui.log.filename')
-
-    def write_log(self):
-        abs_time = datetime.now()
-        time_string = abs_time.strftime('%d.%m.%Y - %H:%M:%S')
-        unix_time = int(time.time())
-        with open(self.logfile_path, 'a') as logfile:
-            logfile.write('{:s}\t{:d}\t{:5.1f}\t{:5.1f}\t{:5.2f}\n'.format(time_string, unix_time,
-                                                                           self.master.controller_process_value,
-                                                                           self.master.controller_working_output,
-                                                                           self.master.sensor_value))
-        if self.is_logging:
-            log_timer = Timer(interval=1, function=self.write_log)
-            log_timer.start()
-
-    def set_logfile(self, filename):
-        self.logfile_path = filename
-
-    def start_log(self):
-        if not self.is_logging:
-            self.is_logging = True
-            with open(self.logfile_path, 'a') as logfile:
-                logfile.write('Time\tUnixtime\tProcess Variable\tOutput Power (%)\tSensor Value\n')
-            log_timer = Timer(interval=1, function=self.write_log)
-            log_timer.start()
-
-    def stop_log(self):
-        self.is_logging = False
-
-    def continue_log(self):
-        self.is_logging = True
-        self.write_log()

@@ -163,7 +163,6 @@ class ElchPlotMenu(QWidget):
         self.setLayout(vbox)
 
     def broadcast_plot_command(self, button):
-        state = self.buttons[button].isChecked()
         if button == 'Clear' and self.buttons['Start'].isChecked():
             self.buttons['Start'].click()
 

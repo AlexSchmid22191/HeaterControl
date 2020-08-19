@@ -50,25 +50,3 @@ class Worker(QRunnable):
             self.signals.con_fail.emit(imp_ex)
         else:
             self.signals.over.emit(result)
-
-
-class WorkThread(threading.Thread):
-    def __init__(self, fn, *args, **kwargs):
-        super().__init__()
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-        self.signals = Signals()
-
-    def run(self):
-        self.signals.started.emit()
-        try:
-            result = self.fn(*self.args, **self.kwargs)
-        except serial.SerialException as ser_ex:
-            print(ser_ex)
-            self.signals.con_fail.emit(ser_ex)
-        except NotImplementedError as imp_ex:
-            print(imp_ex)
-            self.signals.con_fail.emit(imp_ex)
-        else:
-            self.signals.over.emit(result)
