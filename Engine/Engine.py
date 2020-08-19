@@ -53,14 +53,17 @@ class HeaterControlEngine:
         self.controller_slave_address = 1
 
         self.is_logging = False
-        self.log_start_time = datetime.datetime.now()
+        self.log_start_time = None
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
-        subscribe(self.add_controller, 'gui.con.connect_controller')
-        subscribe(self.add_sensor, 'gui.con.connect_sensor')
+        pubsub.pub.subscribe(self.add_controller, 'gui.con.connect_controller')
+        pubsub.pub.subscribe(self.add_sensor, 'gui.con.connect_sensor')
+        pubsub.pub.subscribe(self.start_logging, 'gui.plot.start')
+        pubsub.pub.subscribe(self.clear_log, 'gui.plot.clear')
+        pubsub.pub.subscribe(self.export_log, 'gui.plot.export')
+
         self.broadcast_available_devices()
         self.pool = QThreadPool()
-        self.start_logging()
 
     def broadcast_available_devices(self):
         pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
@@ -109,14 +112,14 @@ class HeaterControlEngine:
         self.sensor.close()
 
     def get_sensor_status(self):
-        runtime = (datetime.datetime.now() - self.log_start_time).seconds
+        runtime = (datetime.datetime.now() - self.log_start_time).seconds if self.log_start_time else None
         worker = Worker(self.sensor.get_sensor_value)
         worker.signals.over.connect(lambda val: sendMessage('engine.answer.status',
                                                             status_values={'Sensor PV': (val, runtime)}))
         self.pool.start(worker)
 
     def get_controller_status(self):
-        runtime = (datetime.datetime.now() - self.log_start_time).seconds
+        runtime = (datetime.datetime.now() - self.log_start_time).seconds if self.log_start_time else None
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
                                     'Setpoint': self.controller.get_working_setpoint,
                                     'Power': self.controller.get_working_output}.items():
@@ -158,12 +161,14 @@ class HeaterControlEngine:
 
     def start_logging(self):
         self.is_logging = True
-        self.log_start_time = datetime.datetime.now()
+        self.log_start_time = datetime.datetime.now() if not self.log_start_time else self.log_start_time
 
     def clear_log(self):
-        self.data = None
+        self.is_logging = False
+        self.log_start_time = None
+        self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
-    def export_log(self):
+    def export_log(self, filepath):
         pass
 
     def add_log_data_point(self, data):

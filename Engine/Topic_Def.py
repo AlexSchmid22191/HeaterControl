@@ -166,7 +166,7 @@ class gui:
             """
             def msgDataSpec(filepath):
                 """
-                - filename: UNDOCUMENTED
+                - filepath: UNDOCUMENTED
                 """
 
     class request:

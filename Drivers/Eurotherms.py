@@ -227,7 +227,7 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def get_target_setpoint(self):
         """Get the target setpoint"""
         with self.com_lock:
-            return self.read_register(2, number_of_decimals=0)
+            return self.read_register(2, number_of_decimals=4)
 
     def set_manual_output_power(self, output):
         """Set the power output of the instrument in percent"""
@@ -262,7 +262,7 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def get_control_mode(self):
         """get the active control mode"""
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.read_register(273, 1)]
+            return {0: 'Automatic', 1: 'Manual'}[self.read_register(273, 0)]
 
     def set_pid_p(self, p):
         """Set the P (Proportional band) for the PID controller, Set 1"""
