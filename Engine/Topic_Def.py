@@ -179,6 +179,9 @@ class gui:
         class devices:
             """
             """
+        class control_parameters:
+            """
+            """
 
 # End of topic tree definition. Note that application may load
 # more than one definitions provider.

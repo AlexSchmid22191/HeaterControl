@@ -36,7 +36,8 @@ class HeaterControlEngine:
                                      'gui.set.power': (self.set_manual_output_power, True),
                                      'gui.set.setpoint': (self.set_target_setpoint, True),
                                      'gui.set.rate': (self.set_rate, True),
-                                     'gui.set.control_mode': (self.set_control_mode, True)}
+                                     'gui.set.control_mode': (self.set_control_mode, True),
+                                     'gui.request.control_parameters': (self.get_controller_parameters, True)}
         self.sensor_functions = {'gui.request.status': (self.get_sensor_status, True),
                                  'gui.con.disconnect_sensor': (self.remove_sensor, True),
                                  'gui.con.connect_sensor': (self.add_sensor, False)}
