@@ -33,9 +33,8 @@ class ElchPlot(FigureCanvas):
 
                 self.axes[key].relim()
                 self.axes[key].autoscale()
-                self.axes[key].set_xlim(0)
-                self.axes[key].set_ylim(0)
                 self.figure.canvas.draw()
+                self.figure.tight_layout()
 
     def start_plotting(self, plotting):
         if plotting:

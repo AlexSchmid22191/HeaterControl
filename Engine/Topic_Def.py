@@ -53,7 +53,7 @@ class engine:
                 """
                 - control_parameters: dict
                 """
-        class pid:
+        class pid_parameters:
             """
             UNDOCUMENTED: created without spec
             """
@@ -134,7 +134,7 @@ class gui:
                 """
                 - setpoint: UNDOCUMENTED
                 """
-        class pid_parameter:
+        class pid_parameters:
             """
             UNDOCUMENTED: created without spec
             """
@@ -146,7 +146,7 @@ class gui:
 
     class plot:
         """
-        A class for everthing related to the logging module
+        A class for everthing related to plotting/logging
         """
         class start:
             """
@@ -180,6 +180,9 @@ class gui:
             """
             """
         class control_parameters:
+            """
+            """
+        class pid_parameters:
             """
             """
 

@@ -149,7 +149,7 @@ class ElchControlMenu(QWidget):
                 self.buttons[control_parameters[key]].blockSignals(True)
                 self.buttons[control_parameters[key]].setChecked(True)
                 self.buttons[control_parameters[key]].blockSignals(False)
-            elif not self.entries[key].hasFocus():
+            else:
                 self.entries[key].blockSignals(True)
                 self.entries[key].setValue(control_parameters[key])
                 self.entries[key].blockSignals(False)
@@ -202,7 +202,7 @@ class ElchPidMenu(QWidget):
         self.entries = {key: QComboBox() if key == 'GS' else QSpinBox(minimum=1, maximum=3) if key == 'AS'
                         else QDoubleSpinBox(decimals=1, singleStep=10, minimum=0, maximum=10000)
                         for subset in parameters for key in parameters[subset]}
-        self.entries['GS'].addItems(['None', 'Set', 'PV', 'Setpoint'])
+        self.entries['GS'].addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
 
         vbox = QVBoxLayout()
         vbox.setSpacing(0)
@@ -219,18 +219,36 @@ class ElchPidMenu(QWidget):
                 form.addRow(parameters[subset][key], self.entries[key])
             vbox.addLayout(form)
             vbox.addSpacing(20)
+
+        refresh_button = QPushButton(text='Refresh', objectName='Refresh')
+        refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.pid_parameters'))
+        vbox.addWidget(refresh_button)
+
         vbox.addStretch()
         self.setLayout(vbox)
 
         for key in self.entries:
             if key == 'GS':
-                self.entries[key].currentTextChanged.connect(functools.partial(self.broadcast_pid_param, control=key))
+                self.entries[key].currentTextChanged.connect(functools.partial(self.set_pid_parameter, control=key))
             else:
-                self.entries[key].valueChanged.connect(functools.partial(self.broadcast_pid_param, control=key))
+                self.entries[key].valueChanged.connect(functools.partial(self.set_pid_parameter, control=key))
+
+        pubsub.pub.subscribe(self.update_pid_parameters, 'engine.answer.pid_parameters')
 
     @staticmethod
-    def broadcast_pid_param(value, control):
-        print(control, value)
+    def set_pid_parameter(value, control):
+        pubsub.pub.sendMessage('gui.set.pid_parameters', parameter=control, value=value)
+
+    def update_pid_parameters(self, pid_parameters):
+        for key in pid_parameters:
+            if key == 'GS':
+                self.entries[key].blockSignals(True)
+                self.entries[key].setCurrentText(pid_parameters[key])
+                self.entries[key].blockSignals(False)
+            else:
+                self.entries[key].blockSignals(True)
+                self.entries[key].setValue(pid_parameters[key])
+                self.entries[key].blockSignals(False)
 
     def change_mode(self, mode):
         for entry in ['B12', 'B23']:

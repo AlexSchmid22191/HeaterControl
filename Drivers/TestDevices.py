@@ -75,6 +75,3 @@ class TestController(AbstractController):
     def set_rate(self, rate):
         with self.com_lock:
             print('Test Controller: Set rate {:f}'.format(rate))
-
-
-

@@ -376,15 +376,23 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
 
     def set_gain_scheduling(self, mode):
         """Set the gain scheduling mode"""
-        mode_dict = {'Off': 0, 'Set': 1, 'Setpoint': 2, 'Process Variable': 3, 'Output': 5}
+        mode_dict = {'None': 0, 'Set': 1, 'Setpoint': 2, 'Process Variable': 3, 'Output': 5}
         with self.com_lock:
             self.write_register(15360, mode_dict[mode])
 
     def get_gain_scheduling(self):
         """Get the gain scheduling mode"""
-        mode_dict = {0: 'Off', 1: 'Set', 2: 'Setpoint', 3: 'Process Variable', 5: 'Output'}
+        mode_dict = {0: 'None', 1: 'Set', 2: 'Setpoint', 3: 'Process Variable', 5: 'Output'}
         with self.com_lock:
             return mode_dict[self.read_register(15360)]
+
+    def get_active_set(self):
+        with self.com_lock:
+            return self.read_register(72)
+
+    def set_active_set(self, active_set):
+        with self.com_lock:
+            self.write_register(72, active_set)
 
 
 class Eurotherm3508S(AbstractSensor, minimalmodbus.Instrument):

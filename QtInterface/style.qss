@@ -47,6 +47,10 @@ ElchMenuPages QPushButton:hover{background: #373a62; color: #7b8ccb}
 ElchMenuPages QPushButton:checked:hover{background: #373a62; color: #7b8ccb}
 ElchMenuPages QPushButton:checked{background: #343760; color: #7b8ccb}
 
+ElchMenuPages QPushButton#Refresh{icon: url(Icons/Refresh.png)}
+ElchMenuPages QPushButton#Refresh:hover{icon: url(Icons/Refresh_Glow.png)}
+ElchMenuPages QPushButton#Refresh:checked{icon: url(Icons/Refresh_Glow.png)}
+
 /*Comboboxes*/
 ElchMenuPages QComboBox{background-color:#2A2D56; border: 1px solid #15183b; color: #7b8ccb; font: 11pt "Roboto Light";}
 ElchMenuPages QComboBox:on{background-color: #252a4e; color: #7f8ab7;}
@@ -77,11 +81,6 @@ ElchMenuPages QRadioButton::indicator:checked:hover{image: url(Icons/Radio_On_Gl
 ElchDeviceMenu QPushButton{icon: url(Icons/Connect.png)}
 ElchDeviceMenu QPushButton:hover{icon: url(Icons/Connect_Glow.png)}
 ElchDeviceMenu QPushButton:checked{icon: url(Icons/Connect_Glow.png)}
-
-ElchDeviceMenu QPushButton#Refresh{icon: url(Icons/Refresh.png)}
-ElchDeviceMenu QPushButton#Refresh:hover{icon: url(Icons/Refresh_Glow.png)}
-ElchDeviceMenu QPushButton#Refresh:checked{icon: url(Icons/Refresh_Glow.png)}
-
 
 ElchPlotMenu QPushButton#Start{icon: url(Icons/Start.png)}
 ElchPlotMenu QPushButton#Start:hover{icon: url(Icons/Start_Glow.png)}

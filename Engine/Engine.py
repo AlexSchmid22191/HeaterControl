@@ -31,13 +31,15 @@ class HeaterControlEngine:
                              'Eurotherm3508': Eurotherm3508S}
 
         self.controller_functions = {'gui.request.status': (self.get_controller_status, True),
+                                     'gui.request.control_parameters': (self.get_controller_parameters, True),
+                                     'gui.request.pid_parameters': (self.get_pid_parameters, True),
                                      'gui.con.disconnect_controller': (self.remove_controller, True),
                                      'gui.con.connect_controller': (self.add_controller, False),
                                      'gui.set.power': (self.set_manual_output_power, True),
                                      'gui.set.setpoint': (self.set_target_setpoint, True),
                                      'gui.set.rate': (self.set_rate, True),
                                      'gui.set.control_mode': (self.set_control_mode, True),
-                                     'gui.request.control_parameters': (self.get_controller_parameters, True)}
+                                     'gui.set.pid_parameters': (self.set_pid_parameters, True)}
         self.sensor_functions = {'gui.request.status': (self.get_sensor_status, True),
                                  'gui.con.disconnect_sensor': (self.remove_sensor, True),
                                  'gui.con.connect_sensor': (self.add_sensor, False)}
@@ -81,6 +83,7 @@ class HeaterControlEngine:
                                                                      slaveadress=self.controller_slave_address)
 
             self.get_controller_parameters()
+            self.get_pid_parameters()
             for topic, function in self.controller_functions.items():
                 if function[1]:
                     pubsub.pub.subscribe(function[0], topic)
@@ -216,142 +219,25 @@ class HeaterControlEngine:
         for parameter, value in data.items():
             self.data[parameter].append((datetime.datetime.now(), value))
 
-    @in_new_thread
-    def set_pid_p(self, p):
-        try:
-            self.controller.set_pid_p(p)
-            sendMessage(topicName='engine.status', text='PID P set to {:f}'.format(p))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_p2(self, p):
-        try:
-            self.controller.set_pid_p2(p)
-            sendMessage(topicName='engine.status', text='PID P2 set to {:f}'.format(p))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_p3(self, p):
-        try:
-            self.controller.set_pid_p3(p)
-            sendMessage(topicName='engine.status', text='PID P3 set to {:f}'.format(p))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_i(self, i):
-        try:
-            self.controller.set_pid_i(i)
-            sendMessage(topicName='engine.status', text='PID I set to {:f}'.format(i))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_i2(self, i):
-        try:
-            self.controller.set_pid_i2(i)
-            sendMessage(topicName='engine.status', text='PID I2 set to {:f}'.format(i))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_i3(self, i):
-        try:
-            self.controller.set_pid_i3(i)
-            sendMessage(topicName='engine.status', text='PID I3 set to {:f}'.format(i))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_d(self, d):
-        try:
-            self.controller.set_pid_d(d)
-            sendMessage(topicName='engine.status', text='PID D set to {:f}'.format(d))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_d2(self, d):
-        try:
-            self.controller.set_pid_d2(d)
-            sendMessage(topicName='engine.status', text='PID D2 set to {:f}'.format(d))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_d3(self, d):
-        try:
-            self.controller.set_pid_d3(d)
-            sendMessage(topicName='engine.status', text='PID D3 set to {:f}'.format(d))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_boundary12(self, boundary):
-        try:
-            self.controller.set_boundary_12(boundary)
-            sendMessage(topicName='engine.status', text='Boundary 1/2 set to {:f}'.format(boundary))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_boundary23(self, boundary):
-        try:
-            self.controller.set_boundary_23(boundary)
-            sendMessage(topicName='engine.status', text='Boundary 2/3 set to {:f}'.format(boundary))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_gain_scheduling(self, mode):
-        try:
-            self.controller.set_gain_scheduling(mode)
-            sendMessage(topicName='engine.status', text='Gain scheduling mode set to {:s}'.format(mode))
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
-
-    @in_new_thread
-    def set_pid_parameter(self, parameteter, value):
-        pass
-
-    @in_new_thread
     def get_pid_parameters(self):
-        try:
-            pid_parameters = {'P': self.controller.get_pid_p(), 'P2': self.controller.get_pid_p2(),
-                              'P3': self.controller.get_pid_p3(), 'I': self.controller.get_pid_i(),
-                              'I2': self.controller.get_pid_i2(), 'I3': self.controller.get_pid_i3(),
-                              'D': self.controller.get_pid_d(), 'D2': self.controller.get_pid_d2(),
-                              'D3': self.controller.get_pid_d3(), 'B23': self.controller.get_boundary_23(),
-                              'B12': self.controller.get_boundary_12(), 'GS': self.controller.get_gain_scheduling()}
+        for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
+                                    'P3': self.controller.get_pid_p3, 'I1': self.controller.get_pid_i,
+                                    'I2': self.controller.get_pid_i2, 'I3': self.controller.get_pid_i3,
+                                    'D1': self.controller.get_pid_d, 'D2': self.controller.get_pid_d2,
+                                    'D3': self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
+                                    'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
+                                    'GS': self.controller.get_gain_scheduling}.items():
+            worker = Worker(function)
+            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.pid_parameters',
+                                                                               pid_parameters={par: val}))
+            self.pool.start(worker)
 
-            sendMessage(topicName='engine.answer.pid', pid_parameters=pid_parameters)
-        except NotImplementedError as exception:
-            print(exception)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Serial communication error!')
+    def set_pid_parameters(self, parameter, value):
+        function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2, 'P3': self.controller.set_pid_p3,
+                    'I1': self.controller.set_pid_i, 'I2': self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
+                    'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
+                    'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
+                    'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
+
+        worker = Worker(lambda val=value: function(val))
+        self.pool.start(worker)
