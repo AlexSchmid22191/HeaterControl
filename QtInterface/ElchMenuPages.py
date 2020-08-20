@@ -39,6 +39,7 @@ class ElchDeviceMenu(QWidget):
         self.device_menus = {key: QComboBox() for key in self.labels}
         self.port_menus = {key: QComboBox() for key in self.labels}
         self.connect_buttons = {key: QPushButton(text='Connect', objectName=key) for key in self.labels}
+        self.refresh_buttons = {key: QPushButton(text='Refresh', objectName='Refresh') for key in self.labels}
 
         self.buttongroup = QButtonGroup()
         self.buttongroup.setExclusive(False)
@@ -50,10 +51,12 @@ class ElchDeviceMenu(QWidget):
         for key in self.labels:
             self.buttongroup.addButton(self.connect_buttons[key])
             self.connect_buttons[key].setCheckable(True)
+            self.refresh_buttons[key].clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.devices'))
             vbox.addWidget(self.labels[key])
             vbox.addWidget(self.device_menus[key])
             vbox.addWidget(self.port_menus[key])
             vbox.addWidget(self.connect_buttons[key])
+            vbox.addWidget(self.refresh_buttons[key])
             vbox.addSpacing(20)
         vbox.addStretch()
         self.setLayout(vbox)

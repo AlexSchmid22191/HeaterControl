@@ -1,10 +1,10 @@
 import datetime
-import numpy as np
-import serial.tools.list_ports
+import math
 
 import pubsub.pub
+import serial.tools.list_ports
 from PySide2.QtCore import QThreadPool
-from pubsub.pub import sendMessage, subscribe, unsubscribe
+from pubsub.pub import sendMessage
 from serial import SerialException
 
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
@@ -17,6 +17,7 @@ from Drivers.TestDevices import TestSensor, TestController
 from Engine.ThreadDecorators import in_new_thread, Worker
 
 # TODO: Implement some notification system for serial failures and not implemented functions
+
 TEST_MODE = True
 
 
@@ -56,16 +57,20 @@ class HeaterControlEngine:
         self.mode = 'Temperature'
         self.units = {'Temperature': (1, '°C'), 'Voltage': (1000, 'mV')}
 
+        pubsub.pub.subscribe(self.refresh_and_broadcast_available_devices, 'gui.request.devices')
         pubsub.pub.subscribe(self.add_controller, 'gui.con.connect_controller')
         pubsub.pub.subscribe(self.add_sensor, 'gui.con.connect_sensor')
         pubsub.pub.subscribe(self.start_logging, 'gui.plot.start')
         pubsub.pub.subscribe(self.clear_log, 'gui.plot.clear')
         pubsub.pub.subscribe(self.export_log, 'gui.plot.export')
 
-        self.broadcast_available_devices()
+        self.refresh_and_broadcast_available_devices()
         self.pool = QThreadPool()
 
-    def broadcast_available_devices(self):
+    def refresh_and_broadcast_available_devices(self):
+        self.available_ports = {port[1]: port[0] for port in serial.tools.list_ports.comports()}
+        if TEST_MODE:
+            self.available_ports['COM Test'] = 'Test Port'
         pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
                                devices={'Controller': self.controller_types.keys(), 'Sensor': self.sensor_types.keys()})
 
@@ -174,6 +179,11 @@ class HeaterControlEngine:
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
     def export_log(self, filepath):
+        """
+        Tedious data aligning: The timestamps separate data series (time -> value) are rounded to whole seconds and
+        transfered into one dict (time -> 4values), to align the 4 data series. This dict is the used to generate a
+        csv file.
+        """
         def _work():
             sorted_data = {}
             for parameter, series in self.data.items():
@@ -190,10 +200,13 @@ class HeaterControlEngine:
             with open(filepath, 'w+') as file:
                 file.write('Time, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.
                            format(unit, unit))
-                for timestamp, data in sorted_data.items():
+                for timestamp, datapoint in sorted_data.items():
                     timestring = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%dT%H:%M:%S')
-                    file.write('{:s}, {:d}, {:.1f}, {:.1f}, {:.1f}\n'.format(timestring, timestamp,
-                               data['Controller PV']*factor, data['Power'], data['Sensor PV']*factor))
+                    power = datapoint['Power'] if 'Power' in datapoint.keys() else math.nan
+                    controller_pv = datapoint['Controller PV'] if 'Controller PV' in datapoint.keys() else math.nan
+                    sensor_pv = datapoint['Sensor PV'] if 'Sensor PV' in datapoint.keys() else math.nan
+                    file.write('{:s}, {:d}, {:.1f}, {:.1f}, {:.1f}\n'.
+                               format(timestring, timestamp, controller_pv*factor, power, sensor_pv*factor))
 
         worker = Worker(_work)
         self.pool.start(worker)

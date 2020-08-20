@@ -78,6 +78,11 @@ ElchDeviceMenu QPushButton{icon: url(Icons/Connect.png)}
 ElchDeviceMenu QPushButton:hover{icon: url(Icons/Connect_Glow.png)}
 ElchDeviceMenu QPushButton:checked{icon: url(Icons/Connect_Glow.png)}
 
+ElchDeviceMenu QPushButton#Refresh{icon: url(Icons/Refresh.png)}
+ElchDeviceMenu QPushButton#Refresh:hover{icon: url(Icons/Refresh_Glow.png)}
+ElchDeviceMenu QPushButton#Refresh:checked{icon: url(Icons/Refresh_Glow.png)}
+
+
 ElchPlotMenu QPushButton#Start{icon: url(Icons/Start.png)}
 ElchPlotMenu QPushButton#Start:hover{icon: url(Icons/Start_Glow.png)}
 ElchPlotMenu QPushButton#Start:checked{icon: url(Icons/Start_Glow.png)}

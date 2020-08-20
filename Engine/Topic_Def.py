@@ -176,6 +176,9 @@ class gui:
         class status:
             """
             """
+        class devices:
+            """
+            """
 
 # End of topic tree definition. Note that application may load
 # more than one definitions provider.
