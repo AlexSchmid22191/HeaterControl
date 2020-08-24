@@ -1,7 +1,6 @@
 import pubsub.pub
-from PySide2.QtCore import QTimer
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QPixmap
+from PySide2.QtCore import Qt, QTimer
+from PySide2.QtGui import QPixmap, QFontDatabase
 from PySide2.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QButtonGroup, \
     QLabel, QToolButton, QSizeGrip
 
@@ -14,6 +13,10 @@ class ElchMainWindow(QWidget):
         super().__init__(*args, **kwargs)
 
         self.setWindowFlags(Qt.FramelessWindowHint)
+
+        QFontDatabase.addApplicationFont('Fonts/Roboto-Light.ttf')
+        QFontDatabase.addApplicationFont('Fonts/Roboto-Regular.ttf')
+
         with open('QtInterface/style.qss') as stylefile:
             self.setStyleSheet(stylefile.read())
 
