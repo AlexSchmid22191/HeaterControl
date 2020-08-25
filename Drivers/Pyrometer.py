@@ -4,6 +4,8 @@ from Drivers.AbstractSensorController import AbstractSensor
 
 
 class Pyrometer(AbstractSensor, serial.Serial):
+    mode = 'Temperature'
+
     def __init__(self, port):
         super().__init__(port, timeout=1.5)
         self.com_lock = threading.Lock()

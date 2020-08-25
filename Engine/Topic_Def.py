@@ -11,32 +11,24 @@ class engine:
     """
     Superclass for all messages emitted by the engine
     """
-    class spam:
-        """
-        UNDOCUMENTED: created without spec
-        """
-        def msgDataSpec(status_values):
-            """
-            - status_values: float
-            """
-
-    class broadcast:
-        """
-        Class for all briadcasts from the engine (typically done at initialization)
-        """
-        class devices:
-            """
-            UNDOCUMENTED: created without spec
-            """
-            def msgDataSpec(ports, devices):
-                """
-                - ports: list
-                - devices: dict
-                """
     class answer:
         """
         Class for all answers to requests from the GUI
         """
+        class ports:
+            """
+            """
+            def msgDataSpec(ports):
+                """
+                - ports: dict
+                """
+        class devices:
+            """
+            """
+            def msgDataSpec(devices):
+                """
+                - devices: dict
+                """
         class status:
             """
             UNDOCUMENTED: created without spec
@@ -183,7 +175,7 @@ class gui:
         class status:
             """
             """
-        class devices:
+        class ports:
             """
             """
         class control_parameters:

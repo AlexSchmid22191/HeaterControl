@@ -3,6 +3,8 @@ import threading
 
 
 class OmegaPt(minimalmodbus.Instrument):
+    mode = 'Temperature'
+
     def __init__(self, portname, slaveadress, *args, **kwargs):
         super().__init__(portname, slaveadress, *args, **kwargs)
 

@@ -11,13 +11,10 @@ setTopicUnspecifiedFatal(True)
 
 def main():
     app = QApplication()
-    gui = ElchMainWindow()
     engine = HeaterControlEngine()
+    gui = ElchMainWindow()
     app.exec_()
 
 
 if __name__ == '__main__':
     main()
-    # for thread in enumerate():
-    #     if type(thread) == Timer:
-    #         thread.cancel()

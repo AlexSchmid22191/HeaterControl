@@ -1,13 +1,13 @@
 figure.facecolor:   2A2D56  # figure background color
 
 axes.facecolor:     2A2D56  # axes background color
-axes.edgecolor:     959DCB  # axes edge color
-axes.labelcolor:    959DCB
+axes.edgecolor:     7b8ccb  # axes edge color
+axes.labelcolor:    7b8ccb
 
-xtick.color:        959DCB      # color of the tick labels
-ytick.color:        959DCB      # color of the tick labels
+xtick.color:        7b8ccb      # color of the tick labels
+ytick.color:        7b8ccb      # color of the tick labels
 
-text.color:         758EFF
+text.color:         7b8ccb
 
 font.family         : sans-serif
 font.style          : normal

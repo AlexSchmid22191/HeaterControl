@@ -17,7 +17,6 @@ from Drivers.TestDevices import TestSensor, TestController
 from Engine.ThreadDecorators import Worker
 
 # TODO: Implement some notification system for serial failures and not implemented functions
-# TODO: Move the unit conversion (mV or °C) from the GUI to the engine
 
 TEST_MODE = True
 
@@ -45,8 +44,6 @@ class HeaterControlEngine:
                                  'gui.con.disconnect_sensor': (self.remove_sensor, True),
                                  'gui.con.connect_sensor': (self.add_sensor, False)}
 
-        self.unit = 'Temperature'
-
         if TEST_MODE:
             self.sensor_types['Test Sensor'] = TestSensor
             self.controller_types['Test Controller'] = TestController
@@ -61,28 +58,29 @@ class HeaterControlEngine:
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
         self.mode = 'Temperature'
-        self.units = {'Temperature': (1, '°C'), 'Voltage': (1000, 'mV')}
+        self.units = {'Temperature': '°C', 'Voltage': 'mV'}
 
-        pubsub.pub.subscribe(self.refresh_and_broadcast_available_devices, 'gui.request.devices')
+        pubsub.pub.subscribe(self.refresh_available_ports, 'gui.request.ports')
+        pubsub.pub.subscribe(self.set_units, 'gui.set.units')
         pubsub.pub.subscribe(self.add_controller, 'gui.con.connect_controller')
         pubsub.pub.subscribe(self.add_sensor, 'gui.con.connect_sensor')
         pubsub.pub.subscribe(self.start_logging, 'gui.plot.start')
         pubsub.pub.subscribe(self.clear_log, 'gui.plot.clear')
         pubsub.pub.subscribe(self.export_log, 'gui.plot.export')
 
-        self.refresh_and_broadcast_available_devices()
         self.pool = QThreadPool()
 
     def set_units(self, unit):
-        self.unit = unit
+        self.mode = unit
+        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.mode == unit],
+                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.mode == unit]}
+        pubsub.pub.sendMessage(topicName='engine.answer.devices', devices=devices)
 
-    def refresh_and_broadcast_available_devices(self):
+    def refresh_available_ports(self):
         self.available_ports = {port[1]: port[0] for port in serial.tools.list_ports.comports()}
         if TEST_MODE:
             self.available_ports['COM Test'] = 'Test Port'
-
-        pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
-                               devices={'Controller': self.controller_types.keys(), 'Sensor': self.sensor_types.keys()})
+        pubsub.pub.sendMessage(topicName='engine.answer.ports', ports=self.available_ports)
 
     def add_controller(self, controller_type, controller_port):
         try:
@@ -178,8 +176,6 @@ class HeaterControlEngine:
                                                                                control_parameters={par: val}))
             self.pool.start(worker)
 
-    # TODO: Implement PID functionality properly
-
     def start_logging(self):
         self.is_logging = True
         self.log_start_time = datetime.datetime.now() if not self.log_start_time else self.log_start_time
@@ -205,11 +201,10 @@ class HeaterControlEngine:
                     else:
                         sorted_data[timestamp].update({parameter: value})
 
-            factor = self.units[self.mode][0]
-            unit = self.units[self.mode][1]
+            unit = self.units[self.mode]
 
             with open(filepath, 'w+') as file:
-                file.write('Time, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.
+                file.write('UTC, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.
                            format(unit, unit))
                 for timestamp, datapoint in sorted_data.items():
                     timestring = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%dT%H:%M:%S')
@@ -217,7 +212,7 @@ class HeaterControlEngine:
                     controller_pv = datapoint['Controller PV'] if 'Controller PV' in datapoint.keys() else math.nan
                     sensor_pv = datapoint['Sensor PV'] if 'Sensor PV' in datapoint.keys() else math.nan
                     file.write('{:s}, {:d}, {:.1f}, {:.1f}, {:.1f}\n'.
-                               format(timestring, timestamp, controller_pv*factor, power, sensor_pv*factor))
+                               format(timestring, timestamp, controller_pv, power, sensor_pv))
 
         worker = Worker(_work)
         self.pool.start(worker)

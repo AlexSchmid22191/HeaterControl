@@ -4,11 +4,8 @@ from Drivers.AbstractSensorController import AbstractController, AbstractSensor
 
 
 class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
-    """Instrument class for Eurotherm 3216 process controller.
-    Args:
-    * portname (str): port name
-    * slaveadress (int): slave address in the range 1 to 247
-    """
+    """Instrument class for Eurotherm 3216 process controller."""
+    mode = 'Temperature'
 
     def __init__(self, portname, slaveadress, baudrate=9600):
         super().__init__(portname, slaveadress)
@@ -109,15 +106,9 @@ class Eurotherm3216(AbstractController, minimalmodbus.Instrument):
 
 
 class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
-    """Instrument class for Eurotherm 2408 process controller.
+    """Instrument class for Eurotherm 2408 process controller."""
+    mode = 'Temperature'
 
-    Implementations for automatic mode need to be reworked, since the Eurotherm can only access the run list via comms,
-     not the prog list
-     #TODO: Rework automatic mode
-    Args:
-    * portname (str): port name
-    * slaveadress (int): slave address in the range 1 to 247
-    """
     def __init__(self, portname, slaveadress, baudrate=9600):
         super().__init__(portname, slaveadress)
         self.serial.baudrate = baudrate
@@ -208,6 +199,7 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     * portname (str): port name
     * slaveadress (int): slave address in the range 1 to 247
     """
+    mode = 'Voltage'
 
     def __init__(self, portname, slaveadress, baudrate=9600):
         super().__init__(portname, slaveadress)
@@ -403,9 +395,10 @@ class Eurotherm3508S(AbstractSensor, minimalmodbus.Instrument):
         * portname (str): port name
         * slaveadress (int): slave address in the range 1 to 247
         """
+    mode = 'Voltage'
 
-    def __init__(self, portname, slaveadress, baudrate=9600):
-        super().__init__(portname, slaveadress)
+    def __init__(self, port, slaveadress=1, baudrate=9600):
+        super().__init__(port, slaveadress)
         self.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
 

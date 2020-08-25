@@ -1,7 +1,6 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.style
-import math
 import numpy as np
 import pubsub.pub
 
@@ -16,7 +15,6 @@ class ElchPlot(FigureCanvas):
 
         ax.set_xlabel('Time (s)')
         ax2.set_ylabel('Power (%)')
-        ax.set_ylabel('Temperature (°C)')
 
         self.units = 'Temperature'
         self.axes = {'Power': ax2, 'Sensor PV': ax, 'Controller PV': ax}
@@ -46,3 +44,8 @@ class ElchPlot(FigureCanvas):
         for plot in self.plots.values():
             plot.set_data([], [])
         self.figure.canvas.draw()
+
+    def set_units(self, unit):
+        self.axes['Sensor PV'].set_ylabel({'Temperature': 'Temperature (°C)', 'Voltage': 'Voltage (mV)'}[unit])
+        self.figure.canvas.draw()
+        self.figure.tight_layout()

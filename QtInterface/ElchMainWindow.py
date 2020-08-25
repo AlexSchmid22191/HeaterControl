@@ -66,6 +66,9 @@ class ElchMainWindow(QWidget):
 
         for key, button in self.controlmenu.menus['Devices'].unitbuttons.items():
             button.clicked.connect(functools.partial(self.statusbar.change_units, key))
+            button.clicked.connect(functools.partial(self.matplotframe.set_units, key))
+
+        self.controlmenu.menus['Devices'].unitbuttons['Temperature'].click()
 
         self.setLayout(hbox_outer)
         self.show()
@@ -145,8 +148,7 @@ class ElchStatusBar(QWidget):
         super().__init__(*args, **kwargs)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
-        self.mode = 'Temperature'
-        self.units = {'Temperature': (1, '°C'), 'Voltage': (1000, 'mV')}
+        self.unit = '°C'
 
         parameters = ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']
         icons = {key: QLabel() for key in parameters}
@@ -181,8 +183,7 @@ class ElchStatusBar(QWidget):
             if key == 'Power':
                 self.values[key].setText('{:.1f} %'.format(value[0]))
             else:
-                self.values[key].setText('{:.1f} {:s}'.format(value[0] * (self.units[self.mode][0]),
-                                                              self.units[self.mode][1]))
+                self.values[key].setText('{:.1f} {:s}'.format(value[0], self.unit))
 
-    def change_units(self, units):
-        self.mode = units
+    def change_units(self, mode):
+        self.unit = {'Temperature': '°C', 'Voltage': 'mV'}[mode]

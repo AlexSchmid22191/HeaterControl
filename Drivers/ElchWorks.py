@@ -5,6 +5,8 @@ from Drivers.AbstractSensorController import AbstractSensor
 
 
 class Thermolino(AbstractSensor, serial.Serial):
+    mode = 'Temperature'
+
     def __init__(self, port):
         super().__init__(self, port, timeout=1.5)
         self.com_lock = Lock()
@@ -23,6 +25,8 @@ class Thermolino(AbstractSensor, serial.Serial):
 
 
 class Thermoplatino(AbstractSensor, serial.Serial):
+    mode = 'Temperature'
+
     def __init__(self, port):
         super().__init__(self, port, timeout=1.5, baudrate=115200)
         self.com_lock = Lock()

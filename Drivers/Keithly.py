@@ -22,6 +22,8 @@ class Keithly2000(AbstractSensor, serial.Serial):
 
 
 class Keithly2000Temp(Keithly2000):
+    mode = 'Temperature'
+
     def __init__(self, port):
         super().__init__(port)
         with self.com_lock:
@@ -29,6 +31,8 @@ class Keithly2000Temp(Keithly2000):
 
 
 class Keithly2000Volt(Keithly2000):
+    mode = 'Voltage'
+
     def __init__(self, port):
         super().__init__(port)
         with self.com_lock:

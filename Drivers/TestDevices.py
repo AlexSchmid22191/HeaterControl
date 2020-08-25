@@ -5,8 +5,9 @@ from Drivers.AbstractSensorController import AbstractSensor, AbstractController
 
 class TestSensor(AbstractSensor):
     """Mock Sensor to test engine to GUI connection"""
+    mode = 'Temperature'
+
     def __init__(self, *args, **kwargs):
-        self.unit = 'Temperature'
         print('Test Sensor connected!')
         self.com_lock = threading.Lock()
         print(args, kwargs)
@@ -22,8 +23,9 @@ class TestSensor(AbstractSensor):
 
 class TestSensorVoltage(AbstractSensor):
     """Mock Sensor to test engine to GUI connection"""
+    mode = 'Voltage'
+
     def __init__(self, *args, **kwargs):
-        self.unit = 'Voltage'
         print('Test Sensor Voltage connected!')
         self.com_lock = threading.Lock()
         print(args, kwargs)
@@ -39,8 +41,9 @@ class TestSensorVoltage(AbstractSensor):
 
 class TestController(AbstractController):
     """Mock controller to test engine to GUI connection"""
+    mode = 'Temperature'
+
     def __init__(self, *args, **kwargs):
-        self.unit = 'Temperature'
         self.com_lock = threading.Lock()
         print('Test Controller connected!')
         print(args, kwargs)
