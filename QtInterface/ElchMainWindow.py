@@ -1,3 +1,4 @@
+import functools
 import pubsub.pub
 from PySide2.QtCore import Qt, QTimer
 from PySide2.QtGui import QPixmap, QFontDatabase
@@ -62,6 +63,9 @@ class ElchMainWindow(QWidget):
 
         self.controlmenu.menus['Plotting'].buttons['Start'].clicked.connect(self.matplotframe.start_plotting)
         self.controlmenu.menus['Plotting'].buttons['Clear'].clicked.connect(self.matplotframe.clear_plot)
+
+        for key, button in self.controlmenu.menus['Devices'].unitbuttons.items():
+            button.clicked.connect(functools.partial(self.statusbar.change_units, key))
 
         self.setLayout(hbox_outer)
         self.show()
@@ -179,3 +183,6 @@ class ElchStatusBar(QWidget):
             else:
                 self.values[key].setText('{:.1f} {:s}'.format(value[0] * (self.units[self.mode][0]),
                                                               self.units[self.mode][1]))
+
+    def change_units(self, units):
+        self.mode = units

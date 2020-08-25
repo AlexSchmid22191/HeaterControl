@@ -14,9 +14,10 @@ from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Omega import OmegaPt
 from Drivers.Pyrometer import Pyrometer
 from Drivers.TestDevices import TestSensor, TestController
-from Engine.ThreadDecorators import in_new_thread, Worker
+from Engine.ThreadDecorators import Worker
 
 # TODO: Implement some notification system for serial failures and not implemented functions
+# TODO: Move the unit conversion (mV or °C) from the GUI to the engine
 
 TEST_MODE = True
 
@@ -44,6 +45,8 @@ class HeaterControlEngine:
                                  'gui.con.disconnect_sensor': (self.remove_sensor, True),
                                  'gui.con.connect_sensor': (self.add_sensor, False)}
 
+        self.unit = 'Temperature'
+
         if TEST_MODE:
             self.sensor_types['Test Sensor'] = TestSensor
             self.controller_types['Test Controller'] = TestController
@@ -70,10 +73,14 @@ class HeaterControlEngine:
         self.refresh_and_broadcast_available_devices()
         self.pool = QThreadPool()
 
+    def set_units(self, unit):
+        self.unit = unit
+
     def refresh_and_broadcast_available_devices(self):
         self.available_ports = {port[1]: port[0] for port in serial.tools.list_ports.comports()}
         if TEST_MODE:
             self.available_ports['COM Test'] = 'Test Port'
+
         pubsub.pub.sendMessage(topicName='engine.broadcast.devices', ports=self.available_ports,
                                devices={'Controller': self.controller_types.keys(), 'Sensor': self.sensor_types.keys()})
 

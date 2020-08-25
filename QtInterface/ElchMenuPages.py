@@ -26,6 +26,10 @@ class ElchMenuPages(QWidget):
 
         self.setLayout(vbox)
 
+        for key, button in self.menus['Devices'].unitbuttons.items():
+            button.clicked.connect(functools.partial(self.menus['Control'].change_units, key))
+            button.clicked.connect(functools.partial(self.menus['PID'].change_mode, key))
+
     def adjust_visibility(self, button, visibility):
         menu = button.objectName()
         self.menus[menu].setVisible(visibility)
@@ -39,25 +43,35 @@ class ElchDeviceMenu(QWidget):
         self.device_menus = {key: QComboBox() for key in self.labels}
         self.port_menus = {key: QComboBox() for key in self.labels}
         self.connect_buttons = {key: QPushButton(text='Connect', objectName=key) for key in self.labels}
-        self.refresh_buttons = {key: QPushButton(text='Refresh', objectName='Refresh') for key in self.labels}
 
         self.buttongroup = QButtonGroup()
         self.buttongroup.setExclusive(False)
         self.buttongroup.buttonToggled.connect(self.connect_device)
 
+        self.unitbuttons = {key: QRadioButton(text=key) for key in ['Temperature', 'Voltage']}
+        self.refresh_button = QPushButton(text='Refresh', objectName='Refresh')
+
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
         vbox.setContentsMargins(10, 10, 10, 10)
+
         for key in self.labels:
             self.buttongroup.addButton(self.connect_buttons[key])
             self.connect_buttons[key].setCheckable(True)
-            self.refresh_buttons[key].clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.devices'))
             vbox.addWidget(self.labels[key])
             vbox.addWidget(self.device_menus[key])
             vbox.addWidget(self.port_menus[key])
             vbox.addWidget(self.connect_buttons[key])
-            vbox.addWidget(self.refresh_buttons[key])
             vbox.addSpacing(20)
+
+        vbox.addWidget(QLabel(text='Process Variable', objectName='Header'))
+        for key, button in self.unitbuttons.items():
+            vbox.addWidget(button)
+            button.toggled.connect(functools.partial(self.set_measurement_unit, unit=key))
+        self.unitbuttons['Temperature'].setChecked(True)
+        vbox.addSpacing(20)
+        vbox.addWidget(self.refresh_button)
+        self.refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.devices'))
         vbox.addStretch()
         self.setLayout(vbox)
 
@@ -87,13 +101,19 @@ class ElchDeviceMenu(QWidget):
             elif key == 'Sensor':
                 pubsub.pub.sendMessage('gui.con.disconnect_sensor')
 
+    @staticmethod
+    def set_measurement_unit(checked, unit):
+        if checked:
+            pubsub.pub.sendMessage('gui.set.units', unit=unit)
+
 
 class ElchControlMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.suffixes = {'Temperature': {'Setpoint': ' °C', 'Rate': ' °C/min', 'Power': ' %'},
-                         'Voltage': {'Setpoint': ' mV', 'Rate': ' mV/min', 'Power': ' %'}}
+        self.mode = 'Temperature'
+        self.units = {'Temperature': {'Setpoint': (1, ' °C'), 'Rate': (1, ' °C/min'), 'Power': (1, ' %')},
+                      'Voltage': {'Setpoint': (1000, ' mV/min'), 'Rate': (1000, ' mV/min'), 'Power': (1, ' %')}}
 
         self.labels = {key: QLabel(text=key, objectName='Header') for key in ['Setpoint', 'Rate', 'Power']}
         self.entries = {key: QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000) for key in self.labels}
@@ -125,12 +145,13 @@ class ElchControlMenu(QWidget):
 
         pubsub.pub.subscribe(self.update_control_values, 'engine.answer.control_parameters')
 
-    @staticmethod
-    def set_control_value(value, control):
-        functions = {'Rate': functools.partial(pubsub.pub.sendMessage, 'gui.set.rate', rate=value),
-                     'Power': functools.partial(pubsub.pub.sendMessage, 'gui.set.power', power=value),
-                     'Setpoint': functools.partial(pubsub.pub.sendMessage, 'gui.set.setpoint', setpoint=value)}
-        functions[control]()
+    def set_control_value(self, value, control):
+        value /= self.units[self.mode][control][0]  # Unit conversion
+        {
+            'Rate': functools.partial(pubsub.pub.sendMessage, 'gui.set.rate', rate=value),
+            'Power': functools.partial(pubsub.pub.sendMessage, 'gui.set.power', power=value),
+            'Setpoint': functools.partial(pubsub.pub.sendMessage, 'gui.set.setpoint', setpoint=value)
+        }[control]()
 
     @staticmethod
     def set_control_mode(checked, mode):
@@ -138,8 +159,9 @@ class ElchControlMenu(QWidget):
             pubsub.pub.sendMessage('gui.set.control_mode', mode=mode)
 
     def change_units(self, mode):
+        self.mode = mode
         for entry in self.entries:
-            self.entries[entry].setSuffix(self.suffixes[mode][entry])
+            self.entries[entry].setSuffix(self.units[mode][entry][1])
 
     def update_control_values(self, control_parameters):
         assert isinstance(control_parameters, dict), 'Illegal type recieved: {:s}'.format(str(type(control_parameters)))
@@ -150,8 +172,9 @@ class ElchControlMenu(QWidget):
                 self.buttons[control_parameters[key]].setChecked(True)
                 self.buttons[control_parameters[key]].blockSignals(False)
             else:
+                value = control_parameters[key] * self.units[self.mode][key][0]  # Unit conversion
                 self.entries[key].blockSignals(True)
-                self.entries[key].setValue(control_parameters[key])
+                self.entries[key].setValue(value)
                 self.entries[key].blockSignals(False)
 
 
@@ -192,7 +215,11 @@ class ElchPlotMenu(QWidget):
 class ElchPidMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.suffixes = {'Temperature': ' °C', 'Voltage': ' mV'}
+
+        self.mode = 'Temperature'
+        self.units = {'Temperature': {'B23': (1, ' °C'), 'B12': (1, ' °C')},
+                      'Voltage': {'B23': (1000, ' mv'), 'B12': (1000, ' mV')}}
+
         parameters = {'Gain Scheduling': {'GS': 'Gain scheduling', 'AS': 'Active Set', 'B12': 'Boundary 1/2',
                                           'B23': 'Boundary 2/3'},
                       'Set 1': {'P1': 'Proportional 1', 'I1': 'Integral 1 (s)', 'D1': 'Derivative 1 (s)'},
@@ -235,8 +262,9 @@ class ElchPidMenu(QWidget):
 
         pubsub.pub.subscribe(self.update_pid_parameters, 'engine.answer.pid_parameters')
 
-    @staticmethod
-    def set_pid_parameter(value, control):
+    def set_pid_parameter(self, value, control):
+        if control in self.units[self.mode]:
+            value /= self.units[self.mode][control][0]  # Unit conversion
         pubsub.pub.sendMessage('gui.set.pid_parameters', parameter=control, value=value)
 
     def update_pid_parameters(self, pid_parameters):
@@ -246,10 +274,13 @@ class ElchPidMenu(QWidget):
                 self.entries[key].setCurrentText(pid_parameters[key])
                 self.entries[key].blockSignals(False)
             else:
+                value = pid_parameters[key]
+                value *= self.units[self.mode][key][0] if key in self.units[self.mode] else 1  # Unit conversion
                 self.entries[key].blockSignals(True)
-                self.entries[key].setValue(pid_parameters[key])
+                self.entries[key].setValue(value)
                 self.entries[key].blockSignals(False)
 
     def change_mode(self, mode):
+        self.mode = mode
         for entry in ['B12', 'B23']:
-            self.entries[entry].setSuffix(self.suffixes[mode])
+            self.entries[entry].setSuffix(self.units[mode][entry][1])

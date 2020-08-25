@@ -143,6 +143,13 @@ class gui:
                 - parameter: string
                 - value: float or string
                 """
+        class units:
+            """
+            """
+            def msgDataSpec(unit):
+                """
+                - unit: string
+                """
 
     class plot:
         """
