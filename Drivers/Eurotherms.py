@@ -217,17 +217,17 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def get_process_variable(self):
         """Return the current process variable"""
         with self.com_lock:
-            return self.read_register(1, number_of_decimals=4, signed=True)
+            return self.read_register(1, number_of_decimals=4, signed=True)*1000
 
     def set_target_setpoint(self, setpoint):
         """Set the target setpoint"""
         with self.com_lock:
-            self.write_register(2, setpoint, number_of_decimals=4, signed=True)
+            self.write_register(2, setpoint/1000, number_of_decimals=4, signed=True)
 
     def get_target_setpoint(self):
         """Get the target setpoint"""
         with self.com_lock:
-            return self.read_register(2, number_of_decimals=4)
+            return self.read_register(2, number_of_decimals=4)*1000
 
     def set_manual_output_power(self, output):
         """Set the power output of the instrument in percent"""
@@ -237,7 +237,7 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def get_rate(self):
         """Get the rate of change for the working setpoint i.e. the heating/cooling rate"""
         with self.com_lock:
-            return self.read_register(35, number_of_decimals=1)
+            return self.read_register(35, number_of_decimals=1)*1000
 
     def get_working_output(self):
         """Return the current power output of the instrument"""
@@ -247,7 +247,7 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def get_working_setpoint(self):
         """Get the current working setpoint of the instrument"""
         with self.com_lock:
-            return self.read_register(5, number_of_decimals=4, signed=True)
+            return self.read_register(5, number_of_decimals=4, signed=True)*1000
 
     def set_automatic_mode(self):
         """Set controller to automatic mode"""
@@ -357,22 +357,22 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def set_boundary_12(self, boundary):
         """Set the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
         with self.com_lock:
-            self.write_register(153, boundary, number_of_decimals=0)
+            self.write_register(153, boundary/1000, number_of_decimals=0)
 
     def set_boundary_23(self, boundary):
         """Set the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
         with self.com_lock:
-            self.write_register(152, boundary, number_of_decimals=0)
+            self.write_register(152, boundary/1000, number_of_decimals=0)
 
     def get_boundary_12(self):
         """Get the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
         with self.com_lock:
-            return self.read_register(153, number_of_decimals=0)
+            return self.read_register(153, number_of_decimals=0)*1000
 
     def get_boundary_23(self):
         """Get the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
         with self.com_lock:
-            return self.read_register(152, number_of_decimals=0)
+            return self.read_register(152, number_of_decimals=0)*1000
 
     def set_gain_scheduling(self, mode):
         """Set the gain scheduling mode"""
@@ -411,4 +411,4 @@ class Eurotherm3508S(AbstractSensor, minimalmodbus.Instrument):
 
     def get_sensor_value(self):
         with self.com_lock:
-            return self.read_register(1, number_of_decimals=4, signed=True)
+            return self.read_register(1, number_of_decimals=4, signed=True)*1000
