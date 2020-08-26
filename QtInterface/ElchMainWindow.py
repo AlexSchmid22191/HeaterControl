@@ -68,6 +68,8 @@ class ElchMainWindow(QWidget):
             button.clicked.connect(functools.partial(self.statusbar.change_units, key))
             button.clicked.connect(functools.partial(self.matplotframe.set_units, key))
 
+        self.controlmenu.menus['Plotting'].check_group.buttonToggled.connect(self.matplotframe.set_plot_visibility)
+
         self.controlmenu.menus['Devices'].unitbuttons['Temperature'].click()
 
         self.setLayout(hbox_outer)

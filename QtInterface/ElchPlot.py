@@ -17,9 +17,9 @@ class ElchPlot(FigureCanvas):
         ax2.set_ylabel('Power (%)')
 
         self.units = 'Temperature'
-        self.axes = {'Power': ax2, 'Sensor PV': ax, 'Controller PV': ax}
-        self.colors = {'Power': '#86f9de', 'Sensor PV': '#86d7f8', 'Controller PV': '#9686f8'}
-        self.plots = {key: self.axes[key].plot([], color=self.colors[key])[0] for key in self.axes}
+        self.axes = {'Power': ax2, 'Sensor PV': ax, 'Controller PV': ax, 'Setpoint': ax}
+        self.colors = {'Power': '#86f9de', 'Sensor PV': '#86d7f8', 'Controller PV': '#9686f8', 'Setpoint': '#f488f9'}
+        self.plots = {key: self.axes[key].plot([], color=self.colors[key], marker='')[0] for key in self.axes}
 
         self.figure.tight_layout()
 
@@ -33,6 +33,9 @@ class ElchPlot(FigureCanvas):
                 self.axes[key].autoscale()
                 self.figure.canvas.draw()
                 self.figure.tight_layout()
+
+    def set_plot_visibility(self, plot, visible):
+        self.plots[plot.objectName()].set_linestyle('-' if visible else '')
 
     def start_plotting(self, plotting):
         if plotting:

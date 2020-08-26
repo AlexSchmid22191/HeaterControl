@@ -40,7 +40,6 @@ ElchMenuPages{background-color: #2A2D56;}
 ElchMenuPages QLabel{color: #7b8ccb; font: 11pt "Roboto Light";}
 ElchMenuPages QLabel#Header{font: 14pt "Roboto"}
 
-
 /*Buttons*/
 ElchMenuPages QPushButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
 ElchMenuPages QPushButton:hover{background: #373a62; color: #7b8ccb}
@@ -76,6 +75,14 @@ ElchMenuPages QRadioButton::indicator:unchecked{image: url(Icons/Radio_Off.png)}
 ElchMenuPages QRadioButton::indicator:unchecked:hover{image: url(Icons/Radio_Off_Glow.png)}
 ElchMenuPages QRadioButton::indicator:checked{image: url(Icons/Radio_On.png)}
 ElchMenuPages QRadioButton::indicator:checked:hover{image: url(Icons/Radio_On_Glow.png)}
+
+/*Checkboxes*/
+ElchMenuPages QCheckBox{color: #7b8ccb; font: 11pt "Roboto Light"}
+ElchMenuPages QCheckBox::indicator{width:15px; height: 15px}
+ElchMenuPages QCheckBox::indicator:unchecked{image: url(Icons/Radio_Off.png)}
+ElchMenuPages QCheckBox::indicator:unchecked:hover{image: url(Icons/Radio_Off_Glow.png)}
+ElchMenuPages QCheckBox::indicator:checked{image: url(Icons/Radio_On.png)}
+ElchMenuPages QCheckBox::indicator:checked:hover{image: url(Icons/Radio_On_Glow.png)}
 
 /* Menu specific icons on buttons*/
 ElchDeviceMenu QPushButton{icon: url(Icons/Connect.png)}

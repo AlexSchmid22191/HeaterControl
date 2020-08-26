@@ -2,7 +2,7 @@ import functools
 import pubsub.pub
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox, QLabel, QRadioButton, QComboBox, \
-    QFormLayout, QButtonGroup, QSpinBox, QFileDialog
+    QFormLayout, QButtonGroup, QSpinBox, QFileDialog, QCheckBox
 
 
 class ElchMenuPages(QWidget):
@@ -185,20 +185,27 @@ class ElchPlotMenu(QWidget):
         controls = ['Start', 'Clear', 'Export']
         self.buttons = {key: QPushButton(parent=self, text=key, objectName=key) for key in controls}
         self.buttons['Start'].setCheckable(True)
+        self.checks = {key: QCheckBox(parent=self, text=key, objectName=key)
+                       for key in ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']}
+        self.check_group = QButtonGroup()
+        self.check_group.setExclusive(False)
 
         vbox = QVBoxLayout()
+        vbox.addWidget(QLabel(text='Plotting', objectName='Header'))
         for key in controls:
             vbox.addWidget(self.buttons[key])
             self.buttons[key].clicked.connect({'Start': functools.partial(self.start_stop_plotting),
                                                'Clear': self.clear_pplot, 'Export': self.export_data}[key])
+        vbox.addSpacing(20)
+        vbox.addWidget(QLabel(text='Data sources', objectName='Header'))
+        for key, button in self.checks.items():
+            button.setChecked(True)
+            self.check_group.addButton(button)
+            vbox.addWidget(button)
         vbox.addStretch()
         vbox.setSpacing(10)
         vbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(vbox)
-
-    def broadcast_plot_command(self, button):
-        if button == 'Clear' and self.buttons['Start'].isChecked():
-            self.buttons['Start'].click()
 
     def start_stop_plotting(self):
         pubsub.pub.sendMessage('gui.plot.start' if self.buttons['Start'].isChecked() else 'gui.plot.stop')
@@ -225,7 +232,7 @@ class ElchPidMenu(QWidget):
 
         self.suffixa = {'I1': ' s', 'I2': ' s', 'I3': ' s', 'D1': ' s', 'D2': ' s', 'D3': ' s'}
         self.entries = {key: QComboBox() if key == 'GS' else QSpinBox(minimum=1, maximum=3) if key == 'AS'
-                        else QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=100000)
+                        else QDoubleSpinBox(decimals=0, singleStep=10, minimum=0, maximum=100000)
                         for subset in parameters for key in parameters[subset]}
         self.entries['GS'].addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
 

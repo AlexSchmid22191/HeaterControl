@@ -61,7 +61,7 @@ class TestController(AbstractController):
     def get_working_output(self):
         with self.com_lock:
             time.sleep(0.01)
-            return time.time() % 100 + 3
+            return 100 - time.time() % 100
 
     def get_working_setpoint(self):
         with self.com_lock:
