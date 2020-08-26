@@ -259,32 +259,32 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def set_pid_p(self, p):
         """Set the P (Proportional band) for the PID controller, Set 1"""
         with self.com_lock:
-            self.write_register(6, p, number_of_decimals=1)
+            self.write_register(6, p/1000, number_of_decimals=1)
 
     def set_pid_p2(self, p):
         """Set the P (Proportional band) for the PID controller, Set 2"""
         with self.com_lock:
-            self.write_register(48, p, number_of_decimals=1)
+            self.write_register(48, p/1000, number_of_decimals=1)
 
     def set_pid_p3(self, p):
         """Set the P (Proportional band) for the PID controller, Set 3"""
         with self.com_lock:
-            self.write_register(180, p, number_of_decimals=1)
+            self.write_register(180, p/1000, number_of_decimals=1)
 
     def get_pid_p(self):
         """Get the P (Proportional band) for the PID controller"""
         with self.com_lock:
-            return self.read_register(6, number_of_decimals=1)
+            return self.read_register(6, number_of_decimals=1)*1000
 
     def get_pid_p2(self):
         """Get the P (Proportional band) for the PID controller, Set2"""
         with self.com_lock:
-            return self.read_register(48, number_of_decimals=1)
+            return self.read_register(48, number_of_decimals=1)*1000
 
     def get_pid_p3(self):
         """Get the P (Proportional band) for the PID controller, Set3"""
         with self.com_lock:
-            return self.read_register(180, number_of_decimals=1)
+            return self.read_register(180, number_of_decimals=1)*1000
 
     def set_pid_i(self, i):
         """Set the I (Integral time) for the PID controller"""
@@ -349,22 +349,22 @@ class Eurotherm3508(AbstractController, minimalmodbus.Instrument):
     def set_boundary_12(self, boundary):
         """Set the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
         with self.com_lock:
-            self.write_register(153, boundary/1000, number_of_decimals=0)
+            self.write_float(15361, boundary/1000)
 
     def set_boundary_23(self, boundary):
         """Set the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
         with self.com_lock:
-            self.write_register(152, boundary/1000, number_of_decimals=0)
+            self.write_float(15362, boundary/1000)
 
     def get_boundary_12(self):
         """Get the boundary between Set 1 and 2 of PID parameters for gain scheduling"""
         with self.com_lock:
-            return self.read_register(153, number_of_decimals=0)*1000
+            return self.read_float(15361)*1000
 
     def get_boundary_23(self):
         """Get the boundary between Set 2 and 3 of PID parameters for gain scheduling"""
         with self.com_lock:
-            return self.read_register(152, number_of_decimals=0)*1000
+            return self.read_float(15362)*1000
 
     def set_gain_scheduling(self, mode):
         """Set the gain scheduling mode"""

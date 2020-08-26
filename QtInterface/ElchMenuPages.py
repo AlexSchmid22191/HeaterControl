@@ -219,14 +219,13 @@ class ElchPidMenu(QWidget):
 
         parameters = {'Gain Scheduling': {'GS': 'Gain scheduling', 'AS': 'Active Set', 'B12': 'Boundary 1/2',
                                           'B23': 'Boundary 2/3'},
-                      'Set 1': {'P1': 'Proportional 1', 'I1': 'Integral 1 (s)', 'D1': 'Derivative 1 (s)'},
-                      'Set 2': {'P2': 'Proportional 2', 'I2': 'Integral 2 (s)', 'D2': 'Derivative 2 (s)'},
-                      'Set 3': {'P3': 'Proportional 3', 'I3': 'Integral 3 (s)', 'D3': 'Derivative 3 (s)'}}
+                      'Set 1': {'P1': 'Proportional 1', 'I1': 'Integral 1', 'D1': 'Derivative 1'},
+                      'Set 2': {'P2': 'Proportional 2', 'I2': 'Integral 2', 'D2': 'Derivative 2'},
+                      'Set 3': {'P3': 'Proportional 3', 'I3': 'Integral 3', 'D3': 'Derivative 3'}}
 
-        self.suffixa = {'P1': ' %', 'P2': ' %', 'P3': ' %', 'I1': ' s', 'I2': ' s', 'I3': ' s',
-                        'D1': ' s', 'D2': ' s', 'D3': ' s'}
+        self.suffixa = {'I1': ' s', 'I2': ' s', 'I3': ' s', 'D1': ' s', 'D2': ' s', 'D3': ' s'}
         self.entries = {key: QComboBox() if key == 'GS' else QSpinBox(minimum=1, maximum=3) if key == 'AS'
-                        else QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000)
+                        else QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=100000)
                         for subset in parameters for key in parameters[subset]}
         self.entries['GS'].addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
 
@@ -256,11 +255,12 @@ class ElchPidMenu(QWidget):
         vbox.addStretch()
         self.setLayout(vbox)
 
-        for key in self.entries:
+        for key, entry in self.entries.items():
             if key == 'GS':
-                self.entries[key].currentTextChanged.connect(functools.partial(self.set_pid_parameter, control=key))
+                entry.currentTextChanged.connect(functools.partial(self.set_pid_parameter, control=key))
             else:
-                self.entries[key].valueChanged.connect(functools.partial(self.set_pid_parameter, control=key))
+                entry.setKeyboardTracking(False)
+                entry.valueChanged.connect(functools.partial(self.set_pid_parameter, control=key))
 
         pubsub.pub.subscribe(self.update_pid_parameters, 'engine.answer.pid_parameters')
 
@@ -278,5 +278,5 @@ class ElchPidMenu(QWidget):
             self.entries[key].blockSignals(False)
 
     def set_unit(self, unit):
-        for entry in ['B12', 'B23']:
+        for entry in ['B12', 'B23', 'P1', 'P2', 'P3']:
             self.entries[entry].setSuffix({'Temperature': ' °C', 'Voltage': ' mv'}[unit])
