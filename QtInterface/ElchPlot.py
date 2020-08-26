@@ -1,11 +1,11 @@
-from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 import matplotlib.style
 import numpy as np
 import pubsub.pub
 
 
-class ElchPlot(FigureCanvas):
+class ElchPlot(FigureCanvasQTAgg):
     def __init__(self, *args, **kwargs):
         matplotlib.style.use('QtInterface/App.mplstyle')
         super().__init__(Figure(figsize=(8, 6)), *args, **kwargs)
