@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['HeaterControl.py'],
+a = Analysis(['ElchiPanel.py'],
              pathex=['C:\\Users\\Alex\\PycharmProjects\\HeaterControl'],
              binaries=[],
-             datas=[('App.mplstyle', '.'), ('Icons', 'Icons')],
+             datas=[('QtInterface', 'QtInterface'), ('Icons', 'Icons'), ('Fonts', 'Fonts')],
              hiddenimports=['pkg_resources.py2_warn'],
              hookspath=[],
              runtime_hooks=[],
@@ -21,13 +21,12 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='HeaterControl',
+          name='ElchiPanel',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False,
-          icon='Icons/Logo.ico')
+          console=True )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -35,4 +34,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='HeaterControl')
+               name='ElchiPanel')
