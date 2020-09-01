@@ -1,4 +1,5 @@
 import functools
+
 import pubsub.pub
 from PySide2.QtCore import Qt, QTimer
 from PySide2.QtGui import QPixmap, QFontDatabase
