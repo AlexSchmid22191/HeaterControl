@@ -1,0 +1,411 @@
+﻿
+[Header]
+ProjectFileVersion = 1.1
+[General]
+Program name = ElchiTools
+Program version = 2.0
+Windows 2000 = 0
+Windows XP = 0
+Windows Server 2003 = 0
+Windows Vista = 0
+Windows Server 2008 = 0
+Windows 7 = 0
+Windows 8 = 0
+Windows 10 = 1
+Windows Server 2016 = 0
+DoNotCheckOS = 0
+Company name = ElchWorks
+Website = https://
+SFA = 0
+DFA = 0
+Comp = 1
+[Graphics]
+Wizard image = <main>
+Header image = <main>
+Show Label = 1
+VisualStylesEnabled = 1
+[Files]
+Installation path = <ProgramFiles>\<Company>\<AppName>\
+Autcip = 1
+[Uninstall]
+Vwau = 0
+Website = https://
+Include uninstaller = 1
+Uninstaller filename = Uninstall
+UseCustomDisplayIcon = 0
+CustomDisplayIcon = <InstallPath>\
+[Licence]
+Licence dialog = 0
+[Finish]
+Sart program = 1
+Reboot computer = 0
+Program = <InstallPath>\ElchiTools.exe
+ProgramArguments = 
+[Shortcuts]
+Allowtc = 0
+Shortcut path = <Company>\<AppName>\
+[Serialoptions]
+Allows = 0
+Number = 1000
+Mask = #####-#####-#####-#####
+[SplashScreen]
+Image = 
+Sound = 
+Time = 2
+PlaySound = 0
+Allow = 0
+[Build]
+File = C:\Users\Alex\PycharmProjects\HeaterControl\inst\ETInstaller.exe
+SetupIconPath = ..\icons\ancient.ico
+UninstallIconPath = ..\icons\ancient.ico
+CompressionMethod = 0
+CompressionLevel = 2
+[Updater]
+Allow = 0
+1 = <AppName>
+2 = <AppVersion>
+3 = http://
+4 = http://
+5 = http://
+6 = Update
+Language = 0
+RunProg = 
+RunProgs = 0
+Execdlls = 0
+[Languages]
+1
+[Files/Dirs]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_asyncio.pyd
+62.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_bz2.pyd
+84.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_ctypes.pyd
+123.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_decimal.pyd
+262.6 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_elementtree.pyd
+173.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_hashlib.pyd
+45.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_lzma.pyd
+247.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_multiprocessing.pyd
+28.6 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_overlapped.pyd
+44.6 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_queue.pyd
+27.6 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_socket.pyd
+77.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_ssl.pyd
+150.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_testcapi.pyd
+110.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_tkinter.pyd
+62.6 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-console-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-datetime-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-debug-l1-1-0.dll
+20.1 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-errorhandling-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-file-l1-1-0.dll
+23.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-file-l1-2-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-file-l2-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-handle-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-heap-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-interlocked-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-libraryloader-l1-1-0.dll
+21.1 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-localization-l1-2-0.dll
+22.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-memory-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-namedpipe-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-processenvironment-l1-1-0.dll
+21 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-processthreads-l1-1-0.dll
+22 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-processthreads-l1-1-1.dll
+20.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-profile-l1-1-0.dll
+19.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-rtlsupport-l1-1-0.dll
+20.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-string-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-synch-l1-1-0.dll
+22 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-synch-l1-2-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-sysinfo-l1-1-0.dll
+21 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-timezone-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-core-util-l1-1-0.dll
+20 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-conio-l1-1-0.dll
+21 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-convert-l1-1-0.dll
+24 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-environment-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-filesystem-l1-1-0.dll
+22 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-heap-l1-1-0.dll
+21 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-locale-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-math-l1-1-0.dll
+28.8 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-process-l1-1-0.dll
+21.1 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-runtime-l1-1-0.dll
+24.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-stdio-l1-1-0.dll
+26 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-string-l1-1-0.dll
+26 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-time-l1-1-0.dll
+22.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\api-ms-win-crt-utility-l1-1-0.dll
+20.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\base_library.zip
+763.7 KB
+zip
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\d3dcompiler_47.dll
+4.3 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\ElchiTools.exe
+5.6 MB
+exe
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\ElchiTools.exe.manifest
+1.2 KB
+manifest
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\kiwisolver.cp38-win_amd64.pyd
+137.5 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\libcrypto-1_1.dll
+3.3 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\libEGL.dll
+23.1 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\libffi-7.dll
+32 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\libGLESv2.dll
+3.2 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\libopenblas.NOIJJG62EMASZI6NYURL6JBKM4EVBGM7.gfortran-win_amd64.dll
+31.4 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\libssl-1_1.dll
+678 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\MSVCP140.dll
+603.8 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\MSVCP140_1.dll
+30.8 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\opengl32sw.dll
+20 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\pyexpat.pyd
+184.6 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\pyside2.abi3.dll
+133.1 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\python3.dll
+57.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\python38.dll
+4 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Core.dll
+5.7 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5DBus.dll
+434.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Gui.dll
+6.8 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Network.dll
+1.3 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Pdf.dll
+4.2 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Qml.dll
+3.6 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5QmlModels.dll
+432.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Quick.dll
+4 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Svg.dll
+322.1 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5VirtualKeyboard.dll
+2 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5WebSockets.dll
+155.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5Widgets.dll
+5.3 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Qt5WinExtras.dll
+458.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\select.pyd
+26.1 KB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\shiboken2.abi3.dll
+227.6 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tcl86t.dll
+1.6 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tk86t.dll
+1.4 MB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\ucrtbase.dll
+1002 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\unicodedata.pyd
+1 MB
+pyd
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\VCRUNTIME140.dll
+98.5 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\VCRUNTIME140_1.dll
+43.3 KB
+dll
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Fonts\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Icons\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Include\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\lib2to3\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\matplotlib\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\mpl-data\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\numpy\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\PIL\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\pubsub\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\PySide2\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\QtInterface\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\shiboken2\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tcl\
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tk\
+N/A
+[Folder]
+[Licence_Begin]
+114
+{\rtf1\ansi\ansicpg1252\deff0\deflang2057{\fonttbl{\f0\fnil\fcharset0 Arial;}}
+\viewkind4\uc1\pard\fs20\par
+}
+ [Licence_End]
+[Registry]
+[Variables]
+[SCs]
+Desktop
+ElchiTools
+<InstallPath>\Elchitools.exe
+
+
+0
+[IFP_End]
+[Serials]
+[Serials_End]
+[Commands]
