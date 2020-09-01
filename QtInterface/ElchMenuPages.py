@@ -8,13 +8,11 @@ from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox,
 class ElchMenuPages(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setMinimumWidth(200)
+        self.setFixedWidth(220)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
                       'PID': ElchPidMenu()}
-
-        self.setFixedWidth(220)
 
         vbox = QVBoxLayout()
         for menu in self.menus:
@@ -229,13 +227,13 @@ class ElchPidMenu(QWidget):
                       'Set 2': {'P2': 'Proportional 2', 'I2': 'Integral 2', 'D2': 'Derivative 2'},
                       'Set 3': {'P3': 'Proportional 3', 'I3': 'Integral 3', 'D3': 'Derivative 3'}}
 
-        self.suffixa = {'I1': ' s', 'I2': ' s', 'I3': ' s', 'D1': ' s', 'D2': ' s', 'D3': ' s'}
+        self.units = {'I1': ' s', 'I2': ' s', 'I3': ' s', 'D1': ' s', 'D2': ' s', 'D3': ' s'}
         self.entries = {key: QComboBox() if key == 'GS' else QSpinBox(minimum=1, maximum=3) if key == 'AS'
                         else QDoubleSpinBox(decimals=0, singleStep=10, minimum=0, maximum=100000)
                         for subset in parameters for key in parameters[subset]}
         self.entries['GS'].addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
 
-        for entry, suffix in self.suffixa.items():
+        for entry, suffix in self.units.items():
             self.entries[entry].setSuffix(suffix)
 
         vbox = QVBoxLayout()

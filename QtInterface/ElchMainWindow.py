@@ -27,17 +27,19 @@ class ElchMainWindow(QWidget):
         self.titlebar = ElchTitlebar()
         self.statusbar = ElchStatusBar()
 
+        panel_spacing = 20
+
         hbox_inner = QHBoxLayout()
         hbox_inner.addWidget(self.matplotframe, stretch=1)
         hbox_inner.addWidget(self.controlmenu, stretch=0)
-        hbox_inner.setSpacing(30)
+        hbox_inner.setSpacing(panel_spacing)
         hbox_inner.setContentsMargins(0, 0, 0, 0)
 
         vbox_inner = QVBoxLayout()
         vbox_inner.addWidget(self.statusbar, stretch=0)
         vbox_inner.addLayout(hbox_inner, stretch=1)
-        vbox_inner.setSpacing(30)
-        vbox_inner.setContentsMargins(30, 30, 17, 30)
+        vbox_inner.setSpacing(panel_spacing)
+        vbox_inner.setContentsMargins(panel_spacing, panel_spacing, panel_spacing - 13, panel_spacing)
 
         sizegrip = QSizeGrip(self)
         hbox_mid = QHBoxLayout()
@@ -127,11 +129,10 @@ class ElchRibbon(QWidget):
         self.menu_buttons = {key: QPushButton(parent=self, objectName=key) for key in self.menus}
         self.buttongroup = QButtonGroup()
         elchicon = QLabel()
-        elchicon.setPixmap(QPixmap('Icons/ElchiHead.png').scaled(100, 100))
+        elchicon.setPixmap(QPixmap('Icons/ElchiHead.png'))
 
         vbox = QVBoxLayout()
         vbox.addWidget(elchicon, alignment=Qt.AlignHCenter)
-        vbox.addSpacing(73)
         for key in self.menus:
             vbox.addWidget(self.menu_buttons[key])
             self.buttongroup.addButton(self.menu_buttons[key])

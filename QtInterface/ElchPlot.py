@@ -1,4 +1,6 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import matplotlib.font_manager as fm
+import matplotlib.ticker
 from matplotlib.figure import Figure
 import matplotlib.style
 import numpy as np
@@ -6,15 +8,22 @@ import pubsub.pub
 
 
 class ElchPlot(FigureCanvasQTAgg):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         matplotlib.style.use('QtInterface/App.mplstyle')
         super().__init__(Figure(figsize=(8, 6)))
 
         ax = self.figure.subplots()
         ax2 = ax.twinx()
 
-        ax.set_xlabel('Time (s)')
-        ax2.set_ylabel('Power (%)')
+        ax.set_xlabel('Time (s)', fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
+        ax2.set_ylabel('Power (%)', fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
+
+        ax.set_xticklabels(range(10), fontProperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=11))
+        ax.set_yticklabels(range(10), fontProperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=11))
+        ax2.set_yticklabels(range(10), fontProperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=11))
+        ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        ax.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        ax2.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         self.units = 'Temperature'
         self.axes = {'Power': ax2, 'Sensor PV': ax, 'Controller PV': ax, 'Setpoint': ax}
@@ -25,14 +34,13 @@ class ElchPlot(FigureCanvasQTAgg):
 
     def add_data_point(self, status_values):
         for key, value in status_values.items():
-            if key in self.plots:
-                self.plots[key].set_data(np.append(self.plots[key].get_data()[0], value[1]),
-                                         np.append(self.plots[key].get_data()[1], value[0]))
+            self.plots[key].set_data(np.append(self.plots[key].get_data()[0], value[1]),
+                                     np.append(self.plots[key].get_data()[1], value[0]))
 
-                self.axes[key].relim()
-                self.axes[key].autoscale()
-                self.figure.canvas.draw()
-                self.figure.tight_layout()
+            self.axes[key].relim()
+            self.axes[key].autoscale()
+            self.figure.canvas.draw()
+            self.figure.tight_layout()
 
     def set_plot_visibility(self, plot, visible):
         self.plots[plot.objectName()].set_linestyle('-' if visible else '')
@@ -49,6 +57,7 @@ class ElchPlot(FigureCanvasQTAgg):
         self.figure.canvas.draw()
 
     def set_units(self, unit):
-        self.axes['Sensor PV'].set_ylabel({'Temperature': 'Temperature (°C)', 'Voltage': 'Voltage (mV)'}[unit])
+        self.axes['Sensor PV'].set_ylabel({'Temperature': 'Temperature (°C)', 'Voltage': 'Voltage (mV)'}[unit],
+                                          fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
         self.figure.canvas.draw()
         self.figure.tight_layout()

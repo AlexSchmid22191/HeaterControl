@@ -17,5 +17,7 @@ font.stretch        : normal
 font.size           : 14
 font.sans-serif     : Roboto
 
+lines.linewidth: 2               # line width in points
+lines.linestyle: -                 # solid line
 
-axes.prop_cycle: cycler(color=['86d7f8', '86f9de', '9686f8'])
+axes.linewidth:     0.5
