@@ -8,7 +8,7 @@ import pubsub.pub
 class ElchPlot(FigureCanvasQTAgg):
     def __init__(self, *args, **kwargs):
         matplotlib.style.use('QtInterface/App.mplstyle')
-        super().__init__(Figure(figsize=(8, 6)), *args, **kwargs)
+        super().__init__(Figure(figsize=(8, 6)))
 
         ax = self.figure.subplots()
         ax2 = ax.twinx()

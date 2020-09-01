@@ -8,14 +8,13 @@ from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox,
 class ElchMenuPages(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # TODO: Implement this with a stackedlayout
         self.setMinimumWidth(200)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
                       'PID': ElchPidMenu()}
 
-        self.setMinimumWidth(280)
+        self.setFixedWidth(220)
 
         vbox = QVBoxLayout()
         for menu in self.menus:
