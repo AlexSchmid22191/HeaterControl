@@ -1,8 +1,9 @@
+from Drivers.AbstractSensorController import AbstractController
 import minimalmodbus
 import threading
 
 
-class OmegaPt(minimalmodbus.Instrument):
+class OmegaPt(AbstractController, minimalmodbus.Instrument):
     mode = 'Temperature'
 
     def __init__(self, portname, slaveadress, *args, **kwargs):
@@ -11,7 +12,7 @@ class OmegaPt(minimalmodbus.Instrument):
         # Due to the way the Omega Pt works (no Rate setting, just ramp/soak mode) the driver needs to be aware of
         # setpoint and ramp setting
         self.rate = 15  # In °C per minute
-        self.setpoint = 0  # In °C
+        self.setpoint = self.read_float(618)  # In °C
 
         # Set SP1 to be controlled by ramp soak cycle
         self.write_register(736, 4)
@@ -21,7 +22,7 @@ class OmegaPt(minimalmodbus.Instrument):
         self.com_lock = threading.Lock()
 
     def adjust_ramp_soak(self):
-        current_temp = self.get_oven_temp()
+        current_temp = self.get_process_variable()
         # Calculate ramp time is ms from difference between real and set temp., multiply by 60 for s and 1000 for ms
         time = int(abs((self.setpoint-current_temp)/self.rate)*60*1000)
 
@@ -59,17 +60,23 @@ class OmegaPt(minimalmodbus.Instrument):
     def get_working_output(self):
         """Return the current power output of the instrument"""
         with self.com_lock:
-            output = self.read_float(554)
-        return output
+            return self.read_float(554)
 
-    def get_oven_temp(self):
+    def get_process_variable(self):
         """Return the current temperature of the internal thermocouple"""
         with self.com_lock:
-            temp = self.read_float(640)
-        return temp
+            return self.read_float(640)
 
     def get_working_setpoint(self):
         """Get the current working setpoint of the instrument"""
         with self.com_lock:
-            setpoint = self.read_float(548)
-        return setpoint
+            return self.read_float(548)
+
+    def get_target_setpoint(self):
+        return self.setpoint
+
+    def get_rate(self):
+        return self.rate
+
+    def get_control_mode(self):
+        return 'Automatic'
