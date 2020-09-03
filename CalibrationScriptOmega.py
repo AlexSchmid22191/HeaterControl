@@ -10,6 +10,7 @@ last_unix_time = 0
 
 target_temperatures = list(range(200, 1050, 50)) + list(range(950, 150, -50))
 
+omega.set_rate(30)
 
 while t_step < len(target_temperatures):
     success = False
