@@ -79,4 +79,19 @@ class OmegaPt(AbstractController, minimalmodbus.Instrument):
         return self.rate
 
     def get_control_mode(self):
-        return 'Automatic'
+        with self.com_lock:
+            return 'Manual' if self.read_register(576) == 3 else 'Automatic'
+
+    def set_manual_output_power(self, output):
+        with self.com_lock:
+            self.write_float(554, output)
+
+    def set_automatic_mode(self):
+        with self.com_lock:
+            self.write_register(576, 6)
+
+    def set_manual_mode(self):
+        with self.com_lock:
+            self.write_register(576, 3)
+
+
