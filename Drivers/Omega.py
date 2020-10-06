@@ -9,17 +9,22 @@ class OmegaPt(AbstractController, minimalmodbus.Instrument):
     def __init__(self, portname, slaveadress, *args, **kwargs):
         super().__init__(portname, slaveadress, *args, **kwargs)
 
+        self.com_lock = threading.Lock()
+
         # Due to the way the Omega Pt works (no Rate setting, just ramp/soak mode) the driver needs to be aware of
         # setpoint and ramp setting
         self.rate = 15  # In °C per minute
         self.setpoint = self.read_float(618)  # In °C
 
+        # For conversion into alternate representation (Proportional band, Integration time and derivative time) the
+        # driver needs to be aware of PID P parameter
+        self.kp = 1
+        self.get_pid_p()
+
         # Set SP1 to be controlled by ramp soak cycle
         self.write_register(736, 4)
         # Select constant soak time mode
         self.write_register(615, 1)
-
-        self.com_lock = threading.Lock()
 
     def adjust_ramp_soak(self):
         current_temp = self.get_process_variable()
@@ -94,4 +99,32 @@ class OmegaPt(AbstractController, minimalmodbus.Instrument):
         with self.com_lock:
             self.write_register(576, 3)
 
+    def get_pid_p(self):
+        with self.com_lock:
+            self.kp = self.read_float(676)
+        return 100/self.kp
 
+    def set_pid_p(self, p):
+        self.kp = 100/p
+        with self.com_lock:
+            self.write_float(676, self.kp)
+
+    def get_pid_i(self):
+        self.get_pid_p()
+        with self.com_lock:
+            return self.kp / self.read_float(678) / 100
+
+    def set_pid_i(self, i):
+        self.get_pid_p()
+        with self.com_lock:
+            self.write_float(678, 100*self.kp/i)
+
+    def get_pid_d(self):
+        self.get_pid_p()
+        with self.com_lock:
+            return self.read_float(680) / self.kp
+
+    def set_pid_d(self, d):
+        self.get_pid_p()
+        with self.com_lock:
+            self.write_float(680, self.kp*d)

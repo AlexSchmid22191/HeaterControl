@@ -3,7 +3,7 @@
 ProjectFileVersion = 1.1
 [General]
 Program name = ElchiTools
-Program version = 2.0
+Program version = 2.1
 Windows 2000 = 0
 Windows XP = 0
 Windows Server 2003 = 0
@@ -75,6 +75,15 @@ Execdlls = 0
 [Languages]
 1
 [Files/Dirs]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\shiboken2
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tcl
+N/A
+[Folder]
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tk
+N/A
+[Folder]
 C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\_asyncio.pyd
 62.1 KB
 pyd
@@ -348,46 +357,37 @@ dll
 C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\VCRUNTIME140_1.dll
 43.3 KB
 dll
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Fonts\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Fonts
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Icons\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Icons
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Include\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\Include
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\lib2to3\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\lib2to3
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\matplotlib\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\matplotlib
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\mpl-data\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\mpl-data
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\numpy\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\numpy
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\PIL\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\PIL
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\pubsub\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\pubsub
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\PySide2\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\PySide2
 N/A
 [Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\QtInterface\
-N/A
-[Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\shiboken2\
-N/A
-[Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tcl\
-N/A
-[Folder]
-C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\tk\
+C:\Users\Alex\PycharmProjects\HeaterControl\dist\ElchiPanel\QtInterface
 N/A
 [Folder]
 [Licence_Begin]
