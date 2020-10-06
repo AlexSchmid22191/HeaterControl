@@ -23,7 +23,7 @@ TEST_MODE = False
 
 class HeaterControlEngine:
     def __init__(self):
-        self.available_ports = {port[1]: port[0] for port in serial.tools.list_ports.comports()}
+        self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
                                  'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
@@ -77,14 +77,14 @@ class HeaterControlEngine:
         pubsub.pub.sendMessage(topicName='engine.answer.devices', devices=devices)
 
     def refresh_available_ports(self):
-        self.available_ports = {port[1]: port[0] for port in serial.tools.list_ports.comports()}
+        self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         if TEST_MODE:
             self.available_ports['COM Test'] = 'Test Port'
         pubsub.pub.sendMessage(topicName='engine.answer.ports', ports=self.available_ports)
 
     def add_controller(self, controller_type, controller_port):
         try:
-            self.controller = self.controller_types[controller_type](portname=self.available_ports[controller_port],
+            self.controller = self.controller_types[controller_type](portname=controller_port,
                                                                      slaveadress=self.controller_slave_address)
 
             self.get_controller_parameters()
@@ -109,7 +109,7 @@ class HeaterControlEngine:
 
     def add_sensor(self, sensor_type, sensor_port):
         try:
-            self.sensor = self.sensor_types[sensor_type](port=self.available_ports[sensor_port])
+            self.sensor = self.sensor_types[sensor_type](port=sensor_port)
             for topic, function in self.sensor_functions.items():
                 if function[1]:
                     pubsub.pub.subscribe(function[0], topic)

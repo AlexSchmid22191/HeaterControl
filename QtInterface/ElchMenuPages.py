@@ -79,9 +79,12 @@ class ElchDeviceMenu(QWidget):
 
     def update_ports(self, ports):
         """Populate the controller and sensor menus with lists of device names and ports"""
-        for key in self.port_menus:
-            self.port_menus[key].clear()
-            self.port_menus[key].addItems(ports)
+        for key, menu in self.port_menus.items():
+            menu.clear()
+            menu.addItems(ports)
+            for port, description in ports.items():
+                index = menu.findText(port)
+                menu.setItemData(index, description, Qt.ToolTipRole)
 
     def update_devices(self, devices):
         for key in self.device_menus:

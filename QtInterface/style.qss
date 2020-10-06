@@ -57,6 +57,9 @@ ElchMenuPages QComboBox::drop-down{border:none}
 ElchMenuPages QComboBox::down-arrow{image: url(Icons/Down.png); width: 10px}
 ElchMenuPages QComboBox::down-arrow:on{image: url(Icons/Down_Glow.png); width: 10px}
 ElchMenuPages QComboBox::down-arrow:hover{image: url(Icons/Down_Glow.png); width: 10px}
+ElchMenuPages QToolTip{background-color: #2A2D56; color: #7b8ccb; font: 11pt "Roboto Light"; border: 1px solid #15183b}
+
+
 ElchMenuPages QAbstractItemView {background-color: #2A2D56; border:1px solid #15183b; color: #7b8ccb;
     selection-background-color: #393b67; outline: 0}
 
