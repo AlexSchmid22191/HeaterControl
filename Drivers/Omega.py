@@ -112,7 +112,7 @@ class OmegaPt(AbstractController, minimalmodbus.Instrument):
     def get_pid_i(self):
         self.get_pid_p()
         with self.com_lock:
-            return self.kp / self.read_float(678) / 100
+            return 100 * self.kp / self.read_float(678)
 
     def set_pid_i(self, i):
         self.get_pid_p()
@@ -122,9 +122,9 @@ class OmegaPt(AbstractController, minimalmodbus.Instrument):
     def get_pid_d(self):
         self.get_pid_p()
         with self.com_lock:
-            return self.read_float(680) / self.kp
+            return 100 * self.read_float(680) / self.kp
 
     def set_pid_d(self, d):
         self.get_pid_p()
         with self.com_lock:
-            self.write_float(680, self.kp*d)
+            self.write_float(680, self.kp*d/100)
