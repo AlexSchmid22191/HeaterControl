@@ -148,7 +148,7 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
     def set_manual_mode(self):
         """Set controller to manual mode"""
         with self.com_lock:
-            self.write_register(273, 1)
+            return {0: 'Automatic', 1: 'Manual'}[self.read_register(273, 0)]
 
     def get_control_mode(self):
         """get the active control mode"""

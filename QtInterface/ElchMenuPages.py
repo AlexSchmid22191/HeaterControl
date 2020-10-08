@@ -8,7 +8,7 @@ from PySide2.QtWidgets import QWidget, QPushButton, QVBoxLayout, QDoubleSpinBox,
 class ElchMenuPages(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setFixedWidth(220)
+        self.setFixedWidth(255)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
