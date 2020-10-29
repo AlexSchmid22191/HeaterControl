@@ -160,7 +160,7 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
         self.setpoint = setpoint
         self.adjust_programmer()
 
-    def get_target_setpoint(self, setpoint):
+    def get_target_setpoint(self):
         """Get the target setpoint"""
         with self.com_lock:
             return self.read_register(2, number_of_decimals=0)
