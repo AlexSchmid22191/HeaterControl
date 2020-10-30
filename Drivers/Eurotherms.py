@@ -148,12 +148,12 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
     def set_manual_mode(self):
         """Set controller to manual mode"""
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.read_register(273, 0)]
+            self.write_register(273, 1)
 
     def get_control_mode(self):
         """get the active control mode"""
         with self.com_lock:
-            return self.read_register(273)
+            return {0: 'Automatic', 1: 'Manual'}[self.read_register(273, 0)]
 
     def set_target_setpoint(self, setpoint):
         """Set the target setpoint"""
@@ -169,6 +169,9 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
         """Set the rate of change for the working setpoint e.g. the heating/cooling rate"""
         self.rate = rate
         self.adjust_programmer()
+
+    def get_rate(self):
+        pass
 
     def adjust_programmer(self):
         """The 2408 cannot adjust ramp and setpoint directly, only via a temeprature program. This function edits
