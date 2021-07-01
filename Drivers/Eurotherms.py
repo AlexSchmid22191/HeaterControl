@@ -171,7 +171,7 @@ class Eurotherm2408(AbstractController, minimalmodbus.Instrument):
         self.adjust_programmer()
 
     def get_rate(self):
-        pass
+        return self.rate
 
     def adjust_programmer(self):
         """The 2408 cannot adjust ramp and setpoint directly, only via a temeprature program. This function edits
