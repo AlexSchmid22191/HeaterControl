@@ -11,7 +11,7 @@ power_step = 5
 
 step_time = 3600
 
-com_pyro = 'COM5'
+com_pyro = 'COM3'
 com_euro = 'COM10'
 
 file_path = 'Logfile.txt'
@@ -78,7 +78,7 @@ for set_power in set_powers:
                 print(f'{current_time:.3f}, {t_euro:3.1f}, {t_pyro:3.1f}')
                 with open(file_path, 'a') as logfile:
                     logfile.write(f'{current_time:.3f}, {t_euro:3.1f}, {t_pyro:3.1f}\n')
-            except (serial.SerialException, minimalmodbus.ModbusException, ValueError) as error:
+            except (serial.SerialException, minimalmodbus.ModbusException, ValueError, IndexError) as error:
                 time.sleep(0.1)
                 errorcount += 1
 
