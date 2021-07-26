@@ -1,33 +1,86 @@
 import time
+import serial
+import datetime
+import minimalmodbus
 from Drivers.Pyrometer import Pyrometer
 from Drivers.Eurotherms import Eurotherm2408
 
 
-pyro = Pyrometer('COM3')
-euro = Eurotherm2408('COM10', 1)
+power_min = 30
+power_max = 90
+power_step = 5
 
-t_step = 0
-last_unix_time = 0
+step_time = 3600
 
-output_powers = list(range(20, 105, 5)) + list(range(95, 15, -5))
+com_pyro = 'COM5'
+com_euro = 'COM10'
 
+file_path = 'Logfile.txt'
+
+with open(file_path, 'w') as logfile:
+    logfile.write('# Calibration Script\n')
+    logfile.write('# unixtime, Eurotherm Temperature (°C), Pyrometer Temperatur (°C)\n')
+
+set_powers = list(range(power_min, power_max+power_step, power_step)) + \
+             list(range(power_max-power_step, power_min-power_step, -power_step))
+
+pyro = Pyrometer(com_pyro)
+euro = Eurotherm2408(com_euro, 1)
 euro.set_manual_mode()
 
-while True:
-    temp = pyro.read_temperature()
-    unixtime = time.time()
+last_unix_time = 0
+errorcount = 0
 
-    print('Unixtime: {:.3f}, Temp: {:3.2f}\n'.format(time, temp))
+for set_power in set_powers:
 
-    with open('Logfile.txt', 'a') as logfile:
-        logfile.write('Unixtime: {:.3f}, Temp: {:3.2f}\n'.format(time, temp))
+    # Set output power
+    sucess = False
+    while not sucess:
+        try:
+            euro.set_manual_output_power(set_power)
+            sucess = euro.read_register(3, 1) == set_power
+        except (serial.SerialException, minimalmodbus.ModbusException) as error:
+            time.sleep(0.1)
+            errorcount += 1
+        if errorcount > 5:
+            errorcount = 0
+            print('Serial connection error! Reconnecting..', end='')
+            euro.serial.close()
+            time.sleep(3)
+            print('.', end='')
+            euro.serial.open()
+            time.sleep(3)
+            print('.')
 
-    if (unixtime - last_unix_time) > 1800:
-        last_unix_time = unixtime
-        euro.set_manual_output_power(output_powers[t_step])
-        print('Changing Output power to {:3.1f}'.format(output_powers[t_step]))
-        with open('Logfile.txt', 'a') as logfile:
-            logfile.write('\nChanging Output power to {:3.1f}\n\n'.format(output_powers[t_step]))
-        t_step += 1
+    with open(file_path, 'a') as logfile:
+        logfile.write('\nChanging Output power to {:3.1f}\n\n'.format(set_power))
 
-    time.sleep(0.1)
+    # Read data
+    errorcount = 0
+    step_start_time = time.time()
+    while (current_time := time.time()) - step_start_time < step_time:
+        sucess = False
+        while not sucess:
+            try:
+                t_pyro = pyro.get_sensor_value()
+                t_euro = euro.get_process_variable()
+                sucess = True
+                print(f'{current_time:.3f}, {t_euro:3.1f}, {t_pyro:3.1f}')
+                with open(file_path, 'a') as logfile:
+                    logfile.write(f'{current_time:.3f}, {t_euro:3.1f}, {t_pyro:3.1f}\n')
+            except (serial.SerialException, minimalmodbus.ModbusException, ValueError) as error:
+                time.sleep(0.1)
+                errorcount += 1
+
+            if errorcount > 5:
+                errorcount = 0
+                print('Serial connection error! Reconnecting..', end='')
+                euro.serial.close()
+                pyro.close()
+                time.sleep(3)
+                print('.', end='')
+                euro.serial.open()
+                pyro.open()
+                time.sleep(3)
+                print('.')
+        time.sleep(0.25)
