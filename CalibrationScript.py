@@ -42,7 +42,7 @@ def error_handler_reconnect():
             euro.serial.open()
             time.sleep(3)
             print('.')
-            _sucess = euro.serial.is_open() and pyro.is_open()
+            _sucess = euro.serial.is_open and pyro.is_open
         except serial.SerialException:
             print('Reattemting connection in 5 seconds')
             time.sleep(5)
