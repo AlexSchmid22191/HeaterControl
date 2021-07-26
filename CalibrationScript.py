@@ -5,7 +5,6 @@ import minimalmodbus
 from Drivers.Pyrometer import Pyrometer
 from Drivers.Eurotherms import Eurotherm2408
 
-
 power_min = 30
 power_max = 90
 power_step = 5
@@ -21,8 +20,8 @@ with open(file_path, 'w') as logfile:
     logfile.write('# Calibration Script\n')
     logfile.write('# unixtime, Eurotherm Temperature (°C), Pyrometer Temperatur (°C)\n')
 
-set_powers = list(range(power_min, power_max+power_step, power_step)) + \
-             list(range(power_max-power_step, power_min-power_step, -power_step))
+set_powers = list(range(power_min, power_max + power_step, power_step)) + \
+             list(range(power_max - power_step, power_min - power_step, -power_step))
 
 pyro = Pyrometer(com_pyro)
 euro = Eurotherm2408(com_euro, 1)
@@ -30,6 +29,24 @@ euro.set_manual_mode()
 
 last_unix_time = 0
 errorcount = 0
+
+
+def error_handler_reconnect():
+    print('Serial connection error! Reconnecting: .', end='')
+    _sucess = False
+    while not _sucess:
+        try:
+            euro.serial.close()
+            time.sleep(3)
+            print('.', end='')
+            euro.serial.open()
+            time.sleep(3)
+            print('.')
+            _sucess = euro.serial.is_open() and pyro.is_open()
+        except serial.SerialException:
+            print('Reattemting connection in 5 seconds')
+            time.sleep(5)
+
 
 for set_power in set_powers:
 
@@ -43,14 +60,7 @@ for set_power in set_powers:
             time.sleep(0.1)
             errorcount += 1
         if errorcount > 5:
-            errorcount = 0
-            print('Serial connection error! Reconnecting..', end='')
-            euro.serial.close()
-            time.sleep(3)
-            print('.', end='')
-            euro.serial.open()
-            time.sleep(3)
-            print('.')
+            error_handler_reconnect()
 
     with open(file_path, 'a') as logfile:
         logfile.write('\nChanging Output power to {:3.1f}\n\n'.format(set_power))
@@ -73,14 +83,5 @@ for set_power in set_powers:
                 errorcount += 1
 
             if errorcount > 5:
-                errorcount = 0
-                print('Serial connection error! Reconnecting..', end='')
-                euro.serial.close()
-                pyro.close()
-                time.sleep(3)
-                print('.', end='')
-                euro.serial.open()
-                pyro.open()
-                time.sleep(3)
-                print('.')
+                error_handler_reconnect()
         time.sleep(0.25)
