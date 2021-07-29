@@ -10,6 +10,7 @@ from serial import SerialException
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
 from Drivers.ElchWorks import Thermolino, Thermoplatino
 from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
+from Drivers.Jumo import JumoQuantol
 from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Omega import OmegaPt
 from Drivers.Pyrometer import Pyrometer
@@ -25,7 +26,7 @@ class HeaterControlEngine:
     def __init__(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
-                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt}
+                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
                              'Eurotherm3508': Eurotherm3508S}

@@ -3,6 +3,7 @@ class AbstractController:
     Abstract base class for controllers. Drivers for specific devices inherit this class and implement the methods.
     Raises a NotImplementedException if the methods are not overwritten in derived subclasses.
     """
+    mode = None
 
     def get_process_variable(self):
         """Return the current process variable of the controller (often this is the oven thermocouple temperature)"""
