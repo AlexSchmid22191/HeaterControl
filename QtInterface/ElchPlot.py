@@ -1,4 +1,4 @@
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 import matplotlib.font_manager as fm
 import matplotlib.ticker
 from matplotlib.figure import Figure
@@ -15,6 +15,9 @@ class ElchPlot(FigureCanvasQTAgg):
         ax = self.figure.subplots()
         ax2 = ax.twinx()
 
+        self.toolbar = NavigationToolbar2QT(self, self)
+        self.toolbar.hide()
+
         ax.set_xlabel('Time (s)', fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
         ax2.set_ylabel('Power (%)', fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
 
@@ -30,6 +33,7 @@ class ElchPlot(FigureCanvasQTAgg):
         self.colors = {'Power': '#86f9de', 'Sensor PV': '#86d7f8', 'Controller PV': '#9686f8', 'Setpoint': '#f488f9'}
         self.plots = {key: self.axes[key].plot([], color=self.colors[key], marker='')[0] for key in self.axes}
 
+        self.autoscale = True
         self.figure.tight_layout()
 
     def add_data_point(self, status_values):
@@ -37,8 +41,9 @@ class ElchPlot(FigureCanvasQTAgg):
             self.plots[key].set_data(np.append(self.plots[key].get_data()[0], value[1]),
                                      np.append(self.plots[key].get_data()[1], value[0]))
 
-            self.axes[key].relim()
-            self.axes[key].autoscale()
+            if self.autoscale:
+                self.axes[key].relim()
+                self.axes[key].autoscale()
             self.figure.canvas.draw()
             self.figure.tight_layout()
 
@@ -61,3 +66,6 @@ class ElchPlot(FigureCanvasQTAgg):
                                           fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
         self.figure.canvas.draw()
         self.figure.tight_layout()
+
+    def toggle_autoscale(self):
+        self.autoscale = not self.autoscale
