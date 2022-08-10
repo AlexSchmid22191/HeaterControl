@@ -66,12 +66,13 @@ class ElchMainWindow(QWidget):
 
         self.controlmenu.menus['Plotting'].buttons['Start'].clicked.connect(self.matplotframe.start_plotting)
         self.controlmenu.menus['Plotting'].buttons['Clear'].clicked.connect(self.matplotframe.clear_plot)
+        self.controlmenu.menus['Plotting'].buttons['Zoom'].clicked.connect(self.matplotframe.toolbar.zoom)
+        self.controlmenu.menus['Plotting'].buttons['Autoscale'].clicked.connect(self.matplotframe.toggle_autoscale)
+        self.controlmenu.menus['Plotting'].check_group.buttonToggled.connect(self.matplotframe.set_plot_visibility)
 
         for key, button in self.controlmenu.menus['Devices'].unitbuttons.items():
             button.clicked.connect(functools.partial(self.statusbar.change_units, key))
             button.clicked.connect(functools.partial(self.matplotframe.set_units, key))
-
-        self.controlmenu.menus['Plotting'].check_group.buttonToggled.connect(self.matplotframe.set_plot_visibility)
 
         self.controlmenu.menus['Devices'].unitbuttons['Temperature'].click()
 
