@@ -1,13 +1,12 @@
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 import matplotlib.font_manager as fm
-import matplotlib.ticker
-from matplotlib.figure import Figure
 import matplotlib.style
+import matplotlib.ticker
 import numpy as np
 import pubsub.pub
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+from matplotlib.figure import Figure
 
-
-colors = {'blue': '#86d2f9', 'green': '#86f8ab', 'pink': '#f488f9', 'yellow': '#faf0b1', 'purple': '#9686f8'}
+colors = {'blue': '#86b3f9', 'green': '#86f8ab', 'pink': '#f488f9', 'yellow': '#faf0b1', 'purple': '#9686f8'}
 
 
 class ElchPlot(FigureCanvasQTAgg):
@@ -30,6 +29,9 @@ class ElchPlot(FigureCanvasQTAgg):
         ax.set_xticklabels(range(11), fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
         ax.set_yticklabels(range(11), fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
         ax2.set_yticklabels(range(11), fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
+        ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+        ax.yaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+        ax2.yaxis.set_major_locator(matplotlib.ticker.AutoLocator())
         ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
         ax.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
         ax2.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
