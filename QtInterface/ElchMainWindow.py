@@ -9,6 +9,7 @@ from QtInterface.ElchPlot import ElchPlot
 from QtInterface.ElchRibbon import ElchRibbon
 from QtInterface.ElchTitleBar import ElchTitlebar
 from QtInterface.ElchiStatusBar import ElchStatusBar
+from QtInterface.ElchNotificationBar import ElchNotificationBar
 
 
 class ElchMainWindow(QWidget):
@@ -28,11 +29,16 @@ class ElchMainWindow(QWidget):
         self.matplotframe = ElchPlot()
         self.titlebar = ElchTitlebar()
         self.statusbar = ElchStatusBar()
+        self.notificbar = ElchNotificationBar()
 
         panel_spacing = 20
 
+        vbox_innermost = QVBoxLayout()
+        vbox_innermost.addWidget(self.matplotframe)
+        vbox_innermost.addWidget(self.notificbar)
+
         hbox_inner = QHBoxLayout()
-        hbox_inner.addWidget(self.matplotframe, stretch=1)
+        hbox_inner.addLayout(vbox_innermost)
         hbox_inner.addWidget(self.controlmenu, stretch=0)
         hbox_inner.setSpacing(panel_spacing)
         hbox_inner.setContentsMargins(0, 0, 0, 0)

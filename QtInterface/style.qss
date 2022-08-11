@@ -6,6 +6,10 @@ ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
 ElchStatusBar QLabel#label{color: #7b8ccb; font: 8pt "Roboto Light";}
 ElchStatusBar QLabel#value{color: #7b8ccb; font: 14pt "Roboto";}
 
+/*Stylinmg of the Notification Bar*/
+ElchNotificationBar{background-color: #2A2D56; color:#7b8ccb;}
+ElchNotificationBar QLabel{color: #7b8ccb; font: 10pt "Roboto Light";}
+
 
 /*Styliong of the Title Bar*/
 ElchTitlebar QToolButton#Close{background: url(Icons/Quit.png) center no-repeat; border:none;}

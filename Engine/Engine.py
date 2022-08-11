@@ -17,6 +17,8 @@ from Drivers.Pyrometer import Pyrometer
 from Drivers.TestDevices import TestSensor, TestController
 from Engine.ThreadDecorators import Worker
 
+from Signals import engine_signals
+
 # TODO: Implement some notification system for serial failures and not implemented functions
 
 TEST_MODE = True
@@ -96,8 +98,11 @@ class HeaterControlEngine:
                 else:
                     pubsub.pub.unsubscribe(function[0], topic)
 
+            engine_signals.controller_connected.emit(controller_type, controller_port)
+
         except SerialException:
             sendMessage(topicName='engine.status', text='Connection error!')
+            engine_signals.connection_failed.emit()
 
     def remove_controller(self):
         self.controller = None
@@ -107,6 +112,7 @@ class HeaterControlEngine:
             else:
                 pubsub.pub.unsubscribe(function[0], topic)
         self.sensor = AbstractSensor()
+        engine_signals.controller_disconnected.emit()
 
     def add_sensor(self, sensor_type, sensor_port):
         try:
@@ -116,8 +122,10 @@ class HeaterControlEngine:
                     pubsub.pub.subscribe(function[0], topic)
                 else:
                     pubsub.pub.unsubscribe(function[0], topic)
+            engine_signals.sensor_connected.emit(sensor_type, sensor_port)
         except SerialException:
             sendMessage(topicName='engine.status', text='Connection error!')
+            engine_signals.connection_failed.emit()
 
     def remove_sensor(self):
         for topic, function in self.sensor_functions.items():
@@ -127,6 +135,7 @@ class HeaterControlEngine:
                 pubsub.pub.unsubscribe(function[0], topic)
         self.sensor.close()
         self.sensor = AbstractSensor()
+        engine_signals.sensor_disconnected.emit()
 
     def get_sensor_status(self):
         runtime = (datetime.datetime.now() - self.log_start_time).seconds if self.log_start_time else None
