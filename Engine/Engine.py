@@ -19,7 +19,7 @@ from Engine.ThreadDecorators import Worker
 
 # TODO: Implement some notification system for serial failures and not implemented functions
 
-TEST_MODE = False
+TEST_MODE = True
 
 
 class HeaterControlEngine:
