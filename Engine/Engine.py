@@ -138,7 +138,7 @@ class HeaterControlEngine:
         engine_signals.sensor_disconnected.emit()
 
     def get_sensor_status(self):
-        runtime = (datetime.datetime.now() - self.log_start_time).seconds if self.log_start_time else None
+        runtime = (datetime.datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
         worker = Worker(self.sensor.get_sensor_value)
         worker.signals.over.connect(lambda val: sendMessage('engine.answer.status',
                                                             status_values={'Sensor PV': (val, runtime)}))
@@ -147,7 +147,7 @@ class HeaterControlEngine:
         self.pool.start(worker)
 
     def get_controller_status(self):
-        runtime = (datetime.datetime.now() - self.log_start_time).seconds if self.log_start_time else None
+        runtime = (datetime.datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
                                     'Setpoint': self.controller.get_working_setpoint,
                                     'Power': self.controller.get_working_output}.items():
