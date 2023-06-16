@@ -11,6 +11,7 @@ class SetpointProgrammer:
         self.is_ramping = True
         self.current_segment = 0
         self.hold_starttime = int(time.time())
+        self.hold_endtime = int(time.time())
 
         self.pv = None
         pubsub.pub.subscribe(self.set_pv, topicName='engine.answer.status')
@@ -18,6 +19,8 @@ class SetpointProgrammer:
         self.timer = QTimer(parent=self)
         self.timer.timeout.connect(self.execute)
         self.timer.start(1000)
+
+        pubsub.pub.sendMessage('gui.set.control_mode', mode='Automatic')
 
         # Todo Timer functionality for setpoint
 
@@ -27,7 +30,7 @@ class SetpointProgrammer:
             if abs(self.pv-self.segments[self.current_segment].get('Setpoint')) < 0.1:
                 self.start_hold(self.segments[self.current_segment].get('Time'))
         else:
-            # Check if hold time has elapsed, then swiutch to next segment
+            # Check if hold time has elapsed, then switch to next segment
             if int(time.time() > self.hold_endtime):
                 self.current_segment = min(len(self.segments)-1, self.current_segment+1)
                 self.start_ramp(self.segments[self.current_segment])
