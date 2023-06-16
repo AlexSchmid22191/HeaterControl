@@ -16,6 +16,7 @@ from Drivers.Omega import OmegaPt
 from Drivers.Pyrometer import Pyrometer
 from Drivers.TestDevices import TestSensor, TestController
 from Engine.ThreadDecorators import Worker
+from Engine.SetProg import SetpointProgrammer
 
 from Signals import engine_signals
 
@@ -42,7 +43,8 @@ class HeaterControlEngine:
                                      'gui.set.setpoint': (self.set_target_setpoint, True),
                                      'gui.set.rate': (self.set_rate, True),
                                      'gui.set.control_mode': (self.set_control_mode, True),
-                                     'gui.set.pid_parameters': (self.set_pid_parameters, True)}
+                                     'gui.set.pid_parameters': (self.set_pid_parameters, True),
+                                     'gui.set.start_program': (self.start_programmer, True)}
         self.sensor_functions = {'gui.request.status': (self.get_sensor_status, True),
                                  'gui.con.disconnect_sensor': (self.remove_sensor, True),
                                  'gui.con.connect_sensor': (self.add_sensor, False)}
@@ -62,6 +64,8 @@ class HeaterControlEngine:
 
         self.mode = 'Temperature'
         self.units = {'Temperature': '°C', 'Voltage': 'mV'}
+
+        self.programmer = None
 
         pubsub.pub.subscribe(self.refresh_available_ports, 'gui.request.ports')
         pubsub.pub.subscribe(self.set_units, 'gui.set.units')
@@ -253,3 +257,6 @@ class HeaterControlEngine:
 
         worker = Worker(lambda val=value: function(val))
         self.pool.start(worker)
+
+    def start_programmer(self, program):
+        self.programmer = SetpointProgrammer(program, self)
