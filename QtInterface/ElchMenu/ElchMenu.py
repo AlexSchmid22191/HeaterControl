@@ -7,6 +7,7 @@ from QtInterface.ElchMenu.ElchControlMenu import ElchControlMenu
 from QtInterface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
 from QtInterface.ElchMenu.ElchPlotMenu import ElchPlotMenu
 from QtInterface.ElchMenu.ElchPidMenu import ElchPidMenu
+from QtInterface.ElchMenu.ElchProgramMenu import ElchProgramMenu
 
 
 class ElchMenu(QWidget):
@@ -16,7 +17,7 @@ class ElchMenu(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
-                      'PID': ElchPidMenu()}
+                      'PID': ElchPidMenu(), 'Program': ElchProgramMenu()}
 
         vbox = QVBoxLayout()
         for menu in self.menus:

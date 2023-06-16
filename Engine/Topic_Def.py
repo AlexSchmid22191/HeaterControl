@@ -129,6 +129,14 @@ class gui:
                 - unit: string
                 """
 
+        class start_program:
+            """
+            """
+            def msgDataSpec(program):
+                """
+                - program: dict
+                """
+
     class plot:
         """
         A class for everthing related to plotting/logging
