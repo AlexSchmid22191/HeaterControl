@@ -8,10 +8,12 @@ from PySide2.QtCore import QTimer
 class SetpointProgrammer:
     def __init__(self, segments, engine):
         self.segments = segments
-        self.is_ramping = True
-        self.current_segment = 1
+        self.is_ramping = False
+        self.current_segment = 0
         self.hold_starttime = int(time.time())
         self.hold_endtime = int(time.time())
+
+        # Maybe the segments thing can be solved with an iterator?
 
         self.pv = 0
         pubsub.pub.subscribe(self.set_pv, topicName='engine.answer.status')
@@ -21,8 +23,6 @@ class SetpointProgrammer:
         self.timer.start(1000)
 
         pubsub.pub.sendMessage('gui.set.control_mode', mode='Automatic')
-        self.start_ramp()
-        # TODO: Add setpoint commands for the first ramp segment
 
     def execute(self):
         if self.is_ramping:
@@ -31,8 +31,8 @@ class SetpointProgrammer:
                 self.start_hold(self.segments[self.current_segment].get('Hold'))
         else:
             # Check if hold time has elapsed, then switch to next segment
-            if int(time.time() > self.hold_endtime):
-                self.current_segment = min(len(self.segments)-1, self.current_segment+1)
+            if int(time.time() > self.hold_endtime) and self.current_segment < len(self.segments):
+                self.current_segment += 1
                 self.start_ramp()
 
     def set_pv(self, status_values):
@@ -42,7 +42,6 @@ class SetpointProgrammer:
 
     def start_ramp(self):
         self.is_ramping = True
-        print(f'Starting {self.current_segment}')
         pubsub.pub.sendMessage('gui.set.rate', rate=self.segments[self.current_segment].get('Rate'))
         pubsub.pub.sendMessage('gui.set.setpoint', setpoint=self.segments[self.current_segment].get('Setpoint'))
 
