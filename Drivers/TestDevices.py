@@ -97,3 +97,41 @@ class TestController(AbstractController):
     def set_rate(self, rate):
         with self.com_lock:
             print('Test Controller: Set rate {:f}'.format(rate))
+
+
+class NiceTestController(TestController):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+
+        self.sp = 0
+        self.pv = 0
+
+    def get_process_variable(self):
+        with self.com_lock:
+            time.sleep(0.01)
+            self.pv = 0.9*self.pv + 0.1*self.sp
+            return self.pv
+
+    def set_target_setpoint(self, setpoint):
+        with self.com_lock:
+            self.sp = setpoint
+            print('Test Controller: Set target setpoint {:f}'.format(setpoint))
+
+    def get_working_setpoint(self):
+        with self.com_lock:
+            return self.sp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

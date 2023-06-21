@@ -14,7 +14,7 @@ from Drivers.Jumo import JumoQuantol
 from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Omega import OmegaPt
 from Drivers.Pyrometer import Pyrometer
-from Drivers.TestDevices import TestSensor, TestController
+from Drivers.TestDevices import TestSensor, TestController, NiceTestController
 from Engine.ThreadDecorators import Worker
 from Engine.SetProg import SetpointProgrammer
 
@@ -52,6 +52,7 @@ class HeaterControlEngine:
         if TEST_MODE:
             self.sensor_types['Test Sensor'] = TestSensor
             self.controller_types['Test Controller'] = TestController
+            self.controller_types['Nice Test Controller'] = NiceTestController
             self.available_ports['COM Test'] = 'Test Port'
 
         self.sensor = AbstractSensor()
