@@ -15,8 +15,8 @@ class SetpointProgrammer:
 
         # Maybe the segments thing can be solved with an iterator?
 
-        self.pv = 0
-        pubsub.pub.subscribe(self.set_pv, topicName='engine.answer.status')
+        self.working_setpoint = 0
+        pubsub.pub.subscribe(self.set_working_setpoint, topicName='engine.answer.status')
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.execute)
@@ -26,26 +26,29 @@ class SetpointProgrammer:
 
     def execute(self):
         if self.is_ramping:
-            # Check if target temperature is reached, then switch to hold
-            if abs(self.pv-self.segments[self.current_segment].get('Setpoint')) < 0.1:
+            # Check if the working setpoint of the controller has reached the target setpoint, then switch to hold
+            if abs(self.working_setpoint - self.segments[self.current_segment].get('Setpoint')) < 0.1:
                 self.start_hold(self.segments[self.current_segment].get('Hold'))
+
         else:
             # Check if hold time has elapsed, then switch to next segment
-            if int(time.time() > self.hold_endtime) and self.current_segment < len(self.segments):
+            if int(time.time()) > self.hold_endtime and self.current_segment < len(self.segments):
                 self.current_segment += 1
                 self.start_ramp()
 
-    def set_pv(self, status_values):
+    def set_working_setpoint(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
-        if 'Controller PV' in status_values.keys():
-            self.pv = status_values['Controller PV'][0]
+        if 'Setpoint' in status_values.keys():
+            self.working_setpoint = status_values['Setpoint'][0]
 
     def start_ramp(self):
         self.is_ramping = True
         pubsub.pub.sendMessage('gui.set.rate', rate=self.segments[self.current_segment].get('Rate'))
         pubsub.pub.sendMessage('gui.set.setpoint', setpoint=self.segments[self.current_segment].get('Setpoint'))
+        pubsub.pub.sendMessage('engine.status', text=f'Ramp segment {self.current_segment} started.')
 
     def start_hold(self, hold_time):
         self.is_ramping = False
         self.hold_starttime = int(time.time())
-        self.hold_endtime = self.hold_starttime+hold_time
+        self.hold_endtime = self.hold_starttime+hold_time*60
+        pubsub.pub.sendMessage('engine.status', text=f'Hold segment {self.current_segment} started.')
