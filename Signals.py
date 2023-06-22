@@ -16,6 +16,9 @@ class EngineSignals(QObject):
     sensor_disconnected = Signal()
     connection_failed = Signal()
 
+    ramp_segment_started = Signal(int)
+    hold_segment_started = Signal(int)
+
 
 gui_signals = GuiSignals()
 engine_signals = EngineSignals()

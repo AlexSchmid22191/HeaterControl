@@ -15,6 +15,8 @@ class ElchNotificationBar(QWidget):
         self.engine_signals.sensor_connected.connect(self.display_sensor_connected)
         self.engine_signals.sensor_disconnected.connect(self.display_sensor_disconnected)
         self.engine_signals.connection_failed.connect(self.display_connection_fail)
+        self.engine_signals.ramp_segment_started.connect(self.display_ramp_started)
+        self.engine_signals.hold_segment_started.connect(self.display_hold_started)
 
         hbox = QHBoxLayout()
         hbox.addWidget(self.label)
@@ -45,3 +47,9 @@ class ElchNotificationBar(QWidget):
 
     def display_connection_fail(self):
         self.display_message('Connection failed!')
+
+    def display_ramp_started(self, segment):
+        self.display_message(f'Ramp segment {segment} started!')
+
+    def display_hold_started(self, segment):
+        self.display_message(f'Hold segment {segment} started!')

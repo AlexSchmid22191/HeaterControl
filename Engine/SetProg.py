@@ -4,6 +4,8 @@ import pubsub.pub
 import pubsub.pub
 from PySide2.QtCore import QTimer
 
+from Signals import engine_signals
+
 
 class SetpointProgrammer:
     def __init__(self, segments, engine):
@@ -45,10 +47,11 @@ class SetpointProgrammer:
         self.is_ramping = True
         pubsub.pub.sendMessage('gui.set.rate', rate=self.segments[self.current_segment].get('Rate'))
         pubsub.pub.sendMessage('gui.set.setpoint', setpoint=self.segments[self.current_segment].get('Setpoint'))
-        pubsub.pub.sendMessage('engine.status', text=f'Ramp segment {self.current_segment} started.')
+        engine_signals.ramp_segment_started.emit(self.current_segment)
 
     def start_hold(self, hold_time):
         self.is_ramping = False
         self.hold_starttime = int(time.time())
         self.hold_endtime = self.hold_starttime+hold_time*60
-        pubsub.pub.sendMessage('engine.status', text=f'Hold segment {self.current_segment} started.')
+        pubsub.pub.sendMessage('engine.status', text=f'Hold segment {self.current_segment} started!')
+        engine_signals.hold_segment_started.emit(self.current_segment)
