@@ -103,35 +103,38 @@ class NiceTestController(TestController):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
 
-        self.sp = 0
+        self.tsp = 0
+        self.wsp = 0
         self.pv = 0
+        self.rt = 5
 
     def get_process_variable(self):
         with self.com_lock:
             time.sleep(0.01)
-            self.pv = 0.9*self.pv + 0.1*self.sp
+            self.pv = 0.9*self.pv + 0.1*self.wsp
             return self.pv
+
+    def set_rate(self, rate):
+        with self.com_lock:
+            self.rt = rate
+            print('Test Controller: Set rate {:f}'.format(rate))
 
     def set_target_setpoint(self, setpoint):
         with self.com_lock:
-            self.sp = setpoint
+            self.tsp = setpoint
             print('Test Controller: Set target setpoint {:f}'.format(setpoint))
+
+    def get_target_setpoint(self):
+        with self.com_lock:
+            return self.tsp
+
+    def get_rate(self):
+        with self.com_lock:
+            return self.rt
 
     def get_working_setpoint(self):
         with self.com_lock:
-            return self.sp
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            self.wsp += self.rt/60
+            if self.wsp > self.tsp:
+                self.wsp = self.tsp
+            return self.wsp
