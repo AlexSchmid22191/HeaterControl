@@ -1,7 +1,7 @@
-import functools
-
 import pubsub.pub
-from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QHBoxLayout, QGridLayout
+from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QHBoxLayout, QGridLayout, QButtonGroup
+
+from Signals import engine_signals
 
 
 class ElchProgramMenu(QWidget):
@@ -10,12 +10,25 @@ class ElchProgramMenu(QWidget):
 
         # Refactor to use gridlayout
         self.labels = {key: QLabel(text=key, objectName='Header') for key in ['Rate', 'Setpoint', 'Hold']}
-        self.entries = {segment: {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, ),
-                                  'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, ),
-                                  'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, )
+        self.entries = {segment: {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120),
+                                  'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=1200),
+                                  'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=100)
                                   } for segment in range(1, 11)}
-        self.buttons = {key: QPushButton(text=key, objectName=key) for key in ['Start', 'Stop']}
 
+        self.radios = {key: [QRadioButton(), QRadioButton()] for key in self.entries}
+
+        radiogroup = QButtonGroup()
+        radiogroup.setExclusive(True)
+        for segment, radio in self.radios.items():
+            radiogroup.addButton(radio[0])
+            radiogroup.addButton(radio[1])
+            radio[0].setEnabled(False)
+            radio[1].setEnabled(False)
+
+        engine_signals.ramp_segment_started.connect(self.mark_ramp_segment)
+        engine_signals.hold_segment_started.connect(self.mark_hold_segment)
+
+        self.buttons = {key: QPushButton(text=key, objectName=key) for key in ['Start', 'Stop']}
         self.buttons['Start'].clicked.connect(self.start_programm)
 
         vbox = QVBoxLayout()
@@ -25,16 +38,21 @@ class ElchProgramMenu(QWidget):
         hbox_header = QHBoxLayout()
         for label in self.labels.values():
             hbox_header.addWidget(label)
+            hbox_header.addStretch(1)
         vbox.addLayout(hbox_header)
         vbox.addSpacing(10)
 
         for segment, seg_dict in self.entries.items():
             line_box = QHBoxLayout()
+            line_box.addWidget(self.radios[segment][0])
+            line_box.addSpacing(5)
             line_box.addWidget(seg_dict.get('Rate'))
             line_box.addSpacing(5)
             line_box.addWidget(seg_dict.get('Setpoint'))
             line_box.addSpacing(5)
             line_box.addWidget(seg_dict.get('Hold'))
+            line_box.addSpacing(5)
+            line_box.addWidget(self.radios[segment][1])
             vbox.addLayout(line_box)
             vbox.addSpacing(10)
 
@@ -53,34 +71,8 @@ class ElchProgramMenu(QWidget):
 
         pubsub.pub.sendMessage(topicName='gui.set.start_program', program=program)
 
+    def mark_ramp_segment(self, segment):
+        self.radios[segment][0].setChecked(True)
 
-
-    # @staticmethod
-    # def set_control_value(value, control):
-    #     {
-    #         'Rate': functools.partial(pubsub.pub.sendMessage, 'gui.set.rate', rate=value),
-    #         'Power': functools.partial(pubsub.pub.sendMessage, 'gui.set.power', power=value),
-    #         'Setpoint': functools.partial(pubsub.pub.sendMessage, 'gui.set.setpoint', setpoint=value)
-    #     }[control]()
-    #
-    # @staticmethod
-    # def set_control_mode(checked, mode):
-    #     if checked:
-    #         pubsub.pub.sendMessage('gui.set.control_mode', mode=mode)
-    #
-    # def change_units(self, mode):
-    #     self.entries['Setpoint'].setSuffix({'Temperature': ' \u00B0C', 'Voltage': ' mV'}[mode])
-    #     self.entries['Rate'].setSuffix({'Temperature': ' \u00B0C/min', 'Voltage': ' mV/min'}[mode])
-    #
-    # def update_control_values(self, control_parameters):
-    #     assert isinstance(control_parameters, dict), 'Illegal type recieved: {:s}'.format(str(type(control_parameters)))
-    #     for key in control_parameters:
-    #         assert key in self.entries or key == 'Mode', 'Illegal key recieved: {:s}'.format(key)
-    #         if key == 'Mode':
-    #             self.buttons[control_parameters[key]].blockSignals(True)
-    #             self.buttons[control_parameters[key]].setChecked(True)
-    #             self.buttons[control_parameters[key]].blockSignals(False)
-    #         else:
-    #             self.entries[key].blockSignals(True)
-    #             self.entries[key].setValue(control_parameters[key])
-    #             self.entries[key].blockSignals(False)
+    def mark_hold_segment(self, segment):
+        self.radios[segment][1].setChecked(True)
