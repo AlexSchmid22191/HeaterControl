@@ -7,6 +7,9 @@ import numpy as np
 import pubsub.pub
 
 
+colors = {'blue': '#86d2f9', 'green': '#86f8ab', 'pink': '#f488f9', 'yellow': '#faf0b1', 'purple': '#9686f8'}
+
+
 class ElchPlot(FigureCanvasQTAgg):
     def __init__(self):
         matplotlib.style.use('QtInterface/App.mplstyle')
@@ -33,7 +36,8 @@ class ElchPlot(FigureCanvasQTAgg):
 
         self.units = 'Temperature'
         self.axes = {'Power': ax2, 'Sensor PV': ax, 'Controller PV': ax, 'Setpoint': ax}
-        self.colors = {'Power': '#86f9de', 'Sensor PV': '#86d7f8', 'Controller PV': '#9686f8', 'Setpoint': '#f488f9'}
+        self.colors = {'Power': colors['green'], 'Sensor PV': colors['blue'],
+                       'Controller PV': colors['pink'], 'Setpoint': colors['yellow']}
         self.plots = {key: self.axes[key].plot([], color=self.colors[key], marker='')[0] for key in self.axes}
 
         self.autoscale = True
