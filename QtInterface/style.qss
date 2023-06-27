@@ -50,9 +50,9 @@ ElchMenu QLabel#Header{font: 14pt "Roboto"}
 
 /*Buttons*/
 ElchMenu QPushButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
-ElchMenu QPushButton:hover{background: #373a62; color: #7b8ccb}
-ElchMenu QPushButton:checked:hover{background: #373a62; color: #7b8ccb}
-ElchMenu QPushButton:checked{background: #343760; color: #7b8ccb}
+ElchMenu QPushButton:hover{background: #434778; color: #7b8ccb}
+ElchMenu QPushButton:checked:hover{background: #434778; color: #7b8ccb}
+ElchMenu QPushButton:checked{background: #434778; color: #7b8ccb}
 
 ElchMenu QPushButton#Refresh{icon: url(Icons/Refresh.png)}
 ElchMenu QPushButton#Refresh:hover{icon: url(Icons/Refresh_Glow.png)}
@@ -107,3 +107,7 @@ ElchPlotMenu QPushButton#Clear{icon: url(Icons/Clear.png)}
 ElchPlotMenu QPushButton#Clear:hover{icon: url(Icons/Clear_Glow.png)}
 ElchPlotMenu QPushButton#Export{icon: url(Icons/Export.png)}
 ElchPlotMenu QPushButton#Export:hover{icon: url(Icons/Export_Glow.png)}
+
+ElchProgramMenu QPushButton#Start{icon: url(Icons/Start.png)}
+ElchProgramMenu QPushButton#Start:hover{icon: url(Icons/Start_Glow.png)}
+ElchProgramMenu QPushButton#Start:checked{icon: url(Icons/Start_Glow.png)}
