@@ -13,7 +13,7 @@ from QtInterface.ElchMenu.ElchProgramMenu import ElchProgramMenu
 class ElchMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setFixedWidth(255)
+        self.setFixedWidth(260)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),

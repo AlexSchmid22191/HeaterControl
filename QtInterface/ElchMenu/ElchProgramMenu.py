@@ -10,8 +10,8 @@ class ElchProgramMenu(QWidget):
         super().__init__(*args, **kwargs)
 
         self.labels = {'Rate': QLabel(text='Rate\n(\u00B0C/min)'),
-                             'Setpoint': QLabel(text='Setpoint\n(\u00B0C)'),
-                             'Hold': QLabel(text='Hold\n(min)')}
+                       'Setpoint': QLabel(text='Setpoint\n(\u00B0C)'),
+                       'Hold': QLabel(text='Hold\n(min)')}
         self.entries = {segment: {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, value=5),
                                   'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=1200),
                                   'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=100)
@@ -46,6 +46,9 @@ class ElchProgramMenu(QWidget):
         self.start_button.setCheckable(True)
         self.start_button.toggled.connect(self.start_programm)
 
+        self.skip_button = QPushButton(text='Skip segment')
+        self.skip_button.clicked.connect(self.skip_segment)
+
         vbox = QVBoxLayout()
         vbox.setSpacing(0)
         vbox.setContentsMargins(10, 10, 10, 10)
@@ -55,6 +58,8 @@ class ElchProgramMenu(QWidget):
         vbox.addLayout(grid)
         vbox.addSpacing(10)
         vbox.addWidget(self.start_button)
+        vbox.addSpacing(5)
+        vbox.addWidget(self.skip_button)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -73,3 +78,10 @@ class ElchProgramMenu(QWidget):
 
     def mark_hold_segment(self, segment):
         self.radios[segment]['hold'].setChecked(True)
+
+    def change_units(self, mode):
+        self.labels['Rate'].setText({'Temperature': 'Rate\n(\u00B0C/min)', 'Voltage': 'Rate\n(mV/min)'}[mode])
+        self.labels['Setpoint'].setText({'Temperature': 'Setpoint\n(\u00B0C)', 'Voltage': 'Setpoint\n(mV)'}[mode])
+
+    def skip_segment(self):
+        pubsub.pub.sendMessage(topicName='gui.set.skip_program')

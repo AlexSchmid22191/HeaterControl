@@ -141,6 +141,10 @@ class gui:
             """
             """
 
+        class skip_program:
+            """
+            """
+
     class plot:
         """
         A class for everthing related to plotting/logging

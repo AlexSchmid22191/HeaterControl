@@ -261,9 +261,14 @@ class HeaterControlEngine:
             self.programmer.timer.stop()
         self.programmer = SetpointProgrammer(program, self)
         pubsub.pub.subscribe(self.stop_programmer, 'gui.set.stop_program')
+        pubsub.pub.subscribe(self.skip_program_segment, 'gui.set.skip_program')
 
     def stop_programmer(self):
         if self.programmer:
             self.programmer.timer.stop()
             self.programmer = None
-        pubsub.pub.subscribe(self.start_programmer, 'gui.set.start_program')
+
+    def skip_program_segment(self):
+        if self.programmer:
+            self.programmer.current_segment += 1
+            self.programmer.start_ramp()
