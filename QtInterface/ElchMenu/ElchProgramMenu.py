@@ -83,5 +83,6 @@ class ElchProgramMenu(QWidget):
         self.labels['Rate'].setText({'Temperature': 'Rate\n(\u00B0C/min)', 'Voltage': 'Rate\n(mV/min)'}[mode])
         self.labels['Setpoint'].setText({'Temperature': 'Setpoint\n(\u00B0C)', 'Voltage': 'Setpoint\n(mV)'}[mode])
 
-    def skip_segment(self):
+    @staticmethod
+    def skip_segment():
         pubsub.pub.sendMessage(topicName='gui.set.skip_program')

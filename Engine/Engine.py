@@ -19,7 +19,7 @@ from Engine.ThreadDecorators import Worker
 from Engine.SetProg import SetpointProgrammer
 
 from Signals import engine_signals
-TEST_MODE = True
+TEST_MODE = False
 
 
 class HeaterControlEngine:

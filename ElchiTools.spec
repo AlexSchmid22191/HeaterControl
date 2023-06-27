@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['ElchiPanel.py'],
+a = Analysis(['ElchiTools.py'],
              pathex=['C:\\Users\\Alex\\PycharmProjects\\HeaterControl'],
              binaries=[],
-             datas=[('QtInterface', 'QtInterface'), ('Icons', 'Icons'), ('Fonts', 'Fonts')],
+             datas=[('QtInterface', 'QtInterface'), ('Icons', 'Icons'), ('Fonts', 'Fonts'), ('License', 'License')],
              hiddenimports=['pkg_resources.py2_warn'],
              hookspath=[],
              runtime_hooks=[],
@@ -35,4 +35,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='ElchiPanel')
+               name='ElchiTools')
