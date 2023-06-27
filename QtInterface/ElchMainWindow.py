@@ -34,8 +34,8 @@ class ElchMainWindow(QWidget):
         panel_spacing = 20
 
         vbox_innermost = QVBoxLayout()
-        vbox_innermost.addWidget(self.matplotframe)
-        vbox_innermost.addWidget(self.notificbar)
+        vbox_innermost.addWidget(self.matplotframe, stretch=1)
+        vbox_innermost.addWidget(self.notificbar, stretch=0)
 
         hbox_inner = QHBoxLayout()
         hbox_inner.addLayout(vbox_innermost)
