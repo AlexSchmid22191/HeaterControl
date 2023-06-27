@@ -38,6 +38,10 @@ ElchRibbon QPushButton#Plotting{border-image: url(Icons/Plotting.png)}
 ElchRibbon QPushButton#Plotting:hover{border-image: url(Icons/Plotting_Glow.png)}
 ElchRibbon QPushButton#Plotting:checked{border-image: url(Icons/Plotting_Glow.png)}
 
+ElchRibbon QPushButton#Programmer{border-image: url(Icons/Programmer.png)}
+ElchRibbon QPushButton#Programmer:hover{border-image: url(Icons/Programmer_Glow.png)}
+ElchRibbon QPushButton#Programmer:checked{border-image: url(Icons/Programmer_Glow.png)}
+
 
 /*Styling of the ElchMenu*/
 ElchMenu{background-color: #2A2D56;}

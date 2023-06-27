@@ -17,7 +17,7 @@ class ElchMenu(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
-                      'PID': ElchPidMenu(), 'Program': ElchProgramMenu()}
+                      'PID': ElchPidMenu(), 'Programmer': ElchProgramMenu()}
 
         vbox = QVBoxLayout()
         for menu in self.menus:
