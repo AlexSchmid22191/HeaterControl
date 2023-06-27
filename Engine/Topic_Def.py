@@ -137,6 +137,10 @@ class gui:
                 - program: dict
                 """
 
+        class stop_program:
+            """
+            """
+
     class plot:
         """
         A class for everthing related to plotting/logging

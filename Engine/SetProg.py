@@ -15,8 +15,6 @@ class SetpointProgrammer:
         self.hold_starttime = int(time.time())
         self.hold_endtime = int(time.time())
 
-        # Maybe the segments thing can be solved with an iterator?
-
         self.working_setpoint = 0
         pubsub.pub.subscribe(self.set_working_setpoint, topicName='engine.answer.status')
 

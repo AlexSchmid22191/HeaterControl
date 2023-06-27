@@ -19,9 +19,6 @@ from Engine.ThreadDecorators import Worker
 from Engine.SetProg import SetpointProgrammer
 
 from Signals import engine_signals
-
-# TODO: Implement some notification system for serial failures and not implemented functions
-
 TEST_MODE = True
 
 
@@ -260,4 +257,13 @@ class HeaterControlEngine:
         self.pool.start(worker)
 
     def start_programmer(self, program):
+        if self.programmer:
+            self.programmer.timer.stop()
         self.programmer = SetpointProgrammer(program, self)
+        pubsub.pub.subscribe(self.stop_programmer, 'gui.set.stop_program')
+
+    def stop_programmer(self):
+        if self.programmer:
+            self.programmer.timer.stop()
+            self.programmer = None
+        pubsub.pub.subscribe(self.start_programmer, 'gui.set.start_program')

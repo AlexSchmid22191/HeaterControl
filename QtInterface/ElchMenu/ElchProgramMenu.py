@@ -12,7 +12,7 @@ class ElchProgramMenu(QWidget):
         self.labels = {'Rate': QLabel(text='Rate\n(\u00B0C/min)'),
                              'Setpoint': QLabel(text='Setpoint\n(\u00B0C)'),
                              'Hold': QLabel(text='Hold\n(min)')}
-        self.entries = {segment: {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120),
+        self.entries = {segment: {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, value=5),
                                   'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=1200),
                                   'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=100)
                                   } for segment in range(1, 11)}
@@ -66,8 +66,7 @@ class ElchProgramMenu(QWidget):
 
             pubsub.pub.sendMessage(topicName='gui.set.start_program', program=program)
         else:
-            print('STOP!!!')
-            # TODO: Implement stop message to engine
+            pubsub.pub.sendMessage(topicName='gui.set.stop_program')
 
     def mark_ramp_segment(self, segment):
         self.radios[segment]['ramp'].setChecked(True)
