@@ -52,7 +52,7 @@ class ElchTitlebar(QWidget):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel('ElchiTools 2.5.0', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel('ElchiTools 2.5.1', objectName='Header'), alignment=Qt.AlignHCenter)
 
         license_label = QLabel()
         license_label.setText('License: <a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">LGPL 2.1</a>')
