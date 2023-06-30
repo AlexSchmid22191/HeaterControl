@@ -14,7 +14,7 @@ class ElchProgramMenu(QWidget):
                        'Hold': QLabel(text='Hold\n(min)')}
         self.entries = {segment: {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, value=5),
                                   'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=1200),
-                                  'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=100)
+                                  'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000)
                                   } for segment in range(1, 11)}
 
         self.radios = {key: {'ramp': QRadioButton(), 'hold': QRadioButton()} for key in self.entries}
