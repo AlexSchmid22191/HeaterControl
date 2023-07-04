@@ -52,10 +52,10 @@ class ElchTitlebar(QWidget):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel('ElchiTools 2.5.1', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel('ElchiTools 2.5.2', objectName='Header'), alignment=Qt.AlignHCenter)
 
         license_label = QLabel()
-        license_label.setText('License: <a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">LGPL 2.1</a>')
+        license_label.setText('License: LGPL 2.1')
         license_label.setOpenExternalLinks(True)
         vbox.addWidget(license_label, alignment=Qt.AlignHCenter)
 
@@ -63,7 +63,7 @@ class ElchTitlebar(QWidget):
         vbox.addWidget(QLabel('Contact: alex.schmid91@gmail.com'), alignment=Qt.AlignHCenter)
 
         source_label = QLabel()
-        source_label.setText('Source: <a href="https://github.com/AlexSchmid22191/HeaterControl">GitHub</a>')
+        source_label.setText('Source: https://github.com/AlexSchmid22191/HeaterControl')
         source_label.setOpenExternalLinks(True)
         vbox.addWidget(source_label, alignment=Qt.AlignHCenter)
         vbox.addWidget(button := QPushButton('Close'))
