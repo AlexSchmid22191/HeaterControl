@@ -54,3 +54,34 @@ class JumoQuantol(minimalmodbus.Instrument, AbstractController):
         with self.com_lock:
             self.write_float(0x004E, rate, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
             self.write_register(0x0047, 0b1 << 8)  # Restart ramp function, so it begins at current process value
+
+    def set_pid_p(self, p):
+        with self.com_lock:
+            self.write_float(0x3000, p, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+    def set_pid_i(self, i):
+        with self.com_lock:
+            self.write_float(0x3006, i, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+    def set_pid_d(self, d):
+        with self.com_lock:
+            self.write_float(0x3004, d, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+    def get_pid_p(self):
+        with self.com_lock:
+            return self.read_float(0x3000, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+    def get_pid_i(self):
+        with self.com_lock:
+            return self.read_float(0x3006, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+    def get_pid_d(self):
+        with self.com_lock:
+            return self.read_float(0x3004, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+
+
+
+
+
+
