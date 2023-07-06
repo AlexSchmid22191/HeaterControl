@@ -1,7 +1,6 @@
 import threading
 import minimalmodbus
-from Drivers.AbstractSensorController import AbstractController, AbstractSensor
-import time
+from Drivers.AbstractSensorController import AbstractController
 
 
 class JumoQuantol(minimalmodbus.Instrument, AbstractController):
@@ -78,10 +77,3 @@ class JumoQuantol(minimalmodbus.Instrument, AbstractController):
     def get_pid_d(self):
         with self.com_lock:
             return self.read_float(0x3004, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
-
-
-
-
-
-
-
