@@ -94,7 +94,7 @@ class ElchLaser(AbstractController, minimalmodbus.Instrument):
     def set_rate(self, rate):
         """Set the rate of change for the working setpoint i.e. the heating/cooling rate"""
         with self.com_lock:
-            self.write_register(35, rate, number_of_decimals=1)
+            self.write_register(5, rate, number_of_decimals=1)
 
     def get_rate(self):
         """Get the rate of change for the working setpoint i.e. the heating/cooling rate"""
