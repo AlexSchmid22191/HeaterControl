@@ -8,7 +8,7 @@ from pubsub.pub import sendMessage
 from serial import SerialException
 
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
-from Drivers.ElchWorks import Thermolino, Thermoplatino
+from Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from Drivers.Jumo import JumoQuantol
 from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
@@ -19,6 +19,7 @@ from Engine.ThreadDecorators import Worker
 from Engine.SetProg import SetpointProgrammer
 
 from Signals import engine_signals
+
 TEST_MODE = False
 
 
@@ -26,7 +27,8 @@ class HeaterControlEngine:
     def __init__(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
-                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol}
+                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol,
+                                 'Elch Laser Control': ElchLaser}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
                              'Eurotherm3508': Eurotherm3508S}
@@ -203,6 +205,7 @@ class HeaterControlEngine:
         transfered into one dict (time -> 4values), to align the 4 data series. This dict is the used to generate a
         csv file.
         """
+
         def _work():
             sorted_data = {}
             for parameter, series in self.data.items():
