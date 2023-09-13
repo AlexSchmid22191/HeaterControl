@@ -18,7 +18,7 @@ from Drivers.TestDevices import TestSensor, TestController, NiceTestController
 from Engine.ThreadDecorators import Worker
 from Engine.SetProg import SetpointProgrammer
 
-from Signals import engine_signals
+from Signals import engine_signals, gui_signals
 
 TEST_MODE = False
 
@@ -96,6 +96,7 @@ class HeaterControlEngine:
 
             self.get_controller_parameters()
             self.get_pid_parameters()
+            gui_signals.enable_output.connect(self.toggle_output_enable)
             for topic, function in self.controller_functions.items():
                 if function[1]:
                     pubsub.pub.subscribe(function[0], topic)
@@ -117,6 +118,12 @@ class HeaterControlEngine:
                 pubsub.pub.unsubscribe(function[0], topic)
         self.sensor = AbstractSensor()
         engine_signals.controller_disconnected.emit()
+
+    def toggle_output_enable(self, state):
+        if state:
+            self.controller.enable_output()
+        else:
+            self.controller.disable_output()
 
     def add_sensor(self, sensor_type, sensor_port):
         try:

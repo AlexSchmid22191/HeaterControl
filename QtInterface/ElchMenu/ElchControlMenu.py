@@ -1,6 +1,7 @@
 import functools
 
 import pubsub.pub
+from Signals import gui_signals, engine_signals
 from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton
 
 
@@ -33,6 +34,12 @@ class ElchControlMenu(QWidget):
         refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.control_parameters'))
         vbox.addSpacing(10)
         vbox.addWidget(refresh_button)
+
+        enable_button = QPushButton(text='Output Enable', objectName='Enable')
+        enable_button.setCheckable(True)
+        enable_button.clicked.connect(lambda: gui_signals.enable_output.emit(enable_button.isChecked()))
+        vbox.addSpacing(10)
+        vbox.addWidget(enable_button)
 
         vbox.addStretch()
         self.setLayout(vbox)

@@ -5,6 +5,7 @@ class GuiSignals(QObject):
     request_ports = Signal()
     connect_device = Signal(str)
     disconnect_device = Signal()
+    enable_output = Signal(bool)
 
 
 class EngineSignals(QObject):
