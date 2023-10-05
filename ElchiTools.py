@@ -12,7 +12,7 @@ setTopicUnspecifiedFatal(True)
 
 
 def main():
-    QtWin.setCurrentProcessExplicitAppUserModelID('elchworks.elchitools.2.5.2')
+    QtWin.setCurrentProcessExplicitAppUserModelID('elchworks.elchitools.2.6')
     app = QApplication()
     app.setWindowIcon(QIcon('Icons/Logo.ico'))
     engine = HeaterControlEngine()
