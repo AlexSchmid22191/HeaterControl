@@ -52,14 +52,12 @@ class Thermoplatino(AbstractSensor, serial.Serial):
 
 
 class ElchLaser(AbstractController, minimalmodbus.Instrument):
-    """Instrument class for Eurotherm 3216 process controller."""
     mode = 'Temperature'
 
     def __init__(self, portname, slaveadress, baudrate=9600):
         super().__init__(portname, slaveadress)
         self.serial.baudrate = baudrate
         self.com_lock = Lock()
-        time.sleep(2)
 
     def get_process_variable(self):
         """Return the current process variable"""
