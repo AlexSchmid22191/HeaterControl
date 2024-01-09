@@ -156,3 +156,11 @@ class ElchLaser(AbstractController, minimalmodbus.Instrument):
     def get_tc_fault(self):
         with self.com_lock:
             return self.read_register(12)
+
+    def enable_aiming_beam(self):
+        with self.com_lock:
+            self.write_register(13, 1)
+
+    def disable_aiming_beam(self):
+        with self.com_lock:
+            self.write_register(13, 0)

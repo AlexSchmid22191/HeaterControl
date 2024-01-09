@@ -97,6 +97,7 @@ class HeaterControlEngine:
             self.get_controller_parameters()
             self.get_pid_parameters()
             gui_signals.enable_output.connect(self.toggle_output_enable)
+            gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
             for topic, function in self.controller_functions.items():
                 if function[1]:
                     pubsub.pub.subscribe(function[0], topic)
@@ -124,6 +125,12 @@ class HeaterControlEngine:
             self.controller.enable_output()
         else:
             self.controller.disable_output()
+
+    def toggle_aiming_beam(self, state):
+        if state:
+            self.controller.enable_aiming_beam()
+        else:
+            self.controller.disable_aiming_beam()
 
     def add_sensor(self, sensor_type, sensor_port):
         try:

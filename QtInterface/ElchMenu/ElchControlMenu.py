@@ -34,12 +34,16 @@ class ElchControlMenu(QWidget):
         refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.control_parameters'))
         vbox.addSpacing(10)
         vbox.addWidget(refresh_button)
+        vbox.addSpacing(10)
 
         enable_button = QPushButton(text='Output Enable', objectName='Enable')
         enable_button.setCheckable(True)
         enable_button.clicked.connect(lambda: gui_signals.enable_output.emit(enable_button.isChecked()))
-        vbox.addSpacing(10)
+        aiming_beam_button = QPushButton(text='Aiming Beam', objectName='Enable')
+        aiming_beam_button.setCheckable(True)
+        aiming_beam_button.clicked.connect(lambda: gui_signals.toggle_aiming.emit(aiming_beam_button.isChecked()))
         vbox.addWidget(enable_button)
+        vbox.addWidget(aiming_beam_button)
 
         vbox.addStretch()
         self.setLayout(vbox)

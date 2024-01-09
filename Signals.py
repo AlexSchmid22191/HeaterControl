@@ -6,6 +6,7 @@ class GuiSignals(QObject):
     connect_device = Signal(str)
     disconnect_device = Signal()
     enable_output = Signal(bool)
+    toggle_aiming = Signal(bool)
 
 
 class EngineSignals(QObject):
