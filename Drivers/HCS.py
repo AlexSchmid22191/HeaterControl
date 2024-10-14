@@ -84,4 +84,10 @@ class HCS34(Serial):
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
-            return float(answer.decode()[:4]) / float(answer.decode()[4:8])
+            voltage = float(answer.decode()[:4])
+            current = float(answer.decode()[4:8])
+            if current < 100:
+                return -1
+            else:
+                return current / voltage
+
