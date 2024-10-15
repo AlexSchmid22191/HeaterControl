@@ -89,5 +89,4 @@ class HCS34(Serial):
             if current < 100:
                 return -1
             else:
-                return current / voltage
-
+                return voltage / current

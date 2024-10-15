@@ -7,6 +7,8 @@ from Drivers.HCS import HCS34
 class CeramicSputterHeater(AbstractController):
     mode = 'Temperature'
 
+    # TODO: Somehow get the calibration functions via the PID control data, maybe save and load them at startup
+
     def __init__(self, portname, *args, **kwargs):
         self.power_supply = HCS34(portname)
         self.power_supply.set_voltage_limit(10)
@@ -30,16 +32,25 @@ class CeramicSputterHeater(AbstractController):
         self.wire_geometry_factor = 0.2075 / self.r_cold
 
     @staticmethod
-    def _current_from_temp(t_set):
-        """Calculates the required current to achive a temperature of t_set"""
-        return 0
+    def _power_from_temp(t_set):
+        """
+        Calculates the required set current to achive a temperature of t_set
+        Uses a quadratic fit to approximate data meaasured on ceramic sputter device
+        Warning: Even at 0 Celsius set this approximation yields a current of 0.84 A
+        """
+        # Calibration using measured curernts
+        # current = 0.84347681 + 0.00105813 * t_set + 4.52795972e-06 * t_set**2
+        # Calibration using set currents
+        current = 0.91967429 + 0.00111274 * t_set + 4.46679138e-06 * t_set**2
+        # Constrain pwoer to 0 - 100
+        return max(0, min(current * 10, 100))
 
     def _control_loop(self):
         if self.control_mode == 'Manual':
             self.working_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
-            self.working_power = self._current_from_temp(self.working_setpoint)
+            self.working_power = self._power_from_temp(self.working_setpoint)
 
         self.power_supply.set_current_limit(self.working_power / 10)
 
