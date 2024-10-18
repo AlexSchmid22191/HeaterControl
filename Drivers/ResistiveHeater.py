@@ -1,13 +1,15 @@
+import configparser
+import os
+
 from PySide2.QtCore import QTimer
 
 from Drivers.AbstractSensorController import AbstractController
 from Drivers.HCS import HCS34
+from Drivers.Software_PID import SoftwarePID
 
 
 class CeramicSputterHeater(AbstractController):
     mode = 'Temperature'
-
-    # TODO: Somehow get the calibration functions via the PID control data, maybe save and load them at startup
 
     def __init__(self, portname, *args, **kwargs):
         self.power_supply = HCS34(portname)
@@ -21,6 +23,9 @@ class CeramicSputterHeater(AbstractController):
         self.working_setpoint = 25
         self.target_setpoint = 25
 
+        self.smoothed_temperature = 25
+        self.smoothing_factor = 0.25
+
         # Timer for automatic ramping mode
         self.loop_time = 250
         self.timer = QTimer()
@@ -30,6 +35,11 @@ class CeramicSputterHeater(AbstractController):
         # Hard coded resistance at 25 Celsius, should be made variable in the future
         self.r_cold = 0.528
         self.wire_geometry_factor = 0.2075 / self.r_cold
+
+        # default pid parameters, needs a better way to handle defaults
+        self.pid_controller = SoftwarePID(1000, 30, 30)
+
+        self.config_dir_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools')
 
     @staticmethod
     def _power_from_temp(t_set):
@@ -41,16 +51,18 @@ class CeramicSputterHeater(AbstractController):
         # Calibration using measured curernts
         # current = 0.84347681 + 0.00105813 * t_set + 4.52795972e-06 * t_set**2
         # Calibration using set currents
-        current = 0.91967429 + 0.00111274 * t_set + 4.46679138e-06 * t_set**2
+        current = 0.91967429 + 0.00111274 * t_set + 4.46679138e-06 * t_set ** 2
         # Constrain pwoer to 0 - 100
         return max(0, min(current * 10, 100))
 
     def _control_loop(self):
+
         if self.control_mode == 'Manual':
             self.working_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
-            self.working_power = self._power_from_temp(self.working_setpoint)
+            self.working_power = self.pid_controller.calculate_output(self.get_process_variable(),
+                                                                      self.working_setpoint)
 
         self.power_supply.set_current_limit(self.working_power / 10)
 
@@ -73,8 +85,13 @@ class CeramicSputterHeater(AbstractController):
     def get_process_variable(self):
         resistance = self.power_supply.get_resistance()
         if resistance == -1:
-            return -1
-        return self._temp_from_resistance(resistance)
+            resistance = self.r_cold
+
+        new_temperature = self._temp_from_resistance(resistance)
+        self.smoothed_temperature *= (1 - self.smoothing_factor)
+        self.smoothed_temperature += new_temperature * self.smoothing_factor
+
+        return self.smoothed_temperature
 
     def set_manual_output_power(self, output):
         self.manual_output_power = output
@@ -99,9 +116,49 @@ class CeramicSputterHeater(AbstractController):
 
     def set_rate(self, rate):
         self.rate = rate
+        self.write_config_to_file()
 
     def set_manual_mode(self):
+        self.manual_output_power = self.working_power
         self.control_mode = 'Manual'
 
     def set_automatic_mode(self):
+        self.working_setpoint = self.get_process_variable()
         self.control_mode = 'Automatic'
+
+    def set_pid_p(self, p):
+        self.pid_controller.pb = p
+        self.write_config_to_file()
+
+    def set_pid_i(self, i):
+        self.pid_controller.ti = i
+        self.write_config_to_file()
+
+    def set_pid_d(self, d):
+        self.pid_controller.td = d
+        self.write_config_to_file()
+
+    def get_pid_p(self):
+        return self.pid_controller.pb
+
+    def get_pid_i(self):
+        return self.pid_controller.ti
+
+    def get_pid_d(self):
+        return self.pid_controller.td
+
+    def write_config_to_file(self):
+        if not os.path.exists(self.config_dir_path):
+            os.makedirs(self.config_dir_path)
+
+        # Define the config file path
+        config_file_path = os.path.join(self.config_dir_path, 'HCS34.ini')
+        config = configparser.ConfigParser()
+        config['PID'] = {'P': str(self.pid_controller.pb),
+                         'I': str(self.pid_controller.ti),
+                         'D': str(self.pid_controller.td)}
+        config['Control'] = {'Ramp': str(self.rate)}
+
+        # Writing to config.ini file
+        with open(config_file_path, 'w') as configfile:
+            config.write(configfile)
