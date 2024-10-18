@@ -30,7 +30,7 @@ class HeaterControlEngine:
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
                                  'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol,
                                  'Elch Laser Control': ElchLaser, 'Elch Heater Controller': ElchLaser,
-                                 'CSH (Experimental)': CeramicSputterHeater}
+                                 'HCS34 (Experimental)': CeramicSputterHeater}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
                              'Eurotherm3508': Eurotherm3508S}

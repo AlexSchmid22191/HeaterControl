@@ -12,6 +12,13 @@ class CeramicSputterHeater(AbstractController):
     mode = 'Temperature'
 
     def __init__(self, portname, *args, **kwargs):
+        self.default_config = {'PID': {'P': 750, 'I': 12, 'D': 20},
+                               'Control': {'Rate': 15},
+                               'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929}}
+
+        self.config_dir_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools')
+        config = self.read_from_config()
+
         self.power_supply = HCS34(portname)
         self.power_supply.set_voltage_limit(10)
         self.control_mode = 'Manual'
@@ -19,12 +26,12 @@ class CeramicSputterHeater(AbstractController):
         self.manual_output_power = 0
         self.working_power = 0
 
-        self.rate = 15
+        self.rate = config['Control']['Rate']
         self.working_setpoint = 25
         self.target_setpoint = 25
 
         self.smoothed_temperature = 25
-        self.smoothing_factor = 0.25
+        self.smoothing_factor = 0.8
 
         # Timer for automatic ramping mode
         self.loop_time = 250
@@ -32,14 +39,14 @@ class CeramicSputterHeater(AbstractController):
         self.timer.timeout.connect(self._control_loop)
         self.timer.start(self.loop_time)
 
-        # Hard coded resistance at 25 Celsius, should be made variable in the future
-        self.r_cold = 0.528
-        self.wire_geometry_factor = 0.2075 / self.r_cold
+        # Take heater resistance from config file
+        self.r_cold = config['Heater']['R_cold']
+        self.wire_geometry_factor = config['Heater']['Geom_factor']
 
-        # default pid parameters, needs a better way to handle defaults
-        self.pid_controller = SoftwarePID(1000, 30, 30)
-
-        self.config_dir_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools')
+        pb = config['PID']['P']
+        ti = config['PID']['I']
+        td = config['PID']['D']
+        self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time/1000)
 
     @staticmethod
     def _power_from_temp(t_set):
@@ -88,8 +95,8 @@ class CeramicSputterHeater(AbstractController):
             resistance = self.r_cold
 
         new_temperature = self._temp_from_resistance(resistance)
-        self.smoothed_temperature *= (1 - self.smoothing_factor)
-        self.smoothed_temperature += new_temperature * self.smoothing_factor
+        self.smoothed_temperature *= self.smoothing_factor
+        self.smoothed_temperature += new_temperature * (1 - self.smoothing_factor)
 
         return self.smoothed_temperature
 
@@ -162,3 +169,22 @@ class CeramicSputterHeater(AbstractController):
         # Writing to config.ini file
         with open(config_file_path, 'w') as configfile:
             config.write(configfile)
+
+    def read_from_config(self):
+        config = configparser.ConfigParser()
+        config_file_path = os.path.join(self.config_dir_path, 'HCS34.ini')
+        if os.path.exists(config_file_path):
+            config.read(config_file_path)
+
+            return {'PID': {'P': config.getfloat('PID', 'P', fallback=self.default_config['PID']['P']),
+                            'I': config.getfloat('PID', 'I', fallback=self.default_config['PID']['I']),
+                            'D': config.getfloat('PID', 'D', fallback=self.default_config['PID']['D'])},
+                    'Control': {
+                        'Rate': config.getfloat('Control', 'Rate', fallback=self.default_config['Control']['Rate'])},
+                    'Heater': {
+                        'R_cold': config.getfloat('Heater', 'R_cold', fallback=self.default_config['Heater']['R_cold']),
+                        'Geom_factor': config.getfloat('Heater', 'Geom_facor',
+                                                       fallback=self.default_config['Heater']['Geom_factor'])}}
+
+        else:
+            return self.default_config

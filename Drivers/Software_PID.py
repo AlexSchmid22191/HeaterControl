@@ -2,7 +2,7 @@ import time
 
 
 class SoftwarePID:
-    def __init__(self, pb, ti, td):
+    def __init__(self, pb, ti, td, loop_interval=0.25):
         self.pb = pb
         self.ti = ti
         self.td = td
@@ -10,7 +10,7 @@ class SoftwarePID:
         self.last_process_variable = 0
         self.output_sum = 0
 
-        self.interval = 0.25  # seconds
+        self.interval = loop_interval  # seconds
         self.last_update = time.time()
 
     def calculate_output(self, process_variable, setpoint):
@@ -23,13 +23,8 @@ class SoftwarePID:
             self.output_sum += ki * error
             self.output_sum = self._constrain(self.output_sum)
 
-            output = error * kp + self.output_sum# + d_pv * kd
+            output = error * kp + self.output_sum + d_pv * kd
             output = self._constrain(output, _min=12)
-
-            print(f'P Term: {error * kp}')
-            print(f'I Term: {self.output_sum}')
-            print(time.time())
-
 
             self.last_process_variable = process_variable
             self.last_update = now
