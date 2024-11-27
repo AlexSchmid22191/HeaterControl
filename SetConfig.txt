@@ -1,0 +1,7 @@
+--type_heater=Test Controller
+--type_sensor=Test Sensor
+--port_heater=Testport
+--port_sensor=Testport
+--delta_temp=5
+--delta_time=3
+--time_res=1
