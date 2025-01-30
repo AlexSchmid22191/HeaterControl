@@ -19,6 +19,8 @@ class CeramicSputterHeater(AbstractController):
         self.config_dir_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools')
         config = self.read_from_config()
 
+        print(config)
+
         self.power_supply = HCS34(portname)
         self.power_supply.set_voltage_limit(10)
         self.control_mode = 'Manual'
@@ -164,7 +166,9 @@ class CeramicSputterHeater(AbstractController):
         config['PID'] = {'P': str(self.pid_controller.pb),
                          'I': str(self.pid_controller.ti),
                          'D': str(self.pid_controller.td)}
-        config['Control'] = {'Ramp': str(self.rate)}
+        config['Control'] = {'Rate': str(self.rate)}
+        config['Heater'] = {'R_cold': str(self.r_cold),
+                            'Geom_factor': str(self.wire_geometry_factor)}
 
         # Writing to config.ini file
         with open(config_file_path, 'w') as configfile:
@@ -183,7 +187,7 @@ class CeramicSputterHeater(AbstractController):
                         'Rate': config.getfloat('Control', 'Rate', fallback=self.default_config['Control']['Rate'])},
                     'Heater': {
                         'R_cold': config.getfloat('Heater', 'R_cold', fallback=self.default_config['Heater']['R_cold']),
-                        'Geom_factor': config.getfloat('Heater', 'Geom_facor',
+                        'Geom_factor': config.getfloat('Heater', 'Geom_factor',
                                                        fallback=self.default_config['Heater']['Geom_factor'])}}
 
         else:
