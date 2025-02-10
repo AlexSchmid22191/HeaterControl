@@ -23,11 +23,14 @@ class SoftwarePID:
             self.output_sum += ki * error
             self.output_sum = self._constrain(self.output_sum)
 
-            output = error * kp + self.output_sum + d_pv * kd
+            output = error * kp + self.output_sum - d_pv * kd
             output = self._constrain(output, _min=12)
 
             self.last_process_variable = process_variable
             self.last_update = now
+
+            print(f'P term: {kp*error} I term: {self.output_sum} D term: {d_pv*kd}')
+            print(f'Output: {output}')
 
             return output
 

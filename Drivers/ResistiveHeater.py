@@ -66,7 +66,7 @@ class CeramicSputterHeater(AbstractController):
         else:
             self._working_setpoint_adjust()
             self.working_power = self.pid_controller.calculate_output(self.get_process_variable(),
-                                                                      self.working_setpoint)
+                                                                      self.working_setpoint) or self.working_power
 
         self.power_supply.set_current_limit(self.working_power / 10)
 
