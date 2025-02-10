@@ -1,7 +1,7 @@
 import configparser
 import os
 
-from PySide6.QtCore import QTimer
+from PySide2.QtCore import QTimer
 
 from Drivers.AbstractSensorController import AbstractController
 from Drivers.HCS import HCS34

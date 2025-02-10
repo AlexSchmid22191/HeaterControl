@@ -2,7 +2,7 @@ import functools
 
 import pubsub.pub
 from Signals import gui_signals, engine_signals
-from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton
 
 
 class ElchControlMenu(QWidget):

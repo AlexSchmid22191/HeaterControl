@@ -1,7 +1,7 @@
 import functools
 
 import pubsub.pub
-from PySide6.QtWidgets import QWidget, QComboBox, QSpinBox, QDoubleSpinBox, QVBoxLayout, QLabel, QFormLayout, \
+from PySide2.QtWidgets import QWidget, QComboBox, QSpinBox, QDoubleSpinBox, QVBoxLayout, QLabel, QFormLayout, \
     QPushButton
 
 

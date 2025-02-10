@@ -2,7 +2,7 @@ import time
 
 import pubsub.pub
 import pubsub.pub
-from PySide6.QtCore import QTimer
+from PySide2.QtCore import QTimer
 
 from Signals import engine_signals
 
