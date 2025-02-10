@@ -17,7 +17,7 @@ def main():
     app.setWindowIcon(QIcon('Icons/Logo.ico'))
     engine = HeaterControlEngine()
     gui = ElchMainWindow()
-    app.exec()
+    app.exec_()
 
 
 if __name__ == '__main__':

@@ -12,15 +12,12 @@ class CeramicSputterHeater(AbstractController):
     mode = 'Temperature'
 
     def __init__(self, portname, *args, **kwargs):
-        self.default_config = {'PID': {'P': 750, 'I': 12, 'D': 20},
-                               'Control': {'Rate': 15},
-                               'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929}}
-
         self.config_dir_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools')
         config = self.read_from_config()
 
         self.power_supply = HCS34(portname)
-        self.power_supply.set_voltage_limit(10)
+        self.max_voltage = config['Heater']['U_max']
+        self.power_supply.set_voltage_limit(self.max_voltage)
         self.control_mode = 'Manual'
 
         self.manual_output_power = 0
@@ -46,7 +43,7 @@ class CeramicSputterHeater(AbstractController):
         pb = config['PID']['P']
         ti = config['PID']['I']
         td = config['PID']['D']
-        self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time/1000)
+        self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time / 1000)
 
     @staticmethod
     def _power_from_temp(t_set):
@@ -164,7 +161,9 @@ class CeramicSputterHeater(AbstractController):
         config['PID'] = {'P': str(self.pid_controller.pb),
                          'I': str(self.pid_controller.ti),
                          'D': str(self.pid_controller.td)}
-        config['Control'] = {'Ramp': str(self.rate)}
+        config['Control'] = {'Rate': str(self.rate)}
+        config['Heater'] = {'R_cold': str(self.r_cold), 'Geom_factor': str(self.wire_geometry_factor),
+                            'U_max': str(self.max_voltage)}
 
         # Writing to config.ini file
         with open(config_file_path, 'w') as configfile:
@@ -176,15 +175,17 @@ class CeramicSputterHeater(AbstractController):
         if os.path.exists(config_file_path):
             config.read(config_file_path)
 
-            return {'PID': {'P': config.getfloat('PID', 'P', fallback=self.default_config['PID']['P']),
-                            'I': config.getfloat('PID', 'I', fallback=self.default_config['PID']['I']),
-                            'D': config.getfloat('PID', 'D', fallback=self.default_config['PID']['D'])},
+            return {'PID': {'P': config.getfloat('PID', 'P', fallback=750),
+                            'I': config.getfloat('PID', 'I', fallback=12),
+                            'D': config.getfloat('PID', 'D', fallback=20)},
                     'Control': {
-                        'Rate': config.getfloat('Control', 'Rate', fallback=self.default_config['Control']['Rate'])},
+                        'Rate': config.getfloat('Control', 'Rate', fallback=15)},
                     'Heater': {
-                        'R_cold': config.getfloat('Heater', 'R_cold', fallback=self.default_config['Heater']['R_cold']),
-                        'Geom_factor': config.getfloat('Heater', 'Geom_facor',
-                                                       fallback=self.default_config['Heater']['Geom_factor'])}}
+                        'R_cold': config.getfloat('Heater', 'R_cold', fallback=0.5),
+                        'Geom_factor': config.getfloat('Heater', 'Geom_factor', fallback=0.4),
+                        'U_max': config.getfloat('Heater', 'U_max', fallback=10)}}
 
         else:
-            return self.default_config
+            return {'PID': {'P': 750, 'I': 12, 'D': 20},
+                    'Control': {'Rate': 15},
+                    'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929, 'U_max': 10}}
