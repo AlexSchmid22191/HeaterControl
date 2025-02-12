@@ -17,6 +17,8 @@ class CeramicSputterHeater(AbstractController):
 
         self.power_supply = HCS34(portname)
         self.max_voltage = config['Heater']['U_max']
+        self.max_current = config['Heater']['I_max']
+
         self.power_supply.set_voltage_limit(self.max_voltage)
         self.control_mode = 'Manual'
 
@@ -68,7 +70,7 @@ class CeramicSputterHeater(AbstractController):
             self.working_power = self.pid_controller.calculate_output(self.get_process_variable(),
                                                                       self.working_setpoint) or self.working_power
 
-        self.power_supply.set_current_limit(self.working_power / 10)
+        self.power_supply.set_current_limit(self.working_power / 100 * self.max_current)
 
     def _working_setpoint_adjust(self):
         increment = self.rate * self.loop_time / 1000 / 60
@@ -163,7 +165,7 @@ class CeramicSputterHeater(AbstractController):
                          'D': str(self.pid_controller.td)}
         config['Control'] = {'Rate': str(self.rate)}
         config['Heater'] = {'R_cold': str(self.r_cold), 'Geom_factor': str(self.wire_geometry_factor),
-                            'U_max': str(self.max_voltage)}
+                            'U_max': str(self.max_voltage),'I_max': str(self.max_current)}
 
         # Writing to config.ini file
         with open(config_file_path, 'w') as configfile:
@@ -183,9 +185,10 @@ class CeramicSputterHeater(AbstractController):
                     'Heater': {
                         'R_cold': config.getfloat('Heater', 'R_cold', fallback=0.5),
                         'Geom_factor': config.getfloat('Heater', 'Geom_factor', fallback=0.4),
-                        'U_max': config.getfloat('Heater', 'U_max', fallback=10)}}
+                        'U_max': config.getfloat('Heater', 'U_max', fallback=10),
+                        'I_max': config.getfloat('Heater', 'I_max', fallback=10)}}
 
         else:
             return {'PID': {'P': 750, 'I': 12, 'D': 20},
                     'Control': {'Rate': 15},
-                    'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929, 'U_max': 10}}
+                    'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929, 'U_max': 10, 'I_max': 10}}
