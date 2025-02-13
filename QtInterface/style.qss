@@ -8,6 +8,8 @@ QDialog QPushButton:hover{background: #434778; color: #7b8ccb}
 QDialog QPushButton:checked:hover{background: #434778; color: #7b8ccb}
 QDialog QPushButton:checked{background: #434778; color: #7b8ccb}
 
+QTextBroser{background-color:#2A2D56; border:1px solid #15183b}
+
 /*Styling of the Status Bar*/
 ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
 ElchStatusBar QLabel#label{color: #7b8ccb; font: 8pt "Roboto Light";}
