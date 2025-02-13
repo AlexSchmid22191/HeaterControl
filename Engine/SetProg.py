@@ -32,7 +32,7 @@ class SetpointProgrammer:
 
         else:
             # Check if hold time has elapsed, then switch to next segment
-            if int(time.time()) > self.hold_endtime and self.current_segment < len(self.segments):
+            if int(time.time()) > self.hold_endtime and self.current_segment < len(self.segments) and self.hold_endtime>0:
                 self.current_segment += 1
                 self.start_ramp()
 
@@ -51,5 +51,10 @@ class SetpointProgrammer:
         self.is_ramping = False
         self.hold_starttime = int(time.time())
         self.hold_endtime = self.hold_starttime+hold_time*60
+
+        # Option for indefinite hold
+        if hold_time == -1:
+            self.hold_endtime = -1
+
         pubsub.pub.sendMessage('engine.status', text=f'Hold segment {self.current_segment} started!')
         engine_signals.hold_segment_started.emit(self.current_segment)
