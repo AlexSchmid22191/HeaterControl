@@ -8,7 +8,7 @@ from Drivers.HCS import HCS34
 from Drivers.Software_PID import SoftwarePID
 
 
-class CeramicSputterHeater(AbstractController):
+class ResistiveHeater(AbstractController):
     mode = 'Temperature'
 
     def __init__(self, portname, *args, **kwargs):
