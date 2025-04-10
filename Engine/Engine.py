@@ -10,7 +10,7 @@ from serial import SerialException
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
 from Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
-from Drivers.ResistiveHeater import ResistiveHeater
+from Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
 from Drivers.Jumo import JumoQuantol
 from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Omega import OmegaPt
@@ -30,7 +30,8 @@ class HeaterControlEngine:
         self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
                                  'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol,
                                  'Elchi Laser Control': ElchLaser, 'Elchi Heater Controller': ElchLaser,
-                                 'Resistive Heater': ResistiveHeater}
+                                 'Resistive Heater Tenma': ResistiveHeaterTenma,
+                                 'Resistive Heater HCS': ResistiveHeaterHCS}
         self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
                              'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
                              'Eurotherm3508': Eurotherm3508S}

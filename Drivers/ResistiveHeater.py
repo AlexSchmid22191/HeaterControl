@@ -1,23 +1,34 @@
 import configparser
 import os
 
+import pubsub.pub
 from PySide2.QtCore import QTimer
 
 from Drivers.AbstractSensorController import AbstractController
 from Drivers.HCS import HCS34
+from Drivers.Tenma import Tenma
 from Drivers.Software_PID import SoftwarePID
 
 
 class ResistiveHeater(AbstractController):
     mode = 'Temperature'
 
-    def __init__(self, portname, *args, **kwargs):
-        self.config_dir_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools')
+    def __init__(self, portname, power_supply=None, config_fname=None, *args, **kwargs):
+
+        self.config_fname = config_fname
+        self.power_supply = power_supply(portname)
+
         config = self.read_from_config()
 
-        self.power_supply = HCS34(portname)
+        self.working_setpoint = 25
+        self.target_setpoint = 25
+
+        self.smoothed_temperature = 25
+        self.smoothing_factor = 0.8
+
         self.max_voltage = config['Heater']['U_max']
         self.max_current = config['Heater']['I_max']
+        self.min_output = config['Heater']['P_min']
 
         self.power_supply.set_voltage_limit(self.max_voltage)
         self.control_mode = 'Manual'
@@ -26,11 +37,6 @@ class ResistiveHeater(AbstractController):
         self.working_power = 0
 
         self.rate = config['Control']['Rate']
-        self.working_setpoint = 25
-        self.target_setpoint = 25
-
-        self.smoothed_temperature = 25
-        self.smoothing_factor = 0.8
 
         # Timer for automatic ramping mode
         self.loop_time = 250
@@ -47,28 +53,18 @@ class ResistiveHeater(AbstractController):
         td = config['PID']['D']
         self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time / 1000)
 
-    @staticmethod
-    def _power_from_temp(t_set):
-        """
-        Calculates the required set current to achive a temperature of t_set
-        Uses a quadratic fit to approximate data meaasured on ceramic sputter device
-        Warning: Even at 0 Celsius set this approximation yields a current of 0.84 A
-        """
-        # Calibration using measured curernts
-        # current = 0.84347681 + 0.00105813 * t_set + 4.52795972e-06 * t_set**2
-        # Calibration using set currents
-        current = 0.91967429 + 0.00111274 * t_set + 4.46679138e-06 * t_set ** 2
-        # Constrain pwoer to 0 - 100
-        return max(0, min(current * 10, 100))
+        pubsub.pub.subscribe(self.report_heater_config, 'gui.request.resistive_heater_config')
+        pubsub.pub.subscribe(self.update_config, 'gui.set.resistive_heater_config')
 
     def _control_loop(self):
-
         if self.control_mode == 'Manual':
             self.working_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
-            self.working_power = self.pid_controller.calculate_output(self.get_process_variable(),
-                                                                      self.working_setpoint) or self.working_power
+            pid_result = (self.pid_controller.calculate_output(self.get_process_variable(), self.working_setpoint)
+                          or self.working_power)
+
+            self.working_power = max(pid_result, self.min_output)
 
         self.power_supply.set_current_limit(self.working_power / 100 * self.max_current)
 
@@ -82,9 +78,9 @@ class ResistiveHeater(AbstractController):
     def _temp_from_resistance(self, resistance):
         """
         Calcualtes heater coil temeprture based on heater coil resistance.
-        Equation is absed on empirical data from the ceramic sputter device
+        Equation is based on empirical data from the ceramic sputter device
         and known temeprature dependence of heater coil resistance.
-        Should be generalised in the future
+        Should be generalised in the future.
         """
         return (resistance * self.wire_geometry_factor - 0.2) / 0.0003
 
@@ -154,26 +150,26 @@ class ResistiveHeater(AbstractController):
         return self.pid_controller.td
 
     def write_config_to_file(self):
-        if not os.path.exists(self.config_dir_path):
-            os.makedirs(self.config_dir_path)
-
-        # Define the config file path
-        config_file_path = os.path.join(self.config_dir_path, 'HCS34.ini')
         config = configparser.ConfigParser()
         config['PID'] = {'P': str(self.pid_controller.pb),
                          'I': str(self.pid_controller.ti),
                          'D': str(self.pid_controller.td)}
         config['Control'] = {'Rate': str(self.rate)}
         config['Heater'] = {'R_cold': str(self.r_cold), 'Geom_factor': str(self.wire_geometry_factor),
-                            'U_max': str(self.max_voltage),'I_max': str(self.max_current)}
+                            'U_max': str(self.max_voltage), 'I_max': str(self.max_current),
+                            'P_min': str(self.min_output)}
 
-        # Writing to config.ini file
+        config_file_path = os.path.join(directory := os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools'),
+                                        self.config_fname)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         with open(config_file_path, 'w') as configfile:
             config.write(configfile)
 
     def read_from_config(self):
         config = configparser.ConfigParser()
-        config_file_path = os.path.join(self.config_dir_path, 'HCS34.ini')
+        config_file_path = os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools', self.config_fname)
         if os.path.exists(config_file_path):
             config.read(config_file_path)
 
@@ -186,9 +182,36 @@ class ResistiveHeater(AbstractController):
                         'R_cold': config.getfloat('Heater', 'R_cold', fallback=0.5),
                         'Geom_factor': config.getfloat('Heater', 'Geom_factor', fallback=0.4),
                         'U_max': config.getfloat('Heater', 'U_max', fallback=10),
-                        'I_max': config.getfloat('Heater', 'I_max', fallback=10)}}
+                        'I_max': config.getfloat('Heater', 'I_max', fallback=10),
+                        'P_min': config.getfloat('Heater', 'P_min', fallback=10)}}
 
         else:
             return {'PID': {'P': 750, 'I': 12, 'D': 20},
                     'Control': {'Rate': 15},
-                    'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929, 'U_max': 10, 'I_max': 10}}
+                    'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929, 'U_max': 10, 'I_max': 10, 'P_min': 10}}
+
+    def update_config(self, parameters):
+        self.max_voltage = parameters['maximum voltage']
+        self.max_current = parameters['maximum current']
+        self.r_cold = parameters['cold resistance']
+        self.wire_geometry_factor = parameters['wire geometry factor']
+        self.min_output = parameters['minimum output']
+        self.write_config_to_file()
+
+        self.power_supply.set_voltage_limit(self.max_voltage)
+
+    def report_heater_config(self):
+        parameters = {'cold resistance': self.r_cold, 'wire geometry factor': self.wire_geometry_factor,
+                      'maximum current': self.max_current, 'maximum voltage': self.max_voltage,
+                      'minimum output': self.min_output}
+        pubsub.pub.sendMessage('engine.answer.resistive_heater_config', parameters=parameters)
+
+
+class ResistiveHeaterTenma(ResistiveHeater):
+    def __init__(self, portname, *args, **kwargs):
+        super().__init__(portname=portname, power_supply=Tenma, config_fname='Tenma.ini')
+
+
+class ResistiveHeaterHCS(ResistiveHeater):
+    def __init__(self, portname, *args, **kwargs):
+        super().__init__(portname=portname, power_supply=HCS34, config_fname='HCS.ini')
