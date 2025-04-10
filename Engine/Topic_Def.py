@@ -42,6 +42,14 @@ class engine:
                 - pid_parameters: dict
                 """
 
+        class resistive_heater_config:
+            """
+            """
+            def msgDataSpec(parameters):
+                """
+                - parameters: dict
+                """
+
     class status:
         """
         """
@@ -145,6 +153,14 @@ class gui:
             """
             """
 
+        class resistive_heater_config:
+            """
+            """
+            def msgDataSpec(parameters):
+                """
+                - parameters: dict
+                """
+
     class plot:
         """
         A class for everthing related to plotting/logging
@@ -180,5 +196,9 @@ class gui:
             """
             """
         class pid_parameters:
+            """
+            """
+
+        class resistive_heater_config:
             """
             """

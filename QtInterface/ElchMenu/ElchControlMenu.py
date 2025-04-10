@@ -1,8 +1,9 @@
 import functools
 
 import pubsub.pub
-from Signals import gui_signals, engine_signals
-from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton
+from Signals import gui_signals
+from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, QGridLayout
+from PySide2.QtCore import Qt
 
 
 class ElchControlMenu(QWidget):
@@ -45,6 +46,12 @@ class ElchControlMenu(QWidget):
         vbox.addWidget(enable_button)
         vbox.addWidget(aiming_beam_button)
 
+        vbox.addSpacing(10)
+
+        res_conf_button = QPushButton(text='Resistive Heater Config', objectName='Config')
+        res_conf_button.clicked.connect(self.resistive_heater_config)
+        vbox.addWidget(res_conf_button)
+
         vbox.addStretch()
         self.setLayout(vbox)
 
@@ -79,3 +86,53 @@ class ElchControlMenu(QWidget):
                 self.entries[key].blockSignals(True)
                 self.entries[key].setValue(control_parameters[key])
                 self.entries[key].blockSignals(False)
+
+    def resistive_heater_config(self):
+        dlg = ResConfDialog(self)
+        dlg.exec_()
+
+
+class ResConfDialog(QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setWindowTitle('Resistive heater configuration')
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        vbox = QVBoxLayout()
+        vbox.setContentsMargins(20, 20, 20, 20)
+        vbox.setSpacing(10)
+        vbox.addWidget(QLabel('Resistive heater configuration', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel('Warning: Do not change any values here\nunless you know exactly what you are doing!'))
+
+        g_box = QGridLayout()
+        fields = ['cold resistance', 'wire geometry factor', 'maximum current', 'maximum voltage', 'minimum output']
+        self.boxes = {}
+
+        for i, field in enumerate(fields):
+            g_box.addWidget(QLabel(field.title()), i, 0)
+            spin_box = QDoubleSpinBox()
+            spin_box.setRange(0.0, 100.0)
+            g_box.addWidget(spin_box, i, 1)
+            self.boxes.update({field: spin_box})
+
+        pubsub.pub.subscribe(self.update_params, 'engine.answer.resistive_heater_config')
+        pubsub.pub.sendMessage('gui.request.resistive_heater_config')
+
+        vbox.addLayout(g_box)
+        vbox.addWidget(button := QPushButton('Save config'))
+        button.clicked.connect(self.save_config)
+        vbox.addWidget(button2 := QPushButton('Close'))
+        button2.clicked.connect(self.close)
+
+        self.setLayout(vbox)
+
+    def save_config(self):
+        pubsub.pub.sendMessage('gui.set.resistive_heater_config',
+                               parameters={_field: _spin_box.value() for (_field, _spin_box) in self.boxes.items()})
+        self.close()
+
+    def update_params(self, parameters):
+        for key, value in parameters.items():
+            self.boxes[key].setValue(float(value))
