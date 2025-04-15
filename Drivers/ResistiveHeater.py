@@ -46,7 +46,7 @@ class ResistiveHeater(AbstractController):
 
         # Take heater resistance from config file
         self.r_cold = config['Heater']['R_cold']
-        self.wire_geometry_factor = config['Heater']['Geom_factor']
+        self.wire_geometry_factor = 0.2075 / self.r_cold
 
         pb = config['PID']['P']
         ti = config['PID']['I']
@@ -155,8 +155,7 @@ class ResistiveHeater(AbstractController):
                          'I': str(self.pid_controller.ti),
                          'D': str(self.pid_controller.td)}
         config['Control'] = {'Rate': str(self.rate)}
-        config['Heater'] = {'R_cold': str(self.r_cold), 'Geom_factor': str(self.wire_geometry_factor),
-                            'U_max': str(self.max_voltage), 'I_max': str(self.max_current),
+        config['Heater'] = {'R_cold': str(self.r_cold), 'U_max': str(self.max_voltage), 'I_max': str(self.max_current),
                             'P_min': str(self.min_output)}
 
         config_file_path = os.path.join(directory := os.path.join(os.getenv('APPDATA'), 'ElchiWorks', 'ElchiTools'),
@@ -180,7 +179,6 @@ class ResistiveHeater(AbstractController):
                         'Rate': config.getfloat('Control', 'Rate', fallback=15)},
                     'Heater': {
                         'R_cold': config.getfloat('Heater', 'R_cold', fallback=0.5),
-                        'Geom_factor': config.getfloat('Heater', 'Geom_factor', fallback=0.4),
                         'U_max': config.getfloat('Heater', 'U_max', fallback=10),
                         'I_max': config.getfloat('Heater', 'I_max', fallback=10),
                         'P_min': config.getfloat('Heater', 'P_min', fallback=10)}}
@@ -188,22 +186,21 @@ class ResistiveHeater(AbstractController):
         else:
             return {'PID': {'P': 750, 'I': 12, 'D': 20},
                     'Control': {'Rate': 15},
-                    'Heater': {'R_cold': 0.528, 'Geom_factor': 0.3929, 'U_max': 10, 'I_max': 10, 'P_min': 10}}
+                    'Heater': {'R_cold': 0.528, 'U_max': 10, 'I_max': 10, 'P_min': 10}}
 
     def update_config(self, parameters):
         self.max_voltage = parameters['maximum voltage']
         self.max_current = parameters['maximum current']
         self.r_cold = parameters['cold resistance']
-        self.wire_geometry_factor = parameters['wire geometry factor']
+        self.wire_geometry_factor = 0.2075 / self.r_cold
         self.min_output = parameters['minimum output']
         self.write_config_to_file()
 
         self.power_supply.set_voltage_limit(self.max_voltage)
 
     def report_heater_config(self):
-        parameters = {'cold resistance': self.r_cold, 'wire geometry factor': self.wire_geometry_factor,
-                      'maximum current': self.max_current, 'maximum voltage': self.max_voltage,
-                      'minimum output': self.min_output}
+        parameters = {'cold resistance': self.r_cold, 'maximum current': self.max_current,
+                      'maximum voltage': self.max_voltage, 'minimum output': self.min_output}
         pubsub.pub.sendMessage('engine.answer.resistive_heater_config', parameters=parameters)
 
 

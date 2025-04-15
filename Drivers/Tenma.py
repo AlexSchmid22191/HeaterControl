@@ -73,7 +73,7 @@ class Tenma(Serial):
 
             voltage = float(answer_v.decode())
             current = float(answer_c.decode())
-            if current < 0.5:
+            if current < 0.1:
                 return -1
             else:
                 return voltage / current
