@@ -1,5 +1,6 @@
-from serial import Serial
 import threading
+
+from serial import Serial
 
 
 class Tenma(Serial):

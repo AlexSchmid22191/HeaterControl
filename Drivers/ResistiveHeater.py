@@ -1,17 +1,16 @@
 import configparser
 import os
 import time
-from Engine.ThreadDecorators import Worker
-from scipy.stats import linregress
 
 import pubsub.pub
 from PySide2.QtCore import QTimer, QThreadPool
+from scipy.stats import linregress
 
 from Drivers.AbstractSensorController import AbstractController
 from Drivers.HCS import HCS34
-from Drivers.Tenma import Tenma
 from Drivers.Software_PID import SoftwarePID
-
+from Drivers.Tenma import Tenma
+from Engine.ThreadDecorators import Worker
 
 
 class ResistiveHeater(AbstractController):
@@ -215,7 +214,7 @@ class ResistiveHeater(AbstractController):
             U = []
             I = []
             for i in range(10):
-                self.set_manual_output_power(i+1)
+                self.set_manual_output_power(i + 1)
                 time.sleep(1)
                 U.append(self.power_supply.get_voltage())
                 I.append(self.power_supply.get_current())
@@ -226,7 +225,8 @@ class ResistiveHeater(AbstractController):
                 return {'State': 'Fail'}
 
         worker = Worker(_calib)
-        worker.signals.over.connect(lambda val: pubsub.pub.sendMessage('engine.answer.calibration', calibration_data=val))
+        worker.signals.over.connect(
+            lambda val: pubsub.pub.sendMessage('engine.answer.calibration', calibration_data=val))
         QThreadPool.globalInstance().start(worker)
 
 

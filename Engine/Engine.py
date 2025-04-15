@@ -10,15 +10,14 @@ from serial import SerialException
 from Drivers.AbstractSensorController import AbstractController, AbstractSensor
 from Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
-from Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
 from Drivers.Jumo import JumoQuantol
 from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
 from Drivers.Omega import OmegaPt
 from Drivers.Pyrometer import Pyrometer
+from Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
 from Drivers.TestDevices import TestSensor, TestController, NiceTestController
-from Engine.ThreadDecorators import Worker
 from Engine.SetProg import SetpointProgrammer
-
+from Engine.ThreadDecorators import Worker
 from Signals import engine_signals, gui_signals
 
 TEST_MODE = False

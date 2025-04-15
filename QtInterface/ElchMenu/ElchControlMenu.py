@@ -1,16 +1,16 @@
 import functools
 
-import pubsub.pub
-from Signals import gui_signals
-from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, QGridLayout
-from PySide2.QtCore import Qt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.font_manager as fm
 import matplotlib.style
 import matplotlib.ticker
+import pubsub.pub
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, \
+    QGridLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-import numpy as np
 
+from Signals import gui_signals
 
 
 class ElchControlMenu(QWidget):
@@ -176,7 +176,7 @@ class CalDialog(QDialog):
             ax = plot.figure.subplots()
 
             line_x = [0, max(data['I'])]
-            line_y = [i*data['R']+data['OS'] for i in line_x]
+            line_y = [i * data['R'] + data['OS'] for i in line_x]
 
             ax.plot(data['I'], data['U'], marker='o', ls='None', color='#86f8ab')
             ax.plot(line_x, line_y, marker='None', ls='-', color='#86b3f9')

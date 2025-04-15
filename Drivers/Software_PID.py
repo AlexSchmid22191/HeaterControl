@@ -25,6 +25,7 @@ class SoftwarePID:
 
             output = error * kp + self.output_sum - d_pv * kd
 
+            output = self._constrain(output)
             self.last_process_variable = process_variable
             self.last_update = now
 
