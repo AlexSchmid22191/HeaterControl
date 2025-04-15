@@ -4,6 +4,13 @@ import pubsub.pub
 from Signals import gui_signals
 from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, QGridLayout
 from PySide2.QtCore import Qt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import matplotlib.font_manager as fm
+import matplotlib.style
+import matplotlib.ticker
+from matplotlib.figure import Figure
+import numpy as np
+
 
 
 class ElchControlMenu(QWidget):
@@ -107,7 +114,7 @@ class ResConfDialog(QDialog):
         vbox.addWidget(QLabel('Warning: Do not change any values here\nunless you know exactly what you are doing!'))
 
         g_box = QGridLayout()
-        fields = ['cold resistance', 'wire geometry factor', 'maximum current', 'maximum voltage', 'minimum output']
+        fields = ['cold resistance', 'maximum current', 'maximum voltage', 'minimum output']
         self.boxes = {}
 
         for i, field in enumerate(fields):
@@ -141,52 +148,68 @@ class ResConfDialog(QDialog):
             self.boxes[key].setValue(float(value))
 
     def dispaly_calibration_results(self, calibration_data):
-        print(calibration_data)
-        pass
-
+        dlg = CalDialog(data=calibration_data, parent=self)
+        if dlg.exec_() == QDialog.Accepted:
+            self.boxes['cold resistance'].setValue(calibration_data['R'])
 
 
 class CalDialog(QDialog):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setWindowTitle('Resistive heater configuration')
+        self.setWindowTitle('Calibration results')
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setObjectName("CalDialog")
 
-        vbox = QVBoxLayout()
-        vbox.setContentsMargins(20, 20, 20, 20)
-        vbox.setSpacing(10)
-        vbox.addWidget(QLabel('Resistive heater configuration', objectName='Header'), alignment=Qt.AlignHCenter)
-        vbox.addWidget(QLabel('Warning: Do not change any values here\nunless you know exactly what you are doing!'))
+        if data['State'] == 'Fail':
+            vbox = QVBoxLayout()
+            vbox.setContentsMargins(20, 20, 20, 20)
+            vbox.setSpacing(10)
+            vbox.addWidget(QLabel('Calibration failed', objectName='Header'), alignment=Qt.AlignHCenter)
+            vbox.addWidget(button2 := QPushButton('Close'))
+            button2.clicked.connect(self.reject)
+            self.setLayout(vbox)
+        else:
+            plot = FigureCanvasQTAgg(Figure(figsize=(3, 3)))
 
-        g_box = QGridLayout()
-        fields = ['cold resistance', 'wire geometry factor', 'maximum current', 'maximum voltage', 'minimum output']
-        self.boxes = {}
+            ax = plot.figure.subplots()
 
-        for i, field in enumerate(fields):
-            g_box.addWidget(QLabel(field.title()), i, 0)
-            spin_box = QDoubleSpinBox()
-            spin_box.setRange(0.0, 100.0)
-            g_box.addWidget(spin_box, i, 1)
-            self.boxes.update({field: spin_box})
+            line_x = [0, max(data['I'])]
+            line_y = [i*data['R']+data['OS'] for i in line_x]
 
-        pubsub.pub.subscribe(self.update_params, 'engine.answer.resistive_heater_config')
-        pubsub.pub.sendMessage('gui.request.resistive_heater_config')
+            ax.plot(data['I'], data['U'], marker='o', ls='None', color='#86f8ab')
+            ax.plot(line_x, line_y, marker='None', ls='-', color='#86b3f9')
 
-        vbox.addLayout(g_box)
-        vbox.addWidget(button := QPushButton('Save config'))
-        button.clicked.connect(self.save_config)
-        vbox.addWidget(button2 := QPushButton('Close'))
-        button2.clicked.connect(self.close)
+            ax.set_xlabel('Current (A)', fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=11))
+            ax.set_ylabel('Voltage (V)', fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=11))
+            ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+            ax.yaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+            ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+            ax.yaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
-        self.setLayout(vbox)
+            plot.autoscale = True
+            plot.figure.tight_layout()
 
-    def save_config(self):
-        pubsub.pub.sendMessage('gui.set.resistive_heater_config',
-                               parameters={_field: _spin_box.value() for (_field, _spin_box) in self.boxes.items()})
-        self.close()
+            vbox = QVBoxLayout()
+            vbox.setContentsMargins(20, 20, 20, 20)
+            vbox.setSpacing(10)
+            vbox.addWidget(QLabel('Calibration results', objectName='Header'), alignment=Qt.AlignHCenter)
+            vbox.addSpacing(20)
+            vbox.addWidget(plot)
+            g_box = QGridLayout()
+            g_box.addWidget(QLabel('Cold resistance'), 0, 0)
+            g_box.addWidget(QLabel(f'{data["R"]:.3f} Ohm'), 0, 1)
+            g_box.addWidget(QLabel('Intercept'), 1, 0)
+            g_box.addWidget(QLabel(f'{data["OS"]:.3f} V'), 1, 1)
+            g_box.addWidget(QLabel('Correlation Coeff.'), 2, 0)
+            g_box.addWidget(QLabel(f'{data["R2"]:.3f}'), 2, 1)
+            vbox.addLayout(g_box)
 
-    def update_params(self, parameters):
-        for key, value in parameters.items():
-            self.boxes[key].setValue(float(value))
+            vbox.addSpacing(20)
+            vbox.addWidget(button := QPushButton('Accept calibration'))
+            button.clicked.connect(self.accept)
+            vbox.addWidget(button2 := QPushButton('Discard calibration'))
+            button2.clicked.connect(self.reject)
+
+            self.setLayout(vbox)

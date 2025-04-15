@@ -1,13 +1,17 @@
 import configparser
 import os
+import time
+from Engine.ThreadDecorators import Worker
+from scipy.stats import linregress
 
 import pubsub.pub
-from PySide2.QtCore import QTimer
+from PySide2.QtCore import QTimer, QThreadPool
 
 from Drivers.AbstractSensorController import AbstractController
 from Drivers.HCS import HCS34
 from Drivers.Tenma import Tenma
 from Drivers.Software_PID import SoftwarePID
+
 
 
 class ResistiveHeater(AbstractController):
@@ -206,8 +210,24 @@ class ResistiveHeater(AbstractController):
 
     def calibrate(self):
         print('Calibrating')
-        dummy_data = {'U': [1, 2, 3], 'I': [1, 2, 3], 'R': 1, 'OS': 0}
-        pubsub.pub.sendMessage('engine.answer.calibration', calibration_data=dummy_data)
+
+        def _calib():
+            U = []
+            I = []
+            for i in range(10):
+                self.set_manual_output_power(i+1)
+                time.sleep(1)
+                U.append(self.power_supply.get_voltage())
+                I.append(self.power_supply.get_current())
+            try:
+                slope, intercept, r_value, p_value, std_err = linregress(I, U)
+                return {'U': U, 'I': I, 'R': slope, 'OS': intercept, 'R2': r_value, 'State': 'Sucess'}
+            except ValueError:
+                return {'State': 'Fail'}
+
+        worker = Worker(_calib)
+        worker.signals.over.connect(lambda val: pubsub.pub.sendMessage('engine.answer.calibration', calibration_data=val))
+        QThreadPool.globalInstance().start(worker)
 
 
 class ResistiveHeaterTenma(ResistiveHeater):

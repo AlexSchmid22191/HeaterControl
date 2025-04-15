@@ -16,6 +16,14 @@ ResConfDialog QPushButton:hover{background: #434778; color: #7b8ccb}
 ResConfDialog QPushButton:checked:hover{background: #434778; color: #7b8ccb}
 ResConfDialog QPushButton:checked{background: #434778; color: #7b8ccb}
 
+CalDialog{background-color:#2A2D56; border:1px solid #15183b}
+CalDialog QLabel{color: #7b8ccb; font: 11pt "Roboto Light";}
+CalDialog QLabel#Header{font: 14pt "Roboto"}
+CalDialog QPushButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
+CalDialog QPushButton:hover{background: #434778; color: #7b8ccb}
+CalDialog QPushButton:checked:hover{background: #434778; color: #7b8ccb}
+CalDialog QPushButton:checked{background: #434778; color: #7b8ccb}
+
 QTextBroser{background-color:#2A2D56; border:1px solid #15183b}
 
 /*Styling of the Status Bar*/
