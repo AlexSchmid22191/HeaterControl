@@ -118,6 +118,60 @@ class ResConfDialog(QDialog):
             self.boxes.update({field: spin_box})
 
         pubsub.pub.subscribe(self.update_params, 'engine.answer.resistive_heater_config')
+        pubsub.pub.subscribe(self.dispaly_calibration_results, 'engine.answer.calibration')
+        pubsub.pub.sendMessage('gui.request.resistive_heater_config')
+
+        vbox.addLayout(g_box)
+        vbox.addWidget(button3 := QPushButton('Calibrate'))
+        button3.clicked.connect(functools.partial(pubsub.pub.sendMessage, topicName='gui.request.calibration'))
+        vbox.addWidget(button := QPushButton('Save config'))
+        button.clicked.connect(self.save_config)
+        vbox.addWidget(button2 := QPushButton('Close'))
+        button2.clicked.connect(self.close)
+
+        self.setLayout(vbox)
+
+    def save_config(self):
+        pubsub.pub.sendMessage('gui.set.resistive_heater_config',
+                               parameters={_field: _spin_box.value() for (_field, _spin_box) in self.boxes.items()})
+        self.close()
+
+    def update_params(self, parameters):
+        for key, value in parameters.items():
+            self.boxes[key].setValue(float(value))
+
+    def dispaly_calibration_results(self, calibration_data):
+        print(calibration_data)
+        pass
+
+
+
+class CalDialog(QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setWindowTitle('Resistive heater configuration')
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        vbox = QVBoxLayout()
+        vbox.setContentsMargins(20, 20, 20, 20)
+        vbox.setSpacing(10)
+        vbox.addWidget(QLabel('Resistive heater configuration', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel('Warning: Do not change any values here\nunless you know exactly what you are doing!'))
+
+        g_box = QGridLayout()
+        fields = ['cold resistance', 'wire geometry factor', 'maximum current', 'maximum voltage', 'minimum output']
+        self.boxes = {}
+
+        for i, field in enumerate(fields):
+            g_box.addWidget(QLabel(field.title()), i, 0)
+            spin_box = QDoubleSpinBox()
+            spin_box.setRange(0.0, 100.0)
+            g_box.addWidget(spin_box, i, 1)
+            self.boxes.update({field: spin_box})
+
+        pubsub.pub.subscribe(self.update_params, 'engine.answer.resistive_heater_config')
         pubsub.pub.sendMessage('gui.request.resistive_heater_config')
 
         vbox.addLayout(g_box)

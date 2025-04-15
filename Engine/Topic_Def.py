@@ -50,6 +50,14 @@ class engine:
                 - parameters: dict
                 """
 
+        class calibration:
+            """
+            """
+            def msgDataSpec(calibration_data):
+                """
+                - calibration_data: dict
+                """
+
     class status:
         """
         """
@@ -200,5 +208,9 @@ class gui:
             """
 
         class resistive_heater_config:
+            """
+            """
+
+        class calibration:
             """
             """

@@ -55,6 +55,7 @@ class ResistiveHeater(AbstractController):
 
         pubsub.pub.subscribe(self.report_heater_config, 'gui.request.resistive_heater_config')
         pubsub.pub.subscribe(self.update_config, 'gui.set.resistive_heater_config')
+        pubsub.pub.subscribe(self.calibrate, 'gui.request.calibration')
 
     def _control_loop(self):
         if self.control_mode == 'Manual':
@@ -202,6 +203,11 @@ class ResistiveHeater(AbstractController):
         parameters = {'cold resistance': self.r_cold, 'maximum current': self.max_current,
                       'maximum voltage': self.max_voltage, 'minimum output': self.min_output}
         pubsub.pub.sendMessage('engine.answer.resistive_heater_config', parameters=parameters)
+
+    def calibrate(self):
+        print('Calibrating')
+        dummy_data = {'U': [1, 2, 3], 'I': [1, 2, 3], 'R': 1, 'OS': 0}
+        pubsub.pub.sendMessage('engine.answer.calibration', calibration_data=dummy_data)
 
 
 class ResistiveHeaterTenma(ResistiveHeater):
