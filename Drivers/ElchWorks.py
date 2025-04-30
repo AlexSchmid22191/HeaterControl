@@ -50,12 +50,12 @@ class Thermoplatino(AbstractSensor, serial.Serial):
     def close(self):
         serial.Serial.close(self)
 
-
 class ElchLaser(AbstractController, minimalmodbus.Instrument):
     mode = 'Temperature'
 
     def __init__(self, portname, slaveadress, baudrate=9600):
         super().__init__(portname, slaveadress)
+        time.sleep(1)
         self.serial.baudrate = baudrate
         self.com_lock = Lock()
 

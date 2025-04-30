@@ -218,6 +218,7 @@ class ResistiveHeater(AbstractController):
                 time.sleep(1)
                 U.append(self.power_supply.get_voltage())
                 I.append(self.power_supply.get_current())
+            self.set_manual_output_power(0)
             try:
                 slope, intercept, r_value, p_value, std_err = linregress(I, U)
                 return {'U': U, 'I': I, 'R': slope, 'OS': intercept, 'R2': r_value, 'State': 'Sucess'}
