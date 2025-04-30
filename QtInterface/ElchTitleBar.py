@@ -52,7 +52,7 @@ class ElchTitlebar(QWidget):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel('ElchiTools 2.8', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel('ElchiTools 2.9', objectName='Header'), alignment=Qt.AlignHCenter)
 
         license_label = QLabel()
         license_label.setText('License: GPL 3.0')
