@@ -1,5 +1,5 @@
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QWidget, QToolButton, QHBoxLayout, QDialog, QLabel, QVBoxLayout, QPushButton, QTextBrowser
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QToolButton, QHBoxLayout, QDialog, QLabel, QVBoxLayout, QPushButton, QTextBrowser
 
 
 class ElchTitlebar(QWidget):
