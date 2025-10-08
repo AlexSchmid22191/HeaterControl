@@ -3,7 +3,7 @@ import math
 
 import pubsub.pub
 import serial.tools.list_ports
-from PySide2.QtCore import QThreadPool
+from PySide6.QtCore import QThreadPool
 from pubsub.pub import sendMessage
 from serial import SerialException
 

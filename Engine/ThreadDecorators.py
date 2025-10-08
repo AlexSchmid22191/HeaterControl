@@ -1,5 +1,5 @@
 import serial
-from PySide2.QtCore import Signal, QRunnable, QObject
+from PySide6.QtCore import Signal, QRunnable, QObject
 
 
 class Signals(QObject):

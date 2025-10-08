@@ -3,7 +3,7 @@ import os
 import time
 
 import pubsub.pub
-from PySide2.QtCore import QTimer, QThreadPool
+from PySide6.QtCore import QTimer, QThreadPool
 from scipy.stats import linregress
 
 from Drivers.AbstractSensorController import AbstractController

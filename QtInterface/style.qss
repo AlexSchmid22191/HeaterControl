@@ -24,7 +24,7 @@ CalDialog QPushButton:hover{background: #434778; color: #7b8ccb}
 CalDialog QPushButton:checked:hover{background: #434778; color: #7b8ccb}
 CalDialog QPushButton:checked{background: #434778; color: #7b8ccb}
 
-QTextBroser{background-color:#2A2D56; border:1px solid #15183b}
+QTextBrowser{background-color:#2A2D56; border:1px solid #15183b}
 
 /*Styling of the Status Bar*/
 ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
