@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['ElchiSet/ElchiSet.py'],
+    ['ElchiSet\\ElchiProg.py'],
     pathex=["."],
     binaries=[],
     datas=[],
@@ -21,7 +21,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='ElchiSet',
+    name='ElchiProg',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -40,5 +40,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='ElchiSet',
+    name='ElchiProg',
 )
