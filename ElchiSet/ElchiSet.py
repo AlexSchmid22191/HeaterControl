@@ -24,13 +24,13 @@ def main():
         print(f"{k}: {v}")
 
     if args.config_path is None:
-        data_dir = Path(user_data_dir('ElchiSet', 'ElchWorks'), roaming=True)
+        data_dir = Path(user_data_dir('ElchiSet', 'ElchWorks', roaming=True))
         data_dir.mkdir(parents=True, exist_ok=True)
         args.config_path = data_dir / 'default_config.yaml'
         print(f'Using default config file path: {args.config_path}')
 
     if args.log_path is None:
-        data_dir = Path(user_data_dir('ElchiSet', 'ElchWorks'), roaming=True)
+        data_dir = Path(user_data_dir('ElchiSet', 'ElchWorks', roaming=True))
         data_dir.mkdir(parents=True, exist_ok=True)
         args.log_path = data_dir / f'log_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.txt'
         print(f'Using default log file path: {args.log_path}')
