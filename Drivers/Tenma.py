@@ -78,3 +78,15 @@ class Tenma(Serial):
                 return -1
             else:
                 return voltage / current
+
+    def enable_output(self):
+        string = f'OUT05:1'
+        with self.com_lock:
+            self.write(string.encode())
+            self.write(b'\x0D')
+
+    def disable_output(self):
+        string = f'OUT05:0'
+        with self.com_lock:
+            self.write(string.encode())
+            self.write(b'\x0D')
