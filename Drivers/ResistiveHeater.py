@@ -130,6 +130,8 @@ class ResistiveHeater(AbstractController):
 
     def set_automatic_mode(self):
         self.working_setpoint = self.get_process_variable()
+        # Reset the error accumulator on each switch to automatic mode to avoid windup
+        self.pid_controller.output_sum = 0
         self.control_mode = 'Automatic'
 
     def set_pid_p(self, p):
