@@ -166,7 +166,8 @@ class CalDialog(QDialog):
             vbox = QVBoxLayout()
             vbox.setContentsMargins(20, 20, 20, 20)
             vbox.setSpacing(10)
-            vbox.addWidget(QLabel('Calibration failed', objectName='Header'), alignment=Qt.AlignHCenter)
+            vbox.addWidget(QLabel('Calibration failed!\n Check if the circuit is clsoed\n and the output is enabled.',
+                                  objectName='Header'), alignment=Qt.AlignHCenter)
             vbox.addWidget(button2 := QPushButton('Close'))
             button2.clicked.connect(self.reject)
             self.setLayout(vbox)
