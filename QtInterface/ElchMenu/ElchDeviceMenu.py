@@ -1,8 +1,8 @@
 import functools
 
 import pubsub.pub
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QPushButton, QButtonGroup, QRadioButton, QVBoxLayout
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QWidget, QLabel, QComboBox, QPushButton, QButtonGroup, QRadioButton, QVBoxLayout
 
 
 class ElchDeviceMenu(QWidget):

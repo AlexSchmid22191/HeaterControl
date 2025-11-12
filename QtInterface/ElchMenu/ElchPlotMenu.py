@@ -1,7 +1,7 @@
 import functools
 
 import pubsub.pub
-from PySide6.QtWidgets import QWidget, QPushButton, QCheckBox, QButtonGroup, QVBoxLayout, QLabel, QFileDialog
+from PySide2.QtWidgets import QWidget, QPushButton, QCheckBox, QButtonGroup, QVBoxLayout, QLabel, QFileDialog
 
 
 class ElchPlotMenu(QWidget):

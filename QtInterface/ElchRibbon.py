@@ -1,6 +1,6 @@
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QWidget, QPushButton, QButtonGroup, QLabel, QVBoxLayout
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QPixmap
+from PySide2.QtWidgets import QWidget, QPushButton, QButtonGroup, QLabel, QVBoxLayout
 
 
 class ElchRibbon(QWidget):

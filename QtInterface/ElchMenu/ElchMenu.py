@@ -1,7 +1,7 @@
 import functools
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QWidget, QVBoxLayout
 
 from QtInterface.ElchMenu.ElchControlMenu import ElchControlMenu
 from QtInterface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu

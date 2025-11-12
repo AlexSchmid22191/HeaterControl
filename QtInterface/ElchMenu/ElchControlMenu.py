@@ -4,8 +4,8 @@ import matplotlib.font_manager as fm
 import matplotlib.style
 import matplotlib.ticker
 import pubsub.pub
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, \
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, \
     QGridLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure

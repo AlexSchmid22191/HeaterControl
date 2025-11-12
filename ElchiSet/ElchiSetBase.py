@@ -103,7 +103,7 @@ def temperature_control_loop(setpoint: float, config: dict, log_path: str | Path
 
     print(f'Setting {config["type_heater"]} at {config["port_heater"]} to {setpoint} C!')
     print(f'Monitoring via {config["type_sensor"]} at {config["port_sensor"]}!')
-    print(f'Waiting until the Temperature changes by less than {config['delta_temp']} C for {config['delta_time']} s!')
+    print(f'Waiting until the Temperature changes by less than {config["delta_temp"]} C for {config["delta_time"]} s!')
     print('Starting in 5 seconds, press Ctrl+C or close window to abort!')
     for i in range(5):
         print(f'{5 - i} ...')
@@ -152,7 +152,7 @@ def temperature_control_loop(setpoint: float, config: dict, log_path: str | Path
             # Reset the countdown and set the current temperature as reference for constancy
             last_meas_temp = current_temp
             time_left = config['delta_time']
-            print(f'Temperature changed by more than {config['delta_temp']}, resetting countdown!')
+            print(f'Temperature changed by more than {config["delta_temp"]}, resetting countdown!')
         else:
             # Temperature stays within delta_temp, decrease remaining time by time_res
             time_left -= config['time_res']

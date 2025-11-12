@@ -3,7 +3,7 @@ import math
 
 import pubsub.pub
 import serial.tools.list_ports
-from PySide6.QtCore import QThreadPool
+from PySide2.QtCore import QThreadPool
 from pubsub.pub import sendMessage
 from serial import SerialException
 
@@ -20,7 +20,7 @@ from Engine.SetProg import SetpointProgrammer
 from Engine.ThreadDecorators import Worker
 from Signals import engine_signals, gui_signals
 
-TEST_MODE = False
+TEST_MODE = True
 
 
 class HeaterControlEngine:

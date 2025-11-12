@@ -1,5 +1,5 @@
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication
+from PySide2.QtGui import QIcon
+from PySide2.QtWidgets import QApplication
 from pubsub.pub import addTopicDefnProvider, TOPIC_TREE_FROM_CLASS, setTopicUnspecifiedFatal
 
 from Engine import Topic_Def
