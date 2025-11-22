@@ -8,15 +8,15 @@ from pathlib import Path
 import yaml
 from serial.serialutil import SerialException
 
-from Drivers.AbstractSensorController import AbstractSensor, AbstractController
-from Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
-from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
-from Drivers.Jumo import JumoQuantol
-from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
-from Drivers.Omega import OmegaPt
-from Drivers.Pyrometer import Pyrometer
-from Drivers.ResistiveHeater import ResistiveHeaterHCS, ResistiveHeaterTenma
-from Drivers.TestDevices import TestSensor, TestController, NiceTestController
+from src.Drivers.AbstractSensorController import AbstractSensor, AbstractController
+from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
+from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
+from src.Drivers.Jumo import JumoQuantol
+from src.Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
+from src.Drivers.Omega import OmegaPt
+from src.Drivers.Pyrometer import Pyrometer
+from src.Drivers.ResistiveHeater import ResistiveHeaterHCS, ResistiveHeaterTenma
+from src.Drivers.TestDevices import TestSensor, TestController, NiceTestController
 
 
 controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,

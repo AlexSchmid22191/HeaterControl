@@ -1,6 +1,6 @@
 import threading
 import minimalmodbus
-from Drivers.AbstractSensorController import AbstractController
+from src.Drivers.AbstractSensorController import AbstractController
 
 
 class JumoQuantol(minimalmodbus.Instrument, AbstractController):

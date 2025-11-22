@@ -1,6 +1,6 @@
 import time
-from Drivers.Pyrometer import Pyrometer
-from Drivers.Omega import OmegaPt
+from src.Drivers.Pyrometer import Pyrometer
+from src.Drivers.Omega import OmegaPt
 
 pyro = Pyrometer('COM3')
 omega = OmegaPt('COM10', 1)

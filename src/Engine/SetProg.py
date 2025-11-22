@@ -4,7 +4,7 @@ import pubsub.pub
 import pubsub.pub
 from PySide2.QtCore import QTimer
 
-from Signals import engine_signals
+from src.Signals import engine_signals
 
 
 class SetpointProgrammer:

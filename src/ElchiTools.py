@@ -2,8 +2,8 @@ from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication
 from pubsub.pub import addTopicDefnProvider, TOPIC_TREE_FROM_CLASS, setTopicUnspecifiedFatal
 
-from Engine import Topic_Def
-from Engine.Engine import HeaterControlEngine
+from src.Engine import Topic_Def
+from src.Engine.Engine import HeaterControlEngine
 from QtInterface.ElchMainWindow import ElchMainWindow
 
 addTopicDefnProvider(Topic_Def, TOPIC_TREE_FROM_CLASS)

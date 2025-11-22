@@ -2,7 +2,7 @@ import pubsub.pub
 from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QGridLayout, \
     QButtonGroup
 
-from Signals import engine_signals
+from src.Signals import engine_signals
 
 
 class ElchProgramMenu(QWidget):

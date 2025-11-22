@@ -3,11 +3,11 @@ import functools
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QVBoxLayout
 
-from QtInterface.ElchMenu.ElchControlMenu import ElchControlMenu
-from QtInterface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
-from QtInterface.ElchMenu.ElchPlotMenu import ElchPlotMenu
-from QtInterface.ElchMenu.ElchPidMenu import ElchPidMenu
-from QtInterface.ElchMenu.ElchProgramMenu import ElchProgramMenu
+from src.QtInterface.ElchMenu.ElchControlMenu import ElchControlMenu
+from src.QtInterface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
+from src.QtInterface.ElchMenu.ElchPlotMenu import ElchPlotMenu
+from src.QtInterface.ElchMenu.ElchPidMenu import ElchPidMenu
+from src.QtInterface.ElchMenu.ElchProgramMenu import ElchProgramMenu
 
 
 class ElchMenu(QWidget):

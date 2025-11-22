@@ -11,7 +11,7 @@ colors = {'blue': '#86b3f9', 'green': '#86f8ab', 'pink': '#f488f9', 'yellow': '#
 
 class ElchPlot(FigureCanvasQTAgg):
     def __init__(self):
-        matplotlib.style.use('QtInterface/App.mplstyle')
+        matplotlib.style.use('Styles/plot_style.mplstyle')
         super().__init__(Figure(figsize=(8, 6)))
 
         ax = self.figure.subplots()

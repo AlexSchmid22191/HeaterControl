@@ -7,18 +7,18 @@ from PySide2.QtCore import QThreadPool
 from pubsub.pub import sendMessage
 from serial import SerialException
 
-from Drivers.AbstractSensorController import AbstractController, AbstractSensor
-from Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
-from Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
-from Drivers.Jumo import JumoQuantol
-from Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
-from Drivers.Omega import OmegaPt
-from Drivers.Pyrometer import Pyrometer
-from Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
-from Drivers.TestDevices import TestSensor, TestController, NiceTestController
-from Engine.SetProg import SetpointProgrammer
-from Engine.ThreadDecorators import Worker
-from Signals import engine_signals, gui_signals
+from src.Drivers.AbstractSensorController import AbstractController, AbstractSensor
+from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
+from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
+from src.Drivers.Jumo import JumoQuantol
+from src.Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
+from src.Drivers.Omega import OmegaPt
+from src.Drivers.Pyrometer import Pyrometer
+from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
+from src.Drivers.TestDevices import TestSensor, TestController, NiceTestController
+from src.Engine.SetProg import SetpointProgrammer
+from src.Engine.ThreadDecorators import Worker
+from src.Signals import engine_signals, gui_signals
 
 TEST_MODE = True
 

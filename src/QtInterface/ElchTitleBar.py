@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QToolButton, QHBoxLayout, QDialog, QLabel, QVBoxLayout, QPushButton, QTextBrowser
 
@@ -84,7 +86,11 @@ class ElchTitlebar(QWidget):
 
         dlg.text_browser = QTextBrowser()
         try:
-            with open('License/gpl-3.0.md', "r", encoding="utf-8") as file:
+            if getattr(sys, "frozen", False):
+                path = Path(sys.executable).resolve().parent / 'License/gpl-3.0.md'
+            else:
+                path = Path(__file__).resolve().parents[2] / 'License/gpl-3.0.md'
+            with open(path, "r", encoding="utf-8") as file:
                 content = file.read()
                 dlg.text_browser.setMarkdown(content)
         except Exception as e:
@@ -108,7 +114,11 @@ class ElchTitlebar(QWidget):
 
         dlg.text_browser = QTextBrowser()
         try:
-            with open('License/License.md', "r", encoding="utf-8") as file:
+            if getattr(sys, "frozen", False):
+                path = Path(sys.executable).resolve().parent / 'License/License.md'
+            else:
+                path = Path(__file__).resolve().parents[2] / 'License/License.md'
+            with open(path, "r", encoding="utf-8") as file:
                 content = file.read()
                 dlg.text_browser.setMarkdown(content)
         except Exception as e:

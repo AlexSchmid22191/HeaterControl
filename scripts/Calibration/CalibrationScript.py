@@ -1,9 +1,8 @@
 import time
 import serial
-import datetime
 import minimalmodbus
-from Drivers.Pyrometer import Pyrometer
-from Drivers.Eurotherms import Eurotherm2408
+from src.Drivers.Pyrometer import Pyrometer
+from src.Drivers.Eurotherms import Eurotherm2408
 
 power_min = 30
 power_max = 90

@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['ElchiTools.py'],
-             pathex=['C:\\Users\\Alex\\PycharmProjects\\HeaterControl'],
+a = Analysis(['src/ElchiTools.py'],
+             pathex=['.', 'src'],
              binaries=[],
-             datas=[('QtInterface', 'QtInterface'), ('Icons', 'Icons'), ('Fonts', 'Fonts'), ('License', 'License')],
+             datas=[('src/Icons', 'Icons'), ('src/Fonts', 'Fonts'), ('License', 'License'), ('src/Styles', 'Styles')],
              hiddenimports=['pkg_resources.py2_warn'],
              hookspath=[],
              runtime_hooks=[],
@@ -27,7 +27,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon='Icons/Logo.ico',
+          icon='src/Icons/Logo.ico',
           contents_directory='.')
 coll = COLLECT(exe,
                a.binaries,

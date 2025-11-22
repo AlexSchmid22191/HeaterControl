@@ -4,12 +4,12 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QFontDatabase
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QSizeGrip
 
-from QtInterface.ElchMenu.ElchMenu import ElchMenu
-from QtInterface.ElchPlot import ElchPlot
-from QtInterface.ElchRibbon import ElchRibbon
-from QtInterface.ElchTitleBar import ElchTitlebar
-from QtInterface.ElchiStatusBar import ElchStatusBar
-from QtInterface.ElchNotificationBar import ElchNotificationBar
+from src.QtInterface.ElchMenu.ElchMenu import ElchMenu
+from src.QtInterface.ElchPlot import ElchPlot
+from src.QtInterface.ElchRibbon import ElchRibbon
+from src.QtInterface.ElchTitleBar import ElchTitlebar
+from src.QtInterface.ElchiStatusBar import ElchStatusBar
+from src.QtInterface.ElchNotificationBar import ElchNotificationBar
 
 
 class ElchMainWindow(QWidget):
@@ -21,8 +21,8 @@ class ElchMainWindow(QWidget):
         QFontDatabase.addApplicationFont('Fonts/Roboto-Light.ttf')
         QFontDatabase.addApplicationFont('Fonts/Roboto-Regular.ttf')
 
-        with open('QtInterface/style.qss') as stylefile:
-            self.setStyleSheet(stylefile.read())
+        with open('Styles/window_style.qss') as style_file:
+            self.setStyleSheet(style_file.read())
 
         self.controlmenu = ElchMenu()
         self.ribbon = ElchRibbon(menus=self.controlmenu.menus)

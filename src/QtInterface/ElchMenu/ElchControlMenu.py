@@ -10,7 +10,7 @@ from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVB
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
-from Signals import gui_signals
+from src.Signals import gui_signals
 
 
 class ElchControlMenu(QWidget):

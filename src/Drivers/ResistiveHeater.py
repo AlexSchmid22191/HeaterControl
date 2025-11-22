@@ -6,11 +6,11 @@ import pubsub.pub
 from PySide2.QtCore import QTimer, QThreadPool
 from scipy.stats import linregress
 
-from Drivers.AbstractSensorController import AbstractController
-from Drivers.HCS import HCS34
-from Drivers.Software_PID import SoftwarePID
-from Drivers.Tenma import Tenma
-from Engine.ThreadDecorators import Worker
+from src.Drivers.AbstractSensorController import AbstractController
+from src.Drivers.HCS import HCS34
+from src.Drivers.Software_PID import SoftwarePID
+from src.Drivers.Tenma import Tenma
+from src.Engine.ThreadDecorators import Worker
 
 
 class ResistiveHeater(AbstractController):
