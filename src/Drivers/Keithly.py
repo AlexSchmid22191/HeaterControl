@@ -1,7 +1,7 @@
 import time
 import serial
 import threading
-from src.Drivers.AbstractSensorController import AbstractSensor
+from src.Drivers.BaseClasses import AbstractSensor
 
 
 class Keithly2000(AbstractSensor, serial.Serial):

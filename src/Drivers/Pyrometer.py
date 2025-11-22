@@ -1,6 +1,6 @@
 import serial
 import threading
-from src.Drivers.AbstractSensorController import AbstractSensor
+from src.Drivers.BaseClasses import AbstractSensor
 
 
 class Pyrometer(AbstractSensor, serial.Serial):

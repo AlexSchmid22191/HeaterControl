@@ -1,4 +1,4 @@
-from src.Drivers.AbstractSensorController import AbstractController
+from src.Drivers.BaseClasses import AbstractController
 import minimalmodbus
 import threading
 

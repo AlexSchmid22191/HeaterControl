@@ -7,7 +7,7 @@ from PySide2.QtCore import QThreadPool
 from pubsub.pub import sendMessage
 from serial import SerialException
 
-from src.Drivers.AbstractSensorController import AbstractController, AbstractSensor
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantol
@@ -24,15 +24,26 @@ TEST_MODE = True
 
 
 class HeaterControlEngine:
+    sensor: AbstractSensor
+    controller: AbstractController
+    programmer: SetpointProgrammer
+
     def __init__(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
-        self.controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
-                                 'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol,
-                                 'Elchi Laser Control': ElchLaser, 'Elchi Heater Controller': ElchLaser,
+        self.controller_types = {'Eurotherm2408': Eurotherm2408,
+                                 'Eurotherm3216': Eurotherm3216,
+                                 'Eurotherm3508': Eurotherm3508,
+                                 'Omega Pt': OmegaPt,
+                                 'Jumo Quantrol': JumoQuantol,
+                                 'Elchi Laser Control': ElchLaser,
+                                 'Elchi Heater Controller': ElchLaser,
                                  'Resistive Heater Tenma': ResistiveHeaterTenma,
                                  'Resistive Heater HCS': ResistiveHeaterHCS}
-        self.sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
-                             'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
+        self.sensor_types = {'Pyrometer': Pyrometer,
+                             'Thermolino': Thermolino,
+                             'Thermoplatino': Thermoplatino,
+                             'Keithly2000 Temperature': Keithly2000Temp,
+                             'Keithly2000 Voltage': Keithly2000Volt,
                              'Eurotherm3508': Eurotherm3508S}
 
         self.controller_functions = {'gui.request.status': (self.get_controller_status, True),
@@ -56,8 +67,6 @@ class HeaterControlEngine:
             self.controller_types['Nice Test Controller'] = NiceTestController
             self.available_ports['COM Test'] = 'Test Port'
 
-        self.sensor = AbstractSensor()
-        self.controller = AbstractController()
         self.controller_slave_address = 1
 
         self.is_logging = False
@@ -66,8 +75,6 @@ class HeaterControlEngine:
 
         self.mode = 'Temperature'
         self.units = {'Temperature': '°C', 'Voltage': 'mV'}
-
-        self.programmer = None
 
         pubsub.pub.subscribe(self.refresh_available_ports, 'gui.request.ports')
         pubsub.pub.subscribe(self.set_units, 'gui.set.units')

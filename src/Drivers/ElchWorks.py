@@ -4,7 +4,7 @@ from threading import Lock
 import minimalmodbus
 import serial
 
-from src.Drivers.AbstractSensorController import AbstractController, AbstractSensor
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 
 
 class Thermolino(AbstractSensor, serial.Serial):

@@ -1,6 +1,6 @@
 import threading
 import minimalmodbus
-from src.Drivers.AbstractSensorController import AbstractController, AbstractSensor
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 
 
 class Eurotherm3216(AbstractController, minimalmodbus.Instrument):

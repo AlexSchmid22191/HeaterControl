@@ -6,7 +6,7 @@ import pubsub.pub
 from PySide2.QtCore import QTimer, QThreadPool
 from scipy.stats import linregress
 
-from src.Drivers.AbstractSensorController import AbstractController
+from src.Drivers.BaseClasses import AbstractController
 from src.Drivers.HCS import HCS34
 from src.Drivers.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma

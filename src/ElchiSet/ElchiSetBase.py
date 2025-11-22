@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 from serial.serialutil import SerialException
 
-from src.Drivers.AbstractSensorController import AbstractSensor, AbstractController
+from src.Drivers.BaseClasses import AbstractSensor, AbstractController
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantol

@@ -1,6 +1,6 @@
 import time
 import threading
-from src.Drivers.AbstractSensorController import AbstractSensor, AbstractController
+from src.Drivers.BaseClasses import AbstractSensor, AbstractController
 
 
 class TestSensor(AbstractSensor):
