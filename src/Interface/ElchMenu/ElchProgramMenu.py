@@ -83,4 +83,4 @@ class ElchProgramMenu(QWidget):
 
     @staticmethod
     def skip_segment():
-        gui_signals.skip_segment.emit()
+        gui_signals.skip_program.emit()

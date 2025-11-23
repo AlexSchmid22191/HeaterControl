@@ -26,7 +26,7 @@ TEST_MODE = True
 class HeaterControlEngine:
     sensor: AbstractSensor
     controller: AbstractController
-    programmer: SetpointProgrammer
+    programmer: SetpointProgrammer | None
 
     def __init__(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
@@ -79,6 +79,8 @@ class HeaterControlEngine:
         self.refresh_timer.setSingleShot(False)
         self.refresh_timer.timeout.connect(self.refresh_status)
         self.refresh_timer.start()
+
+        self.programmer = None
 
         self.pool = QThreadPool()
 
@@ -260,8 +262,8 @@ class HeaterControlEngine:
         if self.programmer:
             self.programmer.timer.stop()
         self.programmer = SetpointProgrammer(program, self)
-        gui_signals.skip_program_segment.connect(self.skip_program_segment)
-        gui_signals.stop_programmer.connect(self.stop_programmer)
+        gui_signals.skip_program.connect(self.skip_program_segment)
+        gui_signals.stop_program.connect(self.stop_programmer)
 
     def stop_programmer(self):
         if self.programmer:
