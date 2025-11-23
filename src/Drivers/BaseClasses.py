@@ -13,6 +13,10 @@ class AbstractController(ABC):
     # Mandatory methods ------------------------------------------------------------------------------------------------
 
     @abstractmethod
+    def __init__(self, portname, slaveadress=1):
+        pass
+
+    @abstractmethod
     def get_process_variable(self):
         """Return the current process variable of the controller (often this is the oven thermocouple temperature)"""
 
@@ -51,6 +55,10 @@ class AbstractController(ABC):
     @abstractmethod
     def set_manual_mode(self):
         """Set controller to manual mode, output power is held constant"""
+
+    @abstractmethod
+    def close(self):
+        """Close the controller serial port"""
 
     # Optional methods -------------------------------------------------------------------------------------------------
 
@@ -189,6 +197,26 @@ class AbstractController(ABC):
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_active_set',
                                                                                       self.__class__.__name__))
 
+    def enable_aiming_beam(self):
+        """Toggle the aiming beam on/off"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('enable_aiming_beam',
+                                                                                      self.__class__.__name__))
+
+    def disable_aiming_beam(self):
+        """Toggle the aiming beam on/off"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('disable_aiming_beam',
+                                                                                      self.__class__.__name__))
+
+    def enable_output(self):
+        """Enable the output"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('enable_output',
+                                                                                      self.__class__.__name__))
+
+    def disable_output(self):
+        """Disable the output"""
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('disable_output',
+                                                                                      self.__class__.__name__))
+
 
 class AbstractSensor(ABC):
     """
@@ -197,6 +225,10 @@ class AbstractSensor(ABC):
     """
 
     mode: Literal["auto", "manual"]
+
+    @abstractmethod
+    def __init__(self, port):
+        pass
 
     @abstractmethod
     def get_sensor_value(self):

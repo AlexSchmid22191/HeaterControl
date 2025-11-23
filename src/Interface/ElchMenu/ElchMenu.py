@@ -3,11 +3,11 @@ import functools
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QVBoxLayout
 
-from src.QtInterface.ElchMenu.ElchControlMenu import ElchControlMenu
-from src.QtInterface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
-from src.QtInterface.ElchMenu.ElchPlotMenu import ElchPlotMenu
-from src.QtInterface.ElchMenu.ElchPidMenu import ElchPidMenu
-from src.QtInterface.ElchMenu.ElchProgramMenu import ElchProgramMenu
+from src.Interface.ElchMenu.ElchControlMenu import ElchControlMenu
+from src.Interface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
+from src.Interface.ElchMenu.ElchPlotMenu import ElchPlotMenu
+from src.Interface.ElchMenu.ElchPidMenu import ElchPidMenu
+from src.Interface.ElchMenu.ElchProgramMenu import ElchProgramMenu
 
 
 class ElchMenu(QWidget):
@@ -28,7 +28,7 @@ class ElchMenu(QWidget):
 
         self.setLayout(vbox)
 
-        for key, button in self.menus['Devices'].unitbuttons.items():
+        for key, button in self.menus['Devices'].unit_buttons.items():
             button.clicked.connect(functools.partial(self.menus['Control'].change_units, key))
             button.clicked.connect(functools.partial(self.menus['PID'].set_unit, key))
 

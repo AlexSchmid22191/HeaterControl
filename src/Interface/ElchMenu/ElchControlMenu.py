@@ -3,14 +3,13 @@ import functools
 import matplotlib.font_manager as fm
 import matplotlib.style
 import matplotlib.ticker
-import pubsub.pub
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, \
     QGridLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
-from src.Signals import gui_signals
+from src.Signals import gui_signals, engine_signals
 
 
 class ElchControlMenu(QWidget):
@@ -39,7 +38,7 @@ class ElchControlMenu(QWidget):
             self.buttons[button].toggled.connect(functools.partial(self.set_control_mode, mode=button))
 
         refresh_button = QPushButton(text='Refresh', objectName='Refresh')
-        refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.control_parameters'))
+        refresh_button.clicked.connect(gui_signals.refresh_parameters.emit)
         vbox.addSpacing(10)
         vbox.addWidget(refresh_button)
         vbox.addSpacing(10)
@@ -47,9 +46,11 @@ class ElchControlMenu(QWidget):
         enable_button = QPushButton(text='Output Enable', objectName='Enable')
         enable_button.setCheckable(True)
         enable_button.clicked.connect(lambda: gui_signals.enable_output.emit(enable_button.isChecked()))
+
         aiming_beam_button = QPushButton(text='Aiming Beam', objectName='Enable')
         aiming_beam_button.setCheckable(True)
         aiming_beam_button.clicked.connect(lambda: gui_signals.toggle_aiming.emit(aiming_beam_button.isChecked()))
+
         vbox.addWidget(enable_button)
         vbox.addWidget(aiming_beam_button)
 
@@ -62,29 +63,31 @@ class ElchControlMenu(QWidget):
         vbox.addStretch()
         self.setLayout(vbox)
 
-        pubsub.pub.subscribe(self.update_control_values, 'engine.answer.control_parameters')
+        engine_signals.controller_parameters_update.connect(self.update_control_values)
 
     @staticmethod
     def set_control_value(value, control):
-        {
-            'Rate': functools.partial(pubsub.pub.sendMessage, 'gui.set.rate', rate=value),
-            'Power': functools.partial(pubsub.pub.sendMessage, 'gui.set.power', power=value),
-            'Setpoint': functools.partial(pubsub.pub.sendMessage, 'gui.set.setpoint', setpoint=value)
-        }[control]()
+        match control:
+            case 'Setpoint':
+                gui_signals.set_target_setpoint.emit(value)
+            case 'Rate':
+                gui_signals.set_rate.emit(value)
+            case 'Power':
+                gui_signals.set_manual_output_power.emit(value)
 
     @staticmethod
     def set_control_mode(checked, mode):
         if checked:
-            pubsub.pub.sendMessage('gui.set.control_mode', mode=mode)
+            gui_signals.set_control_mode.emit(mode)
 
     def change_units(self, mode):
         self.entries['Setpoint'].setSuffix({'Temperature': ' \u00B0C', 'Voltage': ' mV'}[mode])
         self.entries['Rate'].setSuffix({'Temperature': ' \u00B0C/min', 'Voltage': ' mV/min'}[mode])
 
     def update_control_values(self, control_parameters):
-        assert isinstance(control_parameters, dict), 'Illegal type recieved: {:s}'.format(str(type(control_parameters)))
+        assert isinstance(control_parameters, dict), 'Illegal type received: {:s}'.format(str(type(control_parameters)))
         for key in control_parameters:
-            assert key in self.entries or key == 'Mode', 'Illegal key recieved: {:s}'.format(key)
+            assert key in self.entries or key == 'Mode', 'Illegal key received: {:s}'.format(key)
             if key == 'Mode':
                 self.buttons[control_parameters[key]].blockSignals(True)
                 self.buttons[control_parameters[key]].setChecked(True)
@@ -124,13 +127,13 @@ class ResConfDialog(QDialog):
             g_box.addWidget(spin_box, i, 1)
             self.boxes.update({field: spin_box})
 
-        pubsub.pub.subscribe(self.update_params, 'engine.answer.resistive_heater_config')
-        pubsub.pub.subscribe(self.dispaly_calibration_results, 'engine.answer.calibration')
-        pubsub.pub.sendMessage('gui.request.resistive_heater_config')
+        engine_signals.resistive_heater_config_update.connect(self.update_params)
+        engine_signals.calibration_data_update.connect(self.display_calibration_results)
+        gui_signals.get_resistive_heater_config.emit()
 
         vbox.addLayout(g_box)
         vbox.addWidget(button3 := QPushButton('Calibrate'))
-        button3.clicked.connect(functools.partial(pubsub.pub.sendMessage, topicName='gui.request.calibration'))
+        button3.clicked.connect(gui_signals.get_calibration_data.emit)
         vbox.addWidget(button := QPushButton('Save config'))
         button.clicked.connect(self.save_config)
         vbox.addWidget(button2 := QPushButton('Close'))
@@ -139,15 +142,15 @@ class ResConfDialog(QDialog):
         self.setLayout(vbox)
 
     def save_config(self):
-        pubsub.pub.sendMessage('gui.set.resistive_heater_config',
-                               parameters={_field: _spin_box.value() for (_field, _spin_box) in self.boxes.items()})
+        gui_signals.set_resistive_heater_config.emit({_field: _spin_box.value()
+                                                      for (_field, _spin_box) in self.boxes.items()})
         self.close()
 
     def update_params(self, parameters):
         for key, value in parameters.items():
             self.boxes[key].setValue(float(value))
 
-    def dispaly_calibration_results(self, calibration_data):
+    def display_calibration_results(self, calibration_data):
         dlg = CalDialog(data=calibration_data, parent=self)
         if dlg.exec_() == QDialog.Accepted:
             self.boxes['cold resistance'].setValue(calibration_data['R'])
@@ -203,7 +206,7 @@ class CalDialog(QDialog):
             g_box.addWidget(QLabel(f'{data["R"]:.3f} Ohm'), 0, 1)
             g_box.addWidget(QLabel('Intercept'), 1, 0)
             g_box.addWidget(QLabel(f'{data["OS"]:.3f} V'), 1, 1)
-            g_box.addWidget(QLabel('Correlation Coeff.'), 2, 0)
+            g_box.addWidget(QLabel('Correlation Coef.'), 2, 0)
             g_box.addWidget(QLabel(f'{data["R2"]:.3f}'), 2, 1)
             vbox.addLayout(g_box)
 

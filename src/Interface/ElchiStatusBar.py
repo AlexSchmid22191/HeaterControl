@@ -1,7 +1,8 @@
-import pubsub.pub
 from PySide2.QtCore import Qt, QTimer
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
+
+from src.Signals import gui_signals, engine_signals
 
 
 class ElchStatusBar(QWidget):
@@ -31,10 +32,8 @@ class ElchStatusBar(QWidget):
         hbox.setContentsMargins(10, 10, 10, 10)
         self.setLayout(hbox)
 
-        self.timer = QTimer(parent=self)
-        self.timer.timeout.connect(lambda: pubsub.pub.sendMessage(topicName='gui.request.status'))
-        self.timer.start(1000)
-        pubsub.pub.subscribe(self.update_values, topicName='engine.answer.status')
+        engine_signals.controller_status_update.connect(self.update_values)
+        engine_signals.sensor_status_update.connect(self.update_values)
 
         self.exp_labels = {'Sensor PV': {'Temperature': 'Sample Temperature', 'Voltage': 'Pump Voltage'},
                            'Controller PV': {'Temperature': 'Oven Temperature', 'Voltage': '\u03bb Probe Voltage'},
@@ -42,14 +41,14 @@ class ElchStatusBar(QWidget):
                            'Power':{'Temperature': 'Oven Power', 'Voltage': 'Pump Power'}}
 
     def update_values(self, status_values):
-        assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
+        assert isinstance(status_values, dict), 'Illegal data type received: {:s}'.format(str(type(status_values)))
 
         for key, value in status_values.items():
-            assert key in self.values, 'Illegal key recieved: {:s}'.format(key)
+            assert key in self.values, 'Illegal key received: {:s}'.format(key)
             if key == 'Power':
-                self.values[key].setText('{:.1f} %'.format(value[0]))
+                self.values[key].setText('{:.1f} %'.format(value))
             else:
-                self.values[key].setText('{:.1f} {:s}'.format(value[0], self.unit))
+                self.values[key].setText('{:.1f} {:s}'.format(value, self.unit))
 
     def change_units(self, mode):
         match mode:

@@ -1,7 +1,8 @@
 import functools
 
-import pubsub.pub
 from PySide2.QtWidgets import QWidget, QPushButton, QCheckBox, QButtonGroup, QVBoxLayout, QLabel, QFileDialog
+
+from src.Signals import gui_signals
 
 
 class ElchPlotMenu(QWidget):
@@ -46,16 +47,19 @@ class ElchPlotMenu(QWidget):
         self.setLayout(vbox)
 
     def start_stop_plotting(self):
-        pubsub.pub.sendMessage('gui.plot.start' if self.buttons['Start'].isChecked() else 'gui.plot.stop')
+        if self.buttons['Start'].isChecked():
+            gui_signals.start_log.emit()
+        else:
+            gui_signals.log.emit()
 
     def clear_pplot(self):
-        pubsub.pub.sendMessage('gui.plot.clear')
+        gui_signals.clear_log.emit()
         if self.buttons['Start'].isChecked():
             self.buttons['Start'].click()
 
     def export_data(self):
         if (file_path := QFileDialog.getSaveFileName(self, 'Save as...', 'Logs/Log.csv', 'CSV (*.csv)')[0]) != '':
-            pubsub.pub.sendMessage('gui.plot.export', filepath=file_path)
+            gui_signals.export_log.emit(file_path)
 
     def toggle_autoscale(self):
         pass
@@ -63,5 +67,3 @@ class ElchPlotMenu(QWidget):
     def toggle_zoom(self):
         pass
 
-    def toggle_pan(self):
-        pass

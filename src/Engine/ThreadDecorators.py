@@ -1,12 +1,12 @@
-import serial
+from serial import SerialException
+from minimalmodbus import ModbusException
 from PySide2.QtCore import Signal, QRunnable, QObject
 
 
 class Signals(QObject):
     over = Signal(object)
-    started = Signal(object)
-    con_fail = Signal(object)
-    imp_fail = Signal(object)
+    con_fail = Signal(str)
+    imp_fail = Signal(str)
 
 
 class Worker(QRunnable):
@@ -20,11 +20,9 @@ class Worker(QRunnable):
     def run(self):
         try:
             result = self.fn(*self.args, **self.kwargs)
-        except serial.SerialException as ser_ex:
-            print(ser_ex)
-            self.signals.con_fail.emit(ser_ex)
+        except (SerialException, ModbusException) as ser_ex:
+            self.signals.con_fail.emit(f'Serial communication failed: {ser_ex}')
         except NotImplementedError as imp_ex:
-            print(imp_ex)
             self.signals.con_fail.emit(imp_ex)
         else:
             self.signals.over.emit(result)

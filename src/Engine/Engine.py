@@ -1,10 +1,10 @@
-import datetime
 import math
+from typing import Type
+from datetime import timezone, datetime
 
-import pubsub.pub
 import serial.tools.list_ports
-from PySide2.QtCore import QThreadPool
-from pubsub.pub import sendMessage
+from PySide2.QtCore import QThreadPool, QTime, QTimer
+from minimalmodbus import NoResponseError
 from serial import SerialException
 
 from src.Drivers.BaseClasses import AbstractController, AbstractSensor
@@ -30,36 +30,25 @@ class HeaterControlEngine:
 
     def __init__(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
-        self.controller_types = {'Eurotherm2408': Eurotherm2408,
-                                 'Eurotherm3216': Eurotherm3216,
-                                 'Eurotherm3508': Eurotherm3508,
-                                 'Omega Pt': OmegaPt,
-                                 'Jumo Quantrol': JumoQuantol,
-                                 'Elchi Laser Control': ElchLaser,
-                                 'Elchi Heater Controller': ElchLaser,
-                                 'Resistive Heater Tenma': ResistiveHeaterTenma,
-                                 'Resistive Heater HCS': ResistiveHeaterHCS}
-        self.sensor_types = {'Pyrometer': Pyrometer,
-                             'Thermolino': Thermolino,
-                             'Thermoplatino': Thermoplatino,
-                             'Keithly2000 Temperature': Keithly2000Temp,
-                             'Keithly2000 Voltage': Keithly2000Volt,
-                             'Eurotherm3508': Eurotherm3508S}
-
-        self.controller_functions = {'gui.request.status': (self.get_controller_status, True),
-                                     'gui.request.control_parameters': (self.get_controller_parameters, True),
-                                     'gui.request.pid_parameters': (self.get_pid_parameters, True),
-                                     'gui.con.disconnect_controller': (self.remove_controller, True),
-                                     'gui.con.connect_controller': (self.add_controller, False),
-                                     'gui.set.power': (self.set_manual_output_power, True),
-                                     'gui.set.setpoint': (self.set_target_setpoint, True),
-                                     'gui.set.rate': (self.set_rate, True),
-                                     'gui.set.control_mode': (self.set_control_mode, True),
-                                     'gui.set.pid_parameters': (self.set_pid_parameters, True),
-                                     'gui.set.start_program': (self.start_programmer, True)}
-        self.sensor_functions = {'gui.request.status': (self.get_sensor_status, True),
-                                 'gui.con.disconnect_sensor': (self.remove_sensor, True),
-                                 'gui.con.connect_sensor': (self.add_sensor, False)}
+        self.controller_types: dict[str, Type[AbstractController]] = {
+            'Eurotherm2408': Eurotherm2408,
+            'Eurotherm3216': Eurotherm3216,
+            'Eurotherm3508': Eurotherm3508,
+            'Omega Pt': OmegaPt,
+            'Jumo Quantrol': JumoQuantol,
+            'Elchi Laser Control': ElchLaser,
+            'Elchi Heater Controller': ElchLaser,
+            'Resistive Heater Tenma': ResistiveHeaterTenma,
+            'Resistive Heater HCS': ResistiveHeaterHCS
+        }
+        self.sensor_types: dict[str, Type[AbstractSensor]] = {
+            'Pyrometer': Pyrometer,
+            'Thermolino': Thermolino,
+            'Thermoplatino': Thermoplatino,
+            'Keithly2000 Temperature': Keithly2000Temp,
+            'Keithly2000 Voltage': Keithly2000Volt,
+            'Eurotherm3508': Eurotherm3508S
+        }
 
         if TEST_MODE:
             self.sensor_types['Test Sensor'] = TestSensor
@@ -76,114 +65,145 @@ class HeaterControlEngine:
         self.mode = 'Temperature'
         self.units = {'Temperature': '°C', 'Voltage': 'mV'}
 
-        pubsub.pub.subscribe(self.refresh_available_ports, 'gui.request.ports')
-        pubsub.pub.subscribe(self.set_units, 'gui.set.units')
-        pubsub.pub.subscribe(self.add_controller, 'gui.con.connect_controller')
-        pubsub.pub.subscribe(self.add_sensor, 'gui.con.connect_sensor')
-        pubsub.pub.subscribe(self.start_logging, 'gui.plot.start')
-        pubsub.pub.subscribe(self.clear_log, 'gui.plot.clear')
-        pubsub.pub.subscribe(self.export_log, 'gui.plot.export')
+        gui_signals.set_units.connect(self.set_units)
+        gui_signals.request_ports.connect(self.refresh_available_ports)
+        gui_signals.connect_controller.connect(self.add_controller)
+        gui_signals.connect_sensor.connect(self.add_sensor)
+
+        gui_signals.export_log.connect(self.export_log)
+        gui_signals.start_log.connect(self.start_logging)
+        gui_signals.clear_log.connect(self.clear_log)
+
+        self.refresh_timer = QTimer()
+        self.refresh_timer.setInterval(1000)
+        self.refresh_timer.setSingleShot(False)
+        self.refresh_timer.timeout.connect(self.refresh_status)
+        self.refresh_timer.start()
 
         self.pool = QThreadPool()
 
     def set_units(self, unit):
         self.mode = unit
-        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.mode == unit],
-                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.mode == unit]}
-        pubsub.pub.sendMessage(topicName='engine.answer.devices', devices=devices)
+        self.report_devices()
+
+    def report_devices(self):
+        mode = self.mode
+        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.mode == mode],
+                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.mode == mode]}
+        engine_signals.available_devices.emit(devices)
 
     def refresh_available_ports(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         if TEST_MODE:
             self.available_ports['COM Test'] = 'Test Port'
-        pubsub.pub.sendMessage(topicName='engine.answer.ports', ports=self.available_ports)
+        engine_signals.available_ports.emit(self.available_ports)
+
+    def add_sensor(self, sensor_type, sensor_port):
+        try:
+            self.sensor = self.sensor_types[sensor_type](port=sensor_port)
+        except SerialException as e:
+            engine_signals.connection_failed.emit(e)
+        else:
+            engine_signals.sensor_connected.emit(sensor_type, sensor_port)
+            gui_signals.disconnect_sensor.connect(self.remove_sensor)
+            gui_signals.connect_sensor.disconnect()
+
+    def remove_sensor(self):
+        gui_signals.disconnect_sensor.disconnect(self.remove_sensor)
+        gui_signals.connect_sensor.connect(self.add_sensor)
+        try:
+            self.sensor.close()
+        except SerialException as e:
+            engine_signals.connection_failed.emit(f'Error when closing sensor: {e}')
+        else:
+            engine_signals.sensor_disconnected.emit()
+        finally:
+            del self.sensor
 
     def add_controller(self, controller_type, controller_port):
         try:
             self.controller = self.controller_types[controller_type](portname=controller_port,
                                                                      slaveadress=self.controller_slave_address)
+        except (SerialException, NoResponseError) as e:
+            engine_signals.connection_failed.emit(e)
+        else:
+            engine_signals.controller_connected.emit(controller_type, controller_port)
+
+            gui_signals.disconnect_controller.connect(self.remove_controller)
+            gui_signals.set_target_setpoint.connect(self.set_target_setpoint)
+            gui_signals.set_rate.connect(self.set_rate)
+            gui_signals.set_manual_output_power.connect(self.set_manual_output_power)
+            gui_signals.set_control_mode.connect(self.set_control_mode)
+            gui_signals.enable_output.connect(self.toggle_output_enable)
+            gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
+            gui_signals.refresh_status.connect(self.get_controller_status)
+            gui_signals.refresh_parameters.connect(self.get_controller_parameters)
+            gui_signals.set_pid_parameters.connect(self.set_pid_parameters)
+            gui_signals.start_program.connect(self.start_programmer)
+            gui_signals.connect_controller.disconnect()
 
             self.get_controller_parameters()
             self.get_pid_parameters()
-            gui_signals.enable_output.connect(self.toggle_output_enable)
-            gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
-            for topic, function in self.controller_functions.items():
-                if function[1]:
-                    pubsub.pub.subscribe(function[0], topic)
-                else:
-                    pubsub.pub.unsubscribe(function[0], topic)
-
-            engine_signals.controller_connected.emit(controller_type, controller_port)
-
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Connection error!')
-            engine_signals.connection_failed.emit()
 
     def remove_controller(self):
-        self.controller = None
-        for topic, function in self.controller_functions.items():
-            if not function[1]:
-                pubsub.pub.subscribe(function[0], topic)
-            else:
-                pubsub.pub.unsubscribe(function[0], topic)
-        self.sensor = AbstractSensor()
-        engine_signals.controller_disconnected.emit()
+        gui_signals.disconnect_controller.disconnect(self.remove_controller)
+        gui_signals.set_target_setpoint.disconnect(self.set_target_setpoint)
+        gui_signals.set_rate.disconnect(self.set_rate)
+        gui_signals.set_manual_output_power.disconnect(self.set_manual_output_power)
+        gui_signals.set_control_mode.disconnect(self.set_control_mode)
+        gui_signals.enable_output.disconnect(self.toggle_output_enable)
+        gui_signals.toggle_aiming.disconnect(self.toggle_aiming_beam)
+        gui_signals.refresh_status.disconnect(self.get_controller_status)
+        gui_signals.set_pid_parameters.disconnect(self.set_pid_parameters)
+        gui_signals.start_program.disconnect(self.start_programmer)
 
-    def toggle_output_enable(self, state):
-        if state:
-            self.controller.enable_output()
-        else:
-            self.controller.disable_output()
+        gui_signals.connect_controller.connect(self.add_controller)
 
-    def toggle_aiming_beam(self, state):
-        if state:
-            self.controller.enable_aiming_beam()
-        else:
-            self.controller.disable_aiming_beam()
-
-    def add_sensor(self, sensor_type, sensor_port):
         try:
-            self.sensor = self.sensor_types[sensor_type](port=sensor_port)
-            for topic, function in self.sensor_functions.items():
-                if function[1]:
-                    pubsub.pub.subscribe(function[0], topic)
-                else:
-                    pubsub.pub.unsubscribe(function[0], topic)
-            engine_signals.sensor_connected.emit(sensor_type, sensor_port)
-        except SerialException:
-            sendMessage(topicName='engine.status', text='Connection error!')
-            engine_signals.connection_failed.emit()
+            self.controller.close()
+        except SerialException as e:
+            engine_signals.connection_failed.emit(f'Error when closing controller: {e}')
+        else:
+            engine_signals.controller_disconnected.emit()
+        finally:
+            del self.controller
 
-    def remove_sensor(self):
-        for topic, function in self.sensor_functions.items():
-            if not function[1]:
-                pubsub.pub.subscribe(function[0], topic)
-            else:
-                pubsub.pub.unsubscribe(function[0], topic)
-        self.sensor.close()
-        self.sensor = AbstractSensor()
-        engine_signals.sensor_disconnected.emit()
+    def refresh_status(self):
+        if hasattr(self, 'sensor'):
+            self.get_sensor_status()
+        if hasattr(self, 'controller'):
+            self.get_controller_status()
 
     def get_sensor_status(self):
-        runtime = (datetime.datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
+        runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
         worker = Worker(self.sensor.get_sensor_value)
-        worker.signals.over.connect(lambda val: sendMessage('engine.answer.status',
-                                                            status_values={'Sensor PV': (val, runtime)}))
+        worker.signals.over.connect(lambda result:
+                                    engine_signals.sensor_status_update.emit({'Sensor PV': result}, runtime))
         if self.is_logging:
-            worker.signals.over.connect(lambda val, par='Sensor PV': self.add_log_data_point(data={par: val}))
+            worker.signals.over.connect(lambda result: self.add_log_data_point(data={'Sensor PV': result}))
         self.pool.start(worker)
 
     def get_controller_status(self):
-        runtime = (datetime.datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
+        runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
                                     'Setpoint': self.controller.get_working_setpoint,
                                     'Power': self.controller.get_working_output}.items():
-
             worker = Worker(function)
-            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.status', status_values={
-                par: (val, runtime)}))
+            worker.signals.over.connect(lambda result, _param=parameter:
+                                        engine_signals.controller_status_update.emit({_param: result}, runtime))
             if self.is_logging:
-                worker.signals.over.connect(lambda val, par=parameter: self.add_log_data_point(data={par: val}))
+                worker.signals.over.connect(lambda result, _param=parameter:
+                                            self.add_log_data_point(data={_param: result}))
+            self.pool.start(worker)
+
+    def get_controller_parameters(self):
+        for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
+                                    'Power': self.controller.get_working_output,
+                                    'Rate': self.controller.get_rate,
+                                    'Mode': self.controller.get_control_mode}.items():
+            worker = Worker(function)
+            worker.signals.over.connect(lambda result, _param=parameter:
+                                        engine_signals.controller_parameters_update.emit({_param: result}))
             self.pool.start(worker)
 
     def set_control_mode(self, mode):
@@ -192,30 +212,70 @@ class HeaterControlEngine:
         self.pool.start(worker)
 
     def set_target_setpoint(self, setpoint):
-        worker = Worker(lambda setp=setpoint: self.controller.set_target_setpoint(setp))
+        worker = Worker(self.controller.set_target_setpoint, setpoint)
         self.pool.start(worker)
 
     def set_manual_output_power(self, power):
-        worker = Worker(lambda powr=power: self.controller.set_manual_output_power(powr))
+        worker = Worker(self.controller.set_manual_output_power, power)
         self.pool.start(worker)
 
     def set_rate(self, rate):
-        worker = Worker(lambda rat=rate: self.controller.set_rate(rat))
+        worker = Worker(self.controller.set_rate, rate)
         self.pool.start(worker)
 
-    def get_controller_parameters(self):
-        for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
-                                    'Power': self.controller.get_working_output,
-                                    'Rate': self.controller.get_rate,
-                                    'Mode': self.controller.get_control_mode}.items():
+    def get_pid_parameters(self):
+        for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
+                                    'P3': self.controller.get_pid_p3, 'I1': self.controller.get_pid_i,
+                                    'I2': self.controller.get_pid_i2, 'I3': self.controller.get_pid_i3,
+                                    'D1': self.controller.get_pid_d, 'D2': self.controller.get_pid_d2,
+                                    'D3': self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
+                                    'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
+                                    'GS': self.controller.get_gain_scheduling}.items():
             worker = Worker(function)
-            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.control_parameters',
-                                                                               control_parameters={par: val}))
+            worker.signals.over.connect(lambda result, _param=parameter:
+                                        engine_signals.pid_parameters.emit({_param: result}))
             self.pool.start(worker)
+
+    def set_pid_parameters(self, parameter, value):
+        function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2, 'P3': self.controller.set_pid_p3,
+                    'I1': self.controller.set_pid_i, 'I2': self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
+                    'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
+                    'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
+                    'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
+
+        worker = Worker(function, value)
+        self.pool.start(worker)
+
+    def toggle_output_enable(self, state):
+        function = self.controller.enable_output if state else self.controller.disable_output
+        worker = Worker(function)
+        self.pool.start(worker)
+
+    def toggle_aiming_beam(self, state):
+        function = self.controller.enable_aiming_beam if state else self.controller.disable_aiming_beam
+        worker = Worker(function)
+        self.pool.start(worker)
+
+    def start_programmer(self, program):
+        if self.programmer:
+            self.programmer.timer.stop()
+        self.programmer = SetpointProgrammer(program, self)
+        gui_signals.skip_program_segment.connect(self.skip_program_segment)
+        gui_signals.stop_programmer.connect(self.stop_programmer)
+
+    def stop_programmer(self):
+        if self.programmer:
+            self.programmer.timer.stop()
+            del self.programmer
+
+    def skip_program_segment(self):
+        if self.programmer:
+            self.programmer.current_segment += 1
+            self.programmer.start_ramp()
 
     def start_logging(self):
         self.is_logging = True
-        self.log_start_time = datetime.datetime.now() if not self.log_start_time else self.log_start_time
+        self.log_start_time = datetime.now() if not self.log_start_time else self.log_start_time
 
     def clear_log(self):
         self.is_logging = False
@@ -224,9 +284,9 @@ class HeaterControlEngine:
 
     def export_log(self, filepath):
         """
-        Tedious data aligning: The timestamps separate data series (time -> value) are rounded to whole seconds and
-        transfered into one dict (time -> 4values), to align the 4 data series. This dict is the used to generate a
-        csv file.
+        Tedious data aligning: The timestamps of the 4 separate data series (time -> value) are rounded to whole seconds
+        and transferred into one dict (time -> 4 values), to align the 4 data series. This dict is then used to generate
+         a csv file.
         """
 
         def _work():
@@ -245,7 +305,7 @@ class HeaterControlEngine:
                 file.write('UTC, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.
                            format(unit, unit))
                 for timestamp, datapoint in sorted_data.items():
-                    timestring = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+                    timestring = datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
                     power = datapoint['Power'] if 'Power' in datapoint.keys() else math.nan
                     controller_pv = datapoint['Controller PV'] if 'Controller PV' in datapoint.keys() else math.nan
                     sensor_pv = datapoint['Sensor PV'] if 'Sensor PV' in datapoint.keys() else math.nan
@@ -257,44 +317,4 @@ class HeaterControlEngine:
 
     def add_log_data_point(self, data):
         for parameter, value in data.items():
-            self.data[parameter].append((datetime.datetime.now(), value))
-
-    def get_pid_parameters(self):
-        for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
-                                    'P3': self.controller.get_pid_p3, 'I1': self.controller.get_pid_i,
-                                    'I2': self.controller.get_pid_i2, 'I3': self.controller.get_pid_i3,
-                                    'D1': self.controller.get_pid_d, 'D2': self.controller.get_pid_d2,
-                                    'D3': self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
-                                    'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
-                                    'GS': self.controller.get_gain_scheduling}.items():
-            worker = Worker(function)
-            worker.signals.over.connect(lambda val, par=parameter: sendMessage('engine.answer.pid_parameters',
-                                                                               pid_parameters={par: val}))
-            self.pool.start(worker)
-
-    def set_pid_parameters(self, parameter, value):
-        function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2, 'P3': self.controller.set_pid_p3,
-                    'I1': self.controller.set_pid_i, 'I2': self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
-                    'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
-                    'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
-                    'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
-
-        worker = Worker(lambda val=value: function(val))
-        self.pool.start(worker)
-
-    def start_programmer(self, program):
-        if self.programmer:
-            self.programmer.timer.stop()
-        self.programmer = SetpointProgrammer(program, self)
-        pubsub.pub.subscribe(self.stop_programmer, 'gui.set.stop_program')
-        pubsub.pub.subscribe(self.skip_program_segment, 'gui.set.skip_program')
-
-    def stop_programmer(self):
-        if self.programmer:
-            self.programmer.timer.stop()
-            self.programmer = None
-
-    def skip_program_segment(self):
-        if self.programmer:
-            self.programmer.current_segment += 1
-            self.programmer.start_ramp()
+            self.data[parameter].append((datetime.now(), value))

@@ -4,12 +4,12 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QFontDatabase
 from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QSizeGrip
 
-from src.QtInterface.ElchMenu.ElchMenu import ElchMenu
-from src.QtInterface.ElchPlot import ElchPlot
-from src.QtInterface.ElchRibbon import ElchRibbon
-from src.QtInterface.ElchTitleBar import ElchTitlebar
-from src.QtInterface.ElchiStatusBar import ElchStatusBar
-from src.QtInterface.ElchNotificationBar import ElchNotificationBar
+from src.Interface.ElchMenu.ElchMenu import ElchMenu
+from src.Interface.ElchPlot import ElchPlot
+from src.Interface.ElchRibbon import ElchRibbon
+from src.Interface.ElchTitleBar import ElchTitlebar
+from src.Interface.ElchiStatusBar import ElchStatusBar
+from src.Interface.ElchNotificationBar import ElchNotificationBar
 
 
 class ElchMainWindow(QWidget):
@@ -77,12 +77,12 @@ class ElchMainWindow(QWidget):
         self.controlmenu.menus['Plotting'].buttons['Autoscale'].clicked.connect(self.matplotframe.toggle_autoscale)
         self.controlmenu.menus['Plotting'].check_group.buttonToggled.connect(self.matplotframe.set_plot_visibility)
 
-        for key, button in self.controlmenu.menus['Devices'].unitbuttons.items():
+        for key, button in self.controlmenu.menus['Devices'].unit_buttons.items():
             button.clicked.connect(functools.partial(self.statusbar.change_units, key))
             button.clicked.connect(functools.partial(self.matplotframe.set_units, key))
             button.clicked.connect(functools.partial(self.controlmenu.menus['Programmer'].change_units, key))
 
-        self.controlmenu.menus['Devices'].unitbuttons['Temperature'].click()
+        self.controlmenu.menus['Devices'].unit_buttons['Temperature'].click()
 
         self.setLayout(hbox_outer)
         self.show()

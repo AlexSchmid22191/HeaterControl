@@ -1,8 +1,7 @@
-import pubsub.pub
 from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QGridLayout, \
     QButtonGroup
 
-from src.Signals import engine_signals
+from src.Signals import engine_signals, gui_signals
 
 
 class ElchProgramMenu(QWidget):
@@ -44,7 +43,7 @@ class ElchProgramMenu(QWidget):
 
         self.start_button = QPushButton(text='Start', objectName='Start')
         self.start_button.setCheckable(True)
-        self.start_button.toggled.connect(self.start_programm)
+        self.start_button.toggled.connect(self.start_program)
 
         self.skip_button = QPushButton(text='Skip segment')
         self.skip_button.clicked.connect(self.skip_segment)
@@ -64,14 +63,13 @@ class ElchProgramMenu(QWidget):
 
         self.setLayout(vbox)
 
-    def start_programm(self):
+    def start_program(self):
         if self.start_button.isChecked():
             program = {segment: {parameter: entry.value() for parameter, entry in seg_dict.items()}
                        for segment, seg_dict in self.entries.items()}
-
-            pubsub.pub.sendMessage(topicName='gui.set.start_program', program=program)
+            gui_signals.start_program.emit(program)
         else:
-            pubsub.pub.sendMessage(topicName='gui.set.stop_program')
+            gui_signals.stop_program.emit()
 
     def mark_ramp_segment(self, segment):
         self.radios[segment]['ramp'].setChecked(True)
@@ -85,4 +83,4 @@ class ElchProgramMenu(QWidget):
 
     @staticmethod
     def skip_segment():
-        pubsub.pub.sendMessage(topicName='gui.set.skip_program')
+        gui_signals.skip_segment.emit()

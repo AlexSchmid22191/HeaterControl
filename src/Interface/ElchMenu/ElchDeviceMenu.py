@@ -1,8 +1,9 @@
 import functools
 
-import pubsub.pub
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QLabel, QComboBox, QPushButton, QButtonGroup, QRadioButton, QVBoxLayout
+
+from src.Signals import gui_signals, engine_signals
 
 
 class ElchDeviceMenu(QWidget):
@@ -18,7 +19,7 @@ class ElchDeviceMenu(QWidget):
         self.buttongroup.setExclusive(False)
         self.buttongroup.buttonToggled.connect(self.connect_device)
 
-        self.unitbuttons = {key: QRadioButton(text=key) for key in ['Temperature', 'Voltage']}
+        self.unit_buttons = {key: QRadioButton(text=key) for key in ['Temperature', 'Voltage']}
         self.refresh_button = QPushButton(text='Refresh Serial', objectName='Refresh')
 
         vbox = QVBoxLayout()
@@ -26,7 +27,7 @@ class ElchDeviceMenu(QWidget):
         vbox.setContentsMargins(10, 10, 10, 10)
 
         vbox.addWidget(QLabel(text='Process Variable', objectName='Header'))
-        for key, button in self.unitbuttons.items():
+        for key, button in self.unit_buttons.items():
             vbox.addWidget(button)
             button.toggled.connect(functools.partial(self.set_measurement_unit, unit=key))
         vbox.addSpacing(20)
@@ -41,14 +42,13 @@ class ElchDeviceMenu(QWidget):
             vbox.addSpacing(20)
 
         vbox.addWidget(self.refresh_button)
-        self.refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.ports'))
+        self.refresh_button.clicked.connect(gui_signals.request_ports.emit)
         vbox.addStretch()
         self.setLayout(vbox)
 
-        pubsub.pub.subscribe(listener=self.update_ports, topicName='engine.answer.ports')
-        pubsub.pub.subscribe(listener=self.update_devices, topicName='engine.answer.devices')
-
-        pubsub.pub.sendMessage('gui.request.ports')
+        engine_signals.available_ports.connect(self.update_ports)
+        engine_signals.available_devices.connect(self.update_devices)
+        gui_signals.request_ports.emit()
 
     def update_ports(self, ports):
         """Populate the controller and sensor menus with lists of device names and ports"""
@@ -71,16 +71,16 @@ class ElchDeviceMenu(QWidget):
 
         if state:
             if key == 'Controller':
-                pubsub.pub.sendMessage('gui.con.connect_controller', controller_type=device, controller_port=port)
+                gui_signals.connect_controller.emit(device, port)
             elif key == 'Sensor':
-                pubsub.pub.sendMessage('gui.con.connect_sensor', sensor_type=device, sensor_port=port)
+                gui_signals.connect_sensor.emit(device, port)
         else:
             if key == 'Controller':
-                pubsub.pub.sendMessage('gui.con.disconnect_controller')
+                gui_signals.disconnect_controller.emit()
             elif key == 'Sensor':
-                pubsub.pub.sendMessage('gui.con.disconnect_sensor')
+                gui_signals.disconnect_sensor.emit()
 
     @staticmethod
     def set_measurement_unit(checked, unit):
         if checked:
-            pubsub.pub.sendMessage('gui.set.units', unit=unit)
+            gui_signals.set_units.emit(unit)

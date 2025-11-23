@@ -1,8 +1,9 @@
 import functools
 
-import pubsub.pub
 from PySide2.QtWidgets import QWidget, QComboBox, QSpinBox, QDoubleSpinBox, QVBoxLayout, QLabel, QFormLayout, \
     QPushButton
+
+from src.Signals import gui_signals, engine_signals
 
 
 class ElchPidMenu(QWidget):
@@ -41,7 +42,7 @@ class ElchPidMenu(QWidget):
             vbox.addSpacing(20)
 
         refresh_button = QPushButton(text='Refresh', objectName='Refresh')
-        refresh_button.clicked.connect(lambda: pubsub.pub.sendMessage('gui.request.pid_parameters'))
+        refresh_button.clicked.connect(gui_signals.refresh_pid.emit)
         vbox.addWidget(refresh_button)
 
         vbox.addStretch()
@@ -54,11 +55,11 @@ class ElchPidMenu(QWidget):
                 entry.setKeyboardTracking(False)
                 entry.valueChanged.connect(functools.partial(self.set_pid_parameter, control=key))
 
-        pubsub.pub.subscribe(self.update_pid_parameters, 'engine.answer.pid_parameters')
+        engine_signals.pid_parameters_update.connect(self.update_pid_parameters)
 
     @staticmethod
     def set_pid_parameter(value, control):
-        pubsub.pub.sendMessage('gui.set.pid_parameters', parameter=control, value=value)
+        gui_signals.set_pid_parameters.emit(control, value)
 
     def update_pid_parameters(self, pid_parameters):
         for key in pid_parameters:

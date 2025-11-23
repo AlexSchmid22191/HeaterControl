@@ -2,9 +2,10 @@ import matplotlib.font_manager as fm
 import matplotlib.style
 import matplotlib.ticker
 import numpy as np
-import pubsub.pub
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
+
+from src.Signals import engine_signals
 
 colors = {'blue': '#86b3f9', 'green': '#86f8ab', 'pink': '#f488f9', 'yellow': '#faf0b1', 'purple': '#9686f8'}
 
@@ -45,10 +46,10 @@ class ElchPlot(FigureCanvasQTAgg):
         self.autoscale = True
         self.figure.tight_layout()
 
-    def add_data_point(self, status_values):
+    def add_data_point(self, status_values, time):
         for key, value in status_values.items():
-            self.plots[key].set_data(np.append(self.plots[key].get_data()[0], value[1]),
-                                     np.append(self.plots[key].get_data()[1], value[0]))
+            self.plots[key].set_data(np.append(self.plots[key].get_data()[0], time),
+                                     np.append(self.plots[key].get_data()[1], value))
 
             if self.autoscale:
                 self.axes[key].relim()
@@ -61,9 +62,11 @@ class ElchPlot(FigureCanvasQTAgg):
 
     def start_plotting(self, plotting):
         if plotting:
-            pubsub.pub.subscribe(self.add_data_point, 'engine.answer.status')
+            engine_signals.controller_status_update.connect(self.add_data_point)
+            engine_signals.sensor_status_update.connect(self.add_data_point)
         else:
-            pubsub.pub.unsubscribe(self.add_data_point, 'engine.answer.status')
+            engine_signals.controller_status_update.disconnect(self.add_data_point)
+            engine_signals.sensor_status_update.disconnect(self.add_data_point)
 
     def clear_plot(self):
         for plot in self.plots.values():

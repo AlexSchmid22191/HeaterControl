@@ -41,6 +41,7 @@ class TestSensorVoltage(AbstractSensor):
 
 class TestController(AbstractController):
     """Mock controller to test engine to GUI connection"""
+
     mode = 'Temperature'
 
     def __init__(self, *args, **kwargs):
@@ -98,6 +99,9 @@ class TestController(AbstractController):
         with self.com_lock:
             print('Test Controller: Set rate {:f}'.format(rate))
 
+    def close(self):
+        print('Test Sensor disconnected!')
+
 
 class NiceTestController(TestController):
     def __init__(self, *args, **kwargs):
@@ -138,3 +142,6 @@ class NiceTestController(TestController):
             if self.wsp > self.tsp:
                 self.wsp = self.tsp
             return self.wsp
+
+    def close(self):
+        print('Test Sensor disconnected!')
