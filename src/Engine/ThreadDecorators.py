@@ -23,6 +23,6 @@ class Worker(QRunnable):
         except (SerialException, ModbusException) as ser_ex:
             self.signals.con_fail.emit(f'Serial communication failed: {ser_ex}')
         except NotImplementedError as imp_ex:
-            self.signals.con_fail.emit(imp_ex)
+            self.signals.imp_fail.emit(imp_ex)
         else:
             self.signals.over.emit(result)
