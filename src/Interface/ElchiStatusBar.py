@@ -1,8 +1,8 @@
-from PySide2.QtCore import Qt, QTimer
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
 
-from src.Signals import gui_signals, engine_signals
+from src.Signals import engine_signals
 
 
 class ElchStatusBar(QWidget):
@@ -14,19 +14,23 @@ class ElchStatusBar(QWidget):
 
         parameters = ['Sensor PV', 'Controller PV', 'Setpoint', 'Power']
         icons = {key: QLabel() for key in parameters}
-        self.labels = {key: QLabel(text=key+'\n ---', objectName='label') for key in parameters}
-        self.values = {key: QLabel(text='- - -', objectName='value') for key in parameters}
-        vboxes = {key: QVBoxLayout() for key in parameters}
+        self.labels = {key: QLabel(text=key + '\n ---') for key in parameters}
+        self.values = {key: QLabel(text='- - -') for key in parameters}
+        v_boxes = {key: QVBoxLayout() for key in parameters}
+        for key, label in self.labels.items():
+            label.setObjectName('label')
+        for key, label in self.values.items():
+            label.setObjectName('value')
 
         hbox = QHBoxLayout()
         for key in parameters:
-            vboxes[key].addWidget(self.values[key])
-            vboxes[key].addWidget(self.labels[key])
-            vboxes[key].setContentsMargins(0, 0, 0, 0)
-            vboxes[key].setSpacing(5)
+            v_boxes[key].addWidget(self.values[key])
+            v_boxes[key].addWidget(self.labels[key])
+            v_boxes[key].setContentsMargins(0, 0, 0, 0)
+            v_boxes[key].setSpacing(5)
             hbox.addWidget(icons[key])
             hbox.addStretch(1)
-            hbox.addLayout(vboxes[key])
+            hbox.addLayout(v_boxes[key])
             hbox.addStretch(10)
             icons[key].setPixmap(QPixmap('Icons/Ring_{:s}.png'.format(key)))
         hbox.setContentsMargins(10, 10, 10, 10)
@@ -37,8 +41,9 @@ class ElchStatusBar(QWidget):
 
         self.exp_labels = {'Sensor PV': {'Temperature': 'Sample Temperature', 'Voltage': 'Pump Voltage'},
                            'Controller PV': {'Temperature': 'Oven Temperature', 'Voltage': '\u03bb Probe Voltage'},
-                           'Setpoint': {'Temperature': 'Target Oven Temperature', 'Voltage': 'Target \u03bb Probe Voltage'},
-                           'Power':{'Temperature': 'Oven Power', 'Voltage': 'Pump Power'}}
+                           'Setpoint': {'Temperature': 'Target Oven Temperature',
+                                        'Voltage': 'Target \u03bb Probe Voltage'},
+                           'Power': {'Temperature': 'Oven Power', 'Voltage': 'Pump Power'}}
 
     def update_values(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type received: {:s}'.format(str(type(status_values)))

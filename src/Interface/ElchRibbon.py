@@ -9,13 +9,15 @@ class ElchRibbon(QWidget):
 
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.menus = menus if menus is not None else ['Devices', 'Control', 'Setpoints', 'PID', 'Plotting', 'Logging']
-        self.menu_buttons = {key: QPushButton(parent=self, objectName=key) for key in self.menus}
+        self.menu_buttons = {key: QPushButton(parent=self) for key in self.menus}
+        for key, button in self.menu_buttons.items():
+            button.setObjectName(key)
         self.buttongroup = QButtonGroup()
-        elchicon = QLabel()
-        elchicon.setPixmap(QPixmap('Icons/ElchiHead.png'))
+        elchi_icon = QLabel()
+        elchi_icon.setPixmap(QPixmap('Icons/ElchiHead.png'))
 
         vbox = QVBoxLayout()
-        vbox.addWidget(elchicon, alignment=Qt.AlignHCenter)
+        vbox.addWidget(elchi_icon, alignment=Qt.AlignHCenter)
         for key in self.menus:
             vbox.addWidget(self.menu_buttons[key])
             self.buttongroup.addButton(self.menu_buttons[key])

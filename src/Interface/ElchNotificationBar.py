@@ -1,5 +1,6 @@
 from PySide2.QtCore import Qt, QTimer
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
+
 from src.Signals import engine_signals
 
 

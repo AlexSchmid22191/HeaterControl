@@ -9,7 +9,9 @@ class ElchPlotMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         controls = ['Start', 'Clear', 'Export', 'Autoscale', 'Zoom']
-        self.buttons = {key: QPushButton(parent=self, text=key, objectName=key) for key in controls}
+        self.buttons = {key: QPushButton(parent=self, text=key) for key in controls}
+        for key, button in self.buttons.items():
+            button.setObjectName(key)
         self.buttons['Start'].setCheckable(True)
         self.buttons['Autoscale'].setCheckable(True)
         self.buttons['Autoscale'].setChecked(True)
@@ -20,23 +22,24 @@ class ElchPlotMenu(QWidget):
         self.check_group.setExclusive(False)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(QLabel(text='Plotting', objectName='Header'))
+        vbox.addWidget(l := QLabel(text='Plotting'))
+        l.setObjectName('Header')
         for key in controls:
             vbox.addWidget(self.buttons[key])
             match key:
                 case 'Start':
+                    # noinspection PyUnresolvedReferences
                     self.buttons[key].clicked.connect(functools.partial(self.start_stop_plotting))
                 case 'Clear':
+                    # noinspection PyUnresolvedReferences
                     self.buttons[key].clicked.connect(self.clear_pplot)
                 case 'Export':
+                    # noinspection PyUnresolvedReferences
                     self.buttons[key].clicked.connect(self.export_data)
-                case 'Autoscale':
-                    self.buttons[key].clicked.connect(self.toggle_autoscale)
-                case 'Zoom':
-                    self.buttons[key].clicked.connect(self.toggle_zoom)
 
         vbox.addSpacing(20)
-        vbox.addWidget(QLabel(text='Data sources', objectName='Header'))
+        vbox.addWidget(l := QLabel(text='Data sources'))
+        l.setObjectName('Header')
         for key, button in self.checks.items():
             button.setChecked(True)
             self.check_group.addButton(button)
@@ -60,10 +63,3 @@ class ElchPlotMenu(QWidget):
     def export_data(self):
         if (file_path := QFileDialog.getSaveFileName(self, 'Save as...', 'Logs/Log.csv', 'CSV (*.csv)')[0]) != '':
             gui_signals.export_log.emit(file_path)
-
-    def toggle_autoscale(self):
-        pass
-
-    def toggle_zoom(self):
-        pass
-

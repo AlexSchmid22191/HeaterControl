@@ -41,18 +41,22 @@ class ElchProgramMenu(QWidget):
             grid.addWidget(seg_dict['Hold'], segment, 3)
             grid.addWidget(self.radios[segment]['hold'], segment, 4)
 
-        self.start_button = QPushButton(text='Start', objectName='Start')
+        self.start_button = QPushButton(text='Start')
+        self.start_button.setObjectName('Start')
         self.start_button.setCheckable(True)
+        # noinspection PyUnresolvedReferences
         self.start_button.toggled.connect(self.start_program)
 
         self.skip_button = QPushButton(text='Skip segment')
+        # noinspection PyUnresolvedReferences
         self.skip_button.clicked.connect(self.skip_segment)
 
         vbox = QVBoxLayout()
         vbox.setSpacing(0)
         vbox.setContentsMargins(10, 10, 10, 10)
 
-        vbox.addWidget(QLabel(text='Setpoint Programmer', objectName='Header'))
+        vbox.addWidget(l := QLabel(text='Setpoint Programmer'))
+        l.setObjectName('Header')
         vbox.addSpacing(10)
         vbox.addLayout(grid)
         vbox.addSpacing(10)

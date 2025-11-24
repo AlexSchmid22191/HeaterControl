@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QToolButton, QHBoxLayout, QDialog, QLabel, QVBoxLayout, QPushButton, QTextBrowser
 
@@ -24,8 +25,11 @@ class ElchTitlebar(QWidget):
         self.setLayout(hbox)
 
         self.dragPosition = None
+        # noinspection PyUnresolvedReferences
         buttons['Minimize'].clicked.connect(self.minimize)
+        # noinspection PyUnresolvedReferences
         buttons['Close'].clicked.connect(self.close)
+        # noinspection PyUnresolvedReferences
         buttons['About'].clicked.connect(self.show_about)
 
     def mouseMoveEvent(self, event):
@@ -54,7 +58,8 @@ class ElchTitlebar(QWidget):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel('ElchiTools 2.10', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(l := QLabel(text='ElchiTools 2.10'), alignment=Qt.AlignHCenter)
+        l.setObjectName('Header')
 
         license_label = QLabel()
         license_label.setText('License: GPL 3.0')
@@ -71,8 +76,11 @@ class ElchTitlebar(QWidget):
         vbox.addWidget(button2 := QPushButton('View GPL3'))
         vbox.addWidget(button3 := QPushButton('View license info'))
         vbox.addWidget(button := QPushButton('Close'))
+        # noinspection PyUnresolvedReferences
         button.clicked.connect(dlg.close)
+        # noinspection PyUnresolvedReferences
         button2.clicked.connect(self.show_gpl)
+        # noinspection PyUnresolvedReferences
         button3.clicked.connect(self.show_license_info)
 
         dlg.setLayout(vbox)
@@ -100,6 +108,7 @@ class ElchTitlebar(QWidget):
         layout.addWidget(dlg.text_browser)
 
         close_button = QPushButton("Close")
+        # noinspection PyUnresolvedReferences
         close_button.clicked.connect(dlg.close)
         layout.addWidget(close_button)
 
@@ -128,6 +137,7 @@ class ElchTitlebar(QWidget):
         layout.addWidget(dlg.text_browser)
 
         close_button = QPushButton("Close")
+        # noinspection PyUnresolvedReferences
         close_button.clicked.connect(dlg.close)
         layout.addWidget(close_button)
 

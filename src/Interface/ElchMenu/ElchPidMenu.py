@@ -17,13 +17,13 @@ class ElchPidMenu(QWidget):
                       'Set 3': {'P3': 'Proportional 3', 'I3': 'Integral 3', 'D3': 'Derivative 3'}}
 
         self.units = {'I1': ' s', 'I2': ' s', 'I3': ' s', 'D1': ' s', 'D2': ' s', 'D3': ' s'}
-        self.entries = {key: QComboBox() if key == 'GS' else QSpinBox() if key == 'AS'
-        else QDoubleSpinBox() for subset in parameters for key in parameters[subset]}
+        self.entries = {key: QComboBox() if key == 'GS' else QSpinBox() if key == 'AS' else QDoubleSpinBox()
+                        for subset in parameters for key in parameters[subset]}
 
         for key, entry in self.entries.items():
             if key == 'GS':
                 entry.addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
-            if key == 'AS':
+            elif key == 'AS':
                 entry.setMinimum(1)
                 entry.setMaximum(3)
             else:
@@ -39,7 +39,8 @@ class ElchPidMenu(QWidget):
         vbox.setSpacing(0)
         vbox.setContentsMargins(10, 10, 10, 10)
         for subset in parameters:
-            label = QLabel(text=subset, objectName='Header')
+            label = QLabel(text=subset)
+            label.setObjectName('Header')
             vbox.addWidget(label)
             vbox.addSpacing(10)
             form = QFormLayout()
@@ -51,7 +52,9 @@ class ElchPidMenu(QWidget):
             vbox.addLayout(form)
             vbox.addSpacing(20)
 
-        refresh_button = QPushButton(text='Refresh', objectName='Refresh')
+        refresh_button = QPushButton(text='Refresh')
+        refresh_button.setObjectName('Refresh')
+        # noinspection PyUnresolvedReferences
         refresh_button.clicked.connect(gui_signals.refresh_pid.emit)
         vbox.addWidget(refresh_button)
 
@@ -60,9 +63,11 @@ class ElchPidMenu(QWidget):
 
         for key, entry in self.entries.items():
             if key == 'GS':
+                # noinspection PyUnresolvedReferences
                 entry.currentTextChanged.connect(functools.partial(self.set_pid_parameter, control=key))
             else:
                 entry.setKeyboardTracking(False)
+                # noinspection PyUnresolvedReferences
                 entry.valueChanged.connect(functools.partial(self.set_pid_parameter, control=key))
 
         engine_signals.pid_parameters_update.connect(self.update_pid_parameters)

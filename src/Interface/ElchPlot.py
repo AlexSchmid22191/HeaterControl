@@ -27,9 +27,10 @@ class ElchPlot(FigureCanvasQTAgg):
         ax.set_xticks(range(11))
         ax.set_yticks(range(11))
         ax2.set_yticks(range(11))
-        ax.set_xticklabels(range(11), fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
-        ax.set_yticklabels(range(11), fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
-        ax2.set_yticklabels(range(11), fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
+        ticks = [str(x) for x in range(11)]
+        ax.set_xticklabels(ticks, fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
+        ax.set_yticklabels(ticks, fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
+        ax2.set_yticklabels(ticks, fontproperties=fm.FontProperties(fname='Fonts/Roboto-Light.ttf', size=11))
         ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
         ax.yaxis.set_major_locator(matplotlib.ticker.AutoLocator())
         ax2.yaxis.set_major_locator(matplotlib.ticker.AutoLocator())
