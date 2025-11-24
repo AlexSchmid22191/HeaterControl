@@ -6,8 +6,8 @@ from src.Drivers.BaseClasses import AbstractSensor
 class Pyrometer(AbstractSensor, serial.Serial):
     mode = 'Temperature'
 
-    def __init__(self, port):
-        super().__init__(port, timeout=1.5)
+    def __init__(self, _port):
+        super().__init__(_port, timeout=1.5)
         self.com_lock = threading.Lock()
         with self.com_lock:
             self.write('TRIG SP OFF\r'.encode())

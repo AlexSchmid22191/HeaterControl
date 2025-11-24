@@ -1,6 +1,7 @@
 import time
 
 from PySide2.QtCore import QTimer
+
 from src.Signals import engine_signals
 
 
@@ -29,13 +30,13 @@ class SetpointProgrammer:
                 self.start_hold(self.segments[self.current_segment].get('Hold'))
 
         else:
-            # Check if hold time has elapsed, then switch to next segment
-            if int(time.time()) > self.hold_endtime and self.current_segment < len(self.segments) and self.hold_endtime>0:
+            # Check if hold time has elapsed, then switch to the next segment
+            if int(time.time()) > self.hold_endtime and self.current_segment < len(self.segments):
                 self.current_segment += 1
                 self.start_ramp()
 
     def set_working_setpoint(self, status_values):
-        assert isinstance(status_values, dict), 'Illegal data type recieved: {:s}'.format(str(type(status_values)))
+        assert isinstance(status_values, dict), 'Illegal data type received: {:s}'.format(str(type(status_values)))
         if 'Setpoint' in status_values.keys():
             self.working_setpoint = status_values['Setpoint']
 
@@ -50,7 +51,4 @@ class SetpointProgrammer:
         self.hold_start_time = int(time.time())
         self.hold_endtime = self.hold_start_time + hold_time * 60
 
-        # Option for indefinite hold
-        if hold_time == -1:
-            self.hold_endtime = -1
         engine_signals.hold_segment_started.emit(self.current_segment)

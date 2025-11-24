@@ -2,7 +2,6 @@ import configparser
 import os
 import time
 
-import pubsub.pub
 from PySide2.QtCore import QTimer, QThreadPool
 from scipy.stats import linregress
 
@@ -11,15 +10,16 @@ from src.Drivers.HCS import HCS34
 from src.Drivers.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma
 from src.Engine.ThreadDecorators import Worker
+from src.Signals import engine_signals, gui_signals
 
 
 class ResistiveHeater(AbstractController):
     mode = 'Temperature'
 
-    def __init__(self, portname, power_supply=None, config_fname=None, *args, **kwargs):
+    def __init__(self, _port_name, power_supply=None, config_fname=None, *args, **kwargs):
 
         self.config_fname = config_fname
-        self.power_supply = power_supply(portname)
+        self.power_supply = power_supply(_port_name)
 
         config = self.read_from_config()
 
@@ -47,7 +47,7 @@ class ResistiveHeater(AbstractController):
         self.timer.timeout.connect(self._control_loop)
         self.timer.start(self.loop_time)
 
-        # Take heater resistance from config file
+        # Take heater resistance from the config file
         self.r_cold = config['Heater']['R_cold']
         self.wire_geometry_factor = 0.2075 / self.r_cold
 
@@ -56,9 +56,13 @@ class ResistiveHeater(AbstractController):
         td = config['PID']['D']
         self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time / 1000)
 
-        pubsub.pub.subscribe(self.report_heater_config, 'gui.request.resistive_heater_config')
-        pubsub.pub.subscribe(self.update_config, 'gui.set.resistive_heater_config')
-        pubsub.pub.subscribe(self.calibrate, 'gui.request.calibration')
+        gui_signals.get_resistive_heater_config.connect(self.report_heater_config)
+        gui_signals.set_resistive_heater_config.connect(self.update_config)
+        gui_signals.get_calibration_data.connect(self.calibrate)
+
+    def close(self):
+        self.timer.stop()
+        self.power_supply.close()
 
     def _control_loop(self):
         if self.control_mode == 'Manual':
@@ -81,10 +85,10 @@ class ResistiveHeater(AbstractController):
 
     def _temp_from_resistance(self, resistance):
         """
-        Calcualtes heater coil temeprture based on heater coil resistance.
+        Calculates the heater coil temperature based on heater coil resistance.
         Equation is based on empirical data from the ceramic sputter device
-        and known temeprature dependence of heater coil resistance.
-        Should be generalised in the future.
+        and known temperature dependence of heater coil resistance.
+        Should be generalized in the future.
         """
         return (resistance * self.wire_geometry_factor - 0.2) / 0.0003
 
@@ -207,37 +211,37 @@ class ResistiveHeater(AbstractController):
     def report_heater_config(self):
         parameters = {'cold resistance': self.r_cold, 'maximum current': self.max_current,
                       'maximum voltage': self.max_voltage, 'minimum output': self.min_output}
-        pubsub.pub.sendMessage('engine.answer.resistive_heater_config', parameters=parameters)
+        engine_signals.resistive_heater_config_update.emit(parameters)
 
     def calibrate(self):
         print('Calibrating')
 
         def _calib():
-            U = []
-            I = []
+            u = []
+            j = []
             for i in range(10):
                 self.set_manual_output_power(i + 1)
                 time.sleep(1)
-                U.append(self.power_supply.get_voltage())
-                I.append(self.power_supply.get_current())
+                u.append(self.power_supply.get_voltage())
+                j.append(self.power_supply.get_current())
             self.set_manual_output_power(0)
             try:
-                slope, intercept, r_value, p_value, std_err = linregress(I, U)
-                return {'U': U, 'I': I, 'R': slope, 'OS': intercept, 'R2': r_value, 'State': 'Sucess'}
+                slope, intercept, r_value, p_value, std_err = linregress(j, u)
+                return {'U': u, 'I': j, 'R': slope, 'OS': intercept, 'R2': r_value, 'State': 'Success'}
             except ValueError:
                 return {'State': 'Fail'}
 
         worker = Worker(_calib)
         worker.signals.over.connect(
-            lambda val: pubsub.pub.sendMessage('engine.answer.calibration', calibration_data=val))
+            lambda result: engine_signals.calibration_data_update.emit(result))
         QThreadPool.globalInstance().start(worker)
 
 
 class ResistiveHeaterTenma(ResistiveHeater):
-    def __init__(self, portname, *args, **kwargs):
-        super().__init__(portname=portname, power_supply=Tenma, config_fname='Tenma.ini')
+    def __init__(self, _port_name, *args, **kwargs):
+        super().__init__(_port_name=_port_name, power_supply=Tenma, config_fname='Tenma.ini', *args, **kwargs)
 
 
 class ResistiveHeaterHCS(ResistiveHeater):
-    def __init__(self, portname, *args, **kwargs):
-        super().__init__(portname=portname, power_supply=HCS34, config_fname='HCS.ini')
+    def __init__(self, _port_name, *args, **kwargs):
+        super().__init__(_port_name=_port_name, power_supply=HCS34, config_fname='HCS.ini', *args, **kwargs)

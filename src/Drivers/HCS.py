@@ -1,5 +1,6 @@
-from serial import Serial
 import threading
+
+from serial import Serial
 
 
 class HCS34(Serial):
@@ -7,11 +8,11 @@ class HCS34(Serial):
         super().__init__(*args, **kwargs)
         self.com_lock = threading.Lock()
 
-    def readline(self):
+    def readline(self, *args, **kwargs):
         return self.read_until(b'\r').rstrip(b'\r')
 
     def set_voltage_limit(self, voltage):
-        string = f'VOLT{int(voltage*10):03d}'
+        string = f'VOLT{int(voltage * 10):03d}'
         with self.com_lock:
             self.write(string.encode())
             self.write(b'\x0D')
@@ -19,7 +20,7 @@ class HCS34(Serial):
             assert ack_answer.decode() == 'OK', 'No response from device'
 
     def set_current_limit(self, current):
-        string = f'CURR{int(current*10):03d}'
+        string = f'CURR{int(current * 10):03d}'
         with self.com_lock:
             self.write(string.encode())
             self.write(b'\x0D')

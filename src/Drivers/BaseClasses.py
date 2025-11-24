@@ -13,8 +13,8 @@ class AbstractController(ABC):
     # Mandatory methods ------------------------------------------------------------------------------------------------
 
     @abstractmethod
-    def __init__(self, portname, slaveadress=1):
-        pass
+    def __init__(self, _port_name, _slave_address=1):
+        """Init"""
 
     @abstractmethod
     def get_process_variable(self):
@@ -227,8 +227,8 @@ class AbstractSensor(ABC):
     mode: Literal["auto", "manual"]
 
     @abstractmethod
-    def __init__(self, port):
-        pass
+    def __init__(self, _port):
+        """Init"""
 
     @abstractmethod
     def get_sensor_value(self):

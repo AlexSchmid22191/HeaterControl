@@ -30,6 +30,8 @@ class SoftwarePID:
             self.last_update = now
 
             return output
+        else:
+            return None
 
     @staticmethod
     def _constrain(value, _min=0, _max=100):

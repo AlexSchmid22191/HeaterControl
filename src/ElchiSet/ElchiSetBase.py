@@ -11,8 +11,8 @@ from serial.serialutil import SerialException
 from src.Drivers.BaseClasses import AbstractSensor, AbstractController
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
-from src.Drivers.Jumo import JumoQuantol
-from src.Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
+from src.Drivers.Jumo import JumoQuantrol
+from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
 from src.Drivers.ResistiveHeater import ResistiveHeaterHCS, ResistiveHeaterTenma
@@ -20,12 +20,12 @@ from src.Drivers.TestDevices import TestSensor, TestController, NiceTestControll
 
 
 controller_types = {'Eurotherm2408': Eurotherm2408, 'Eurotherm3216': Eurotherm3216,
-                    'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantol,
+                    'Eurotherm3508': Eurotherm3508, 'Omega Pt': OmegaPt, 'Jumo Quantrol': JumoQuantrol,
                     'Elch Laser Control': ElchLaser, 'Elch Heater Controller': ElchLaser,
                     'Resistive Heater Tenma': ResistiveHeaterTenma, 'Resistive Heater HCS': ResistiveHeaterHCS,
                     'Test Controller': TestController, 'Nice Test Controller': NiceTestController}
 sensor_types = {'Pyrometer': Pyrometer, 'Thermolino': Thermolino, 'Thermoplatino': Thermoplatino,
-                'Keithly2000 Temperature': Keithly2000Temp, 'Keithly2000 Voltage': Keithly2000Volt,
+                'Keithly2000 Temperature': Keithley2000Temp, 'Keithly2000 Voltage': Keithley2000Volt,
                 'Eurotherm3508': Eurotherm3508S, 'Test Sensor': TestSensor}
 
 

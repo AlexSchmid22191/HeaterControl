@@ -10,8 +10,8 @@ from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 class Thermolino(AbstractSensor, serial.Serial):
     mode = 'Temperature'
 
-    def __init__(self, port):
-        super().__init__(port, timeout=1.5)
+    def __init__(self, _port):
+        super().__init__(_port, timeout=1.5)
         self.com_lock = Lock()
         time.sleep(1)
         with self.com_lock:
@@ -30,8 +30,8 @@ class Thermolino(AbstractSensor, serial.Serial):
 class Thermoplatino(AbstractSensor, serial.Serial):
     mode = 'Temperature'
 
-    def __init__(self, port):
-        super().__init__(port, timeout=1.5, baudrate=115200)
+    def __init__(self, _port):
+        super().__init__(_port, timeout=1.5, baudrate=115200)
         self.com_lock = Lock()
         time.sleep(1)
         with self.com_lock:
@@ -50,14 +50,18 @@ class Thermoplatino(AbstractSensor, serial.Serial):
     def close(self):
         serial.Serial.close(self)
 
+
 class ElchLaser(AbstractController, minimalmodbus.Instrument):
     mode = 'Temperature'
 
-    def __init__(self, portname, slaveadress, baudrate=9600):
-        super().__init__(portname, slaveadress)
+    def __init__(self, _port_name, _slave_address, baudrate=9600):
+        super().__init__(_port_name, _slave_address)
         time.sleep(1)
         self.serial.baudrate = baudrate
         self.com_lock = Lock()
+
+    def close(self):
+        self.serial.close()
 
     def get_process_variable(self):
         """Return the current process variable"""
@@ -90,12 +94,12 @@ class ElchLaser(AbstractController, minimalmodbus.Instrument):
             return self.read_register(4, number_of_decimals=1)
 
     def set_rate(self, rate):
-        """Set the rate of change for the working setpoint i.e. the heating/cooling rate"""
+        """Set the rate of change for the working setpoint i.e., the heating/cooling rate"""
         with self.com_lock:
             self.write_register(5, rate, number_of_decimals=1)
 
     def get_rate(self):
-        """Get the rate of change for the working setpoint i.e. the heating/cooling rate"""
+        """Get the rate of change for the working setpoint i.e., the heating/cooling rate"""
         with self.com_lock:
             return self.read_register(5, number_of_decimals=1)
 

@@ -1,5 +1,6 @@
-import time
 import threading
+import time
+
 from src.Drivers.BaseClasses import AbstractSensor, AbstractController
 
 
@@ -115,7 +116,7 @@ class NiceTestController(TestController):
     def get_process_variable(self):
         with self.com_lock:
             time.sleep(0.01)
-            self.pv = 0.9*self.pv + 0.1*self.wsp
+            self.pv = 0.9 * self.pv + 0.1 * self.wsp
             return self.pv
 
     def set_rate(self, rate):
@@ -138,7 +139,7 @@ class NiceTestController(TestController):
 
     def get_working_setpoint(self):
         with self.com_lock:
-            self.wsp += self.rt/60
+            self.wsp += self.rt / 60
             if self.wsp > self.tsp:
                 self.wsp = self.tsp
             return self.wsp

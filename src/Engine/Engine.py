@@ -1,17 +1,17 @@
 import math
-from typing import Type
 from datetime import timezone, datetime
+from typing import Type
 
 import serial.tools.list_ports
-from PySide2.QtCore import QThreadPool, QTime, QTimer
+from PySide2.QtCore import QThreadPool, QTimer
 from minimalmodbus import NoResponseError
 from serial import SerialException
 
 from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
-from src.Drivers.Jumo import JumoQuantol
-from src.Drivers.Keithly import Keithly2000Temp, Keithly2000Volt
+from src.Drivers.Jumo import JumoQuantrol
+from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
 from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
@@ -35,7 +35,7 @@ class HeaterControlEngine:
             'Eurotherm3216': Eurotherm3216,
             'Eurotherm3508': Eurotherm3508,
             'Omega Pt': OmegaPt,
-            'Jumo Quantrol': JumoQuantol,
+            'Jumo Quantrol': JumoQuantrol,
             'Elchi Laser Control': ElchLaser,
             'Elchi Heater Controller': ElchLaser,
             'Resistive Heater Tenma': ResistiveHeaterTenma,
@@ -45,8 +45,8 @@ class HeaterControlEngine:
             'Pyrometer': Pyrometer,
             'Thermolino': Thermolino,
             'Thermoplatino': Thermoplatino,
-            'Keithly2000 Temperature': Keithly2000Temp,
-            'Keithly2000 Voltage': Keithly2000Volt,
+            'Keithley2000 Temperature': Keithley2000Temp,
+            'Keithley2000 Voltage': Keithley2000Volt,
             'Eurotherm3508': Eurotherm3508S
         }
 
@@ -102,7 +102,7 @@ class HeaterControlEngine:
 
     def add_sensor(self, sensor_type, sensor_port):
         try:
-            self.sensor = self.sensor_types[sensor_type](port=sensor_port)
+            self.sensor = self.sensor_types[sensor_type](_port=sensor_port)
         except SerialException as e:
             engine_signals.connection_failed.emit(e)
         else:
@@ -124,8 +124,8 @@ class HeaterControlEngine:
 
     def add_controller(self, controller_type, controller_port):
         try:
-            self.controller = self.controller_types[controller_type](portname=controller_port,
-                                                                     slaveadress=self.controller_slave_address)
+            self.controller = self.controller_types[controller_type](_port_name=controller_port,
+                                                                     _slave_address=self.controller_slave_address)
         except (SerialException, NoResponseError) as e:
             engine_signals.connection_failed.emit(e)
         else:

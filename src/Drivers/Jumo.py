@@ -1,16 +1,21 @@
 import threading
+
 import minimalmodbus
+
 from src.Drivers.BaseClasses import AbstractController
 
 
-class JumoQuantol(minimalmodbus.Instrument, AbstractController):
+class JumoQuantrol(minimalmodbus.Instrument, AbstractController):
     mode = 'Temperature'
 
-    def __init__(self, portname, slaveadress):
-        super().__init__(portname, slaveadress)
+    def __init__(self, _port_name, _slave_address):
+        super().__init__(_port_name, _slave_address)
         self.serial.baudrate = 9600
         self.serial.timeout = 0.25
         self.com_lock = threading.Lock()
+
+    def close(self):
+        self.serial.close()
 
     def get_process_variable(self):
         with self.com_lock:
