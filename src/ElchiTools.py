@@ -9,10 +9,9 @@ def main():
     app = QApplication()
     app.setWindowIcon(QIcon('Icons/Logo.ico'))
     engine = HeaterControlEngine()
-    print(f'Engine started!: {engine}')
     gui = ElchMainWindow()
     gui.show()
-    app.exec_()
+    app.exec()
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ class Signals(QObject):
     over = Signal(object)
     con_fail = Signal(str)
     imp_fail = Signal(str)
+    finished = Signal()
 
 
 class Worker(QRunnable):
@@ -22,13 +23,12 @@ class Worker(QRunnable):
             result = self.fn(*self.args, **self.kwargs)
         except (SerialException, ModbusException) as ser_ex:
             # noinspection PyUnresolvedReferences
-            pass#self.signals.con_fail.emit(f'Serial communication failed: {'ser_ex'}')
+            self.signals.con_fail.emit(f'Serial communication failed: {ser_ex}')
         except NotImplementedError as imp_ex:
             # noinspection PyUnresolvedReferences
-            pass#self.signals.imp_fail.emit('imp_ex')
+            self.signals.imp_fail.emit(f'{imp_ex}')
         else:
             # noinspection PyUnresolvedReferences
-            print(f"Worker {self.fn.__name__} result:", repr(result), type(result))
-            if result is not None:
-                self.signals.over.emit(result)
-            #self.signals.over.emit(result)
+            self.signals.over.emit(result)
+        finally:
+            self.signals.finished.emit()

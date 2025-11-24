@@ -21,7 +21,7 @@ class SetpointProgrammer:
         self.timer.timeout.connect(self.execute)
         self.timer.start(1000)
 
-        engine.controller.set_automatic_mode()
+        engine.set_control_mode('Automatic')
 
     def execute(self):
         if self.is_ramping:

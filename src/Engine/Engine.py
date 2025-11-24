@@ -3,7 +3,7 @@ from datetime import timezone, datetime
 from typing import Type
 
 import serial.tools.list_ports
-from PySide6.QtCore import QThreadPool, QTimer
+from PySide6.QtCore import QThreadPool, QTimer, QObject, Slot
 from minimalmodbus import NoResponseError
 from serial import SerialException
 
@@ -23,12 +23,13 @@ from src.Signals import engine_signals, gui_signals
 TEST_MODE = True
 
 
-class HeaterControlEngine:
-    sensor: AbstractSensor
-    controller: AbstractController
-    programmer: SetpointProgrammer | None
+class HeaterControlEngine(QObject):
+    sensor: AbstractSensor | None = None
+    controller: AbstractController | None = None
+    programmer: SetpointProgrammer | None = None
 
     def __init__(self):
+        super().__init__()
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         self.controller_types: dict[str, Type[AbstractController]] = {
             'Eurotherm2408': Eurotherm2408,
@@ -83,6 +84,7 @@ class HeaterControlEngine:
         self.programmer = None
 
         self.pool = QThreadPool()
+        self.workers = []
 
     def set_units(self, unit):
         self.mode = unit
@@ -120,7 +122,7 @@ class HeaterControlEngine:
         else:
             engine_signals.sensor_disconnected.emit()
         finally:
-            del self.sensor
+            self.sensor = None
 
     def add_controller(self, controller_type, controller_port):
         try:
@@ -138,7 +140,6 @@ class HeaterControlEngine:
             gui_signals.set_control_mode.connect(self.set_control_mode)
             gui_signals.enable_output.connect(self.toggle_output_enable)
             gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
-            gui_signals.refresh_status.connect(self.get_controller_status)
             gui_signals.refresh_parameters.connect(self.get_controller_parameters)
             gui_signals.set_pid_parameters.connect(self.set_pid_parameters)
             gui_signals.start_program.connect(self.start_programmer)
@@ -155,7 +156,6 @@ class HeaterControlEngine:
         gui_signals.set_control_mode.disconnect(self.set_control_mode)
         gui_signals.enable_output.disconnect(self.toggle_output_enable)
         gui_signals.toggle_aiming.disconnect(self.toggle_aiming_beam)
-        gui_signals.refresh_status.disconnect(self.get_controller_status)
         gui_signals.set_pid_parameters.disconnect(self.set_pid_parameters)
         gui_signals.start_program.disconnect(self.start_programmer)
 
@@ -168,34 +168,36 @@ class HeaterControlEngine:
         else:
             engine_signals.controller_disconnected.emit()
         finally:
-            del self.controller
+            self.controller = None
 
     def refresh_status(self):
-        if hasattr(self, 'sensor'):
+        if self.sensor:
             self.get_sensor_status()
-        if hasattr(self, 'controller'):
+        if self.controller:
             self.get_controller_status()
 
     def get_sensor_status(self):
-        runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
-        worker = Worker(self.sensor.get_sensor_value)
+        runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0
+        self.workers.append(worker := Worker(self.sensor.get_sensor_value))
         worker.signals.over.connect(lambda result:
                                     engine_signals.sensor_status_update.emit({'Sensor PV': result}, runtime))
         if self.is_logging:
             worker.signals.over.connect(lambda result: self.add_log_data_point(data={'Sensor PV': result}))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def get_controller_status(self):
-        runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else None
+        runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
                                     'Setpoint': self.controller.get_working_setpoint,
                                     'Power': self.controller.get_working_output}.items():
-            worker = Worker(function)
+            self.workers.append(worker := Worker(function))
             worker.signals.over.connect(lambda result, _param=parameter:
                                         engine_signals.controller_status_update.emit({_param: result}, runtime))
             if self.is_logging:
                 worker.signals.over.connect(lambda result, _param=parameter:
                                             self.add_log_data_point(data={_param: result}))
+            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
             self.pool.start(worker)
 
     def get_controller_parameters(self):
@@ -203,26 +205,31 @@ class HeaterControlEngine:
                                     'Power': self.controller.get_working_output,
                                     'Rate': self.controller.get_rate,
                                     'Mode': self.controller.get_control_mode}.items():
-            worker = Worker(function)
+            self.workers.append(worker := Worker(function))
             worker.signals.over.connect(lambda result, _param=parameter:
                                         engine_signals.controller_parameters_update.emit({_param: result}))
+            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
             self.pool.start(worker)
 
     def set_control_mode(self, mode):
         function = self.controller.set_manual_mode if mode == 'Manual' else self.controller.set_automatic_mode
-        worker = Worker(function)
+        self.workers.append(worker := Worker(function))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def set_target_setpoint(self, setpoint):
-        worker = Worker(self.controller.set_target_setpoint, setpoint)
+        self.workers.append(worker := Worker(self.controller.set_target_setpoint, setpoint))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def set_manual_output_power(self, power):
-        worker = Worker(self.controller.set_manual_output_power, power)
+        self.workers.append(worker := Worker(self.controller.set_manual_output_power, power))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def set_rate(self, rate):
-        worker = Worker(self.controller.set_rate, rate)
+        self.workers.append(worker := Worker(self.controller.set_rate, rate))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def get_pid_parameters(self):
@@ -233,9 +240,10 @@ class HeaterControlEngine:
                                     'D3': self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
                                     'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
                                     'GS': self.controller.get_gain_scheduling}.items():
-            worker = Worker(function)
+            self.workers.append(worker := Worker(function))
             worker.signals.over.connect(lambda result, _param=parameter:
                                         engine_signals.pid_parameters.emit({_param: result}))
+            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
             self.pool.start(worker)
 
     def set_pid_parameters(self, parameter, value):
@@ -244,18 +252,20 @@ class HeaterControlEngine:
                     'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
                     'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
                     'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
-
-        worker = Worker(function, value)
+        self.workers.append(worker := Worker(function, value))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def toggle_output_enable(self, state):
         function = self.controller.enable_output if state else self.controller.disable_output
-        worker = Worker(function)
+        self.workers.append(worker := Worker(function))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def toggle_aiming_beam(self, state):
         function = self.controller.enable_aiming_beam if state else self.controller.disable_aiming_beam
-        worker = Worker(function)
+        self.workers.append(worker := Worker(function))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         self.pool.start(worker)
 
     def start_programmer(self, program):
@@ -268,7 +278,7 @@ class HeaterControlEngine:
     def stop_programmer(self):
         if self.programmer:
             self.programmer.timer.stop()
-            del self.programmer
+            self.programmer = None
 
     def skip_program_segment(self):
         if self.programmer:

@@ -53,7 +53,7 @@ class ElchPlotMenu(QWidget):
         if self.buttons['Start'].isChecked():
             gui_signals.start_log.emit()
         else:
-            gui_signals.log.emit()
+            gui_signals.stop_log.emit()
 
     def clear_pplot(self):
         gui_signals.clear_log.emit()

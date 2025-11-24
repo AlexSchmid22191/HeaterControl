@@ -17,7 +17,6 @@ class GuiSignals(QObject):
     set_control_mode = Signal(str)
     enable_output = Signal(bool)
     toggle_aiming = Signal(bool)
-    refresh_status = Signal()
     refresh_parameters = Signal()
     refresh_pid = Signal()
     set_pid_parameters = Signal(str, str)
@@ -27,7 +26,7 @@ class GuiSignals(QObject):
     clear_log = Signal()
     export_log = Signal()
 
-    start_program = Signal(dict)
+    start_program = Signal(object)
     skip_program = Signal()
     stop_program = Signal()
 
