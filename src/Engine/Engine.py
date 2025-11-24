@@ -3,7 +3,7 @@ from datetime import timezone, datetime
 from typing import Type
 
 import serial.tools.list_ports
-from PySide2.QtCore import QThreadPool, QTimer
+from PySide6.QtCore import QThreadPool, QTimer
 from minimalmodbus import NoResponseError
 from serial import SerialException
 

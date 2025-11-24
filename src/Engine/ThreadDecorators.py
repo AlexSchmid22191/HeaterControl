@@ -1,4 +1,4 @@
-from PySide2.QtCore import Signal, QRunnable, QObject
+from PySide6.QtCore import Signal, QRunnable, QObject
 from minimalmodbus import ModbusException
 from serial import SerialException
 
@@ -22,10 +22,13 @@ class Worker(QRunnable):
             result = self.fn(*self.args, **self.kwargs)
         except (SerialException, ModbusException) as ser_ex:
             # noinspection PyUnresolvedReferences
-            self.signals.con_fail.emit(f'Serial communication failed: {ser_ex}')
+            pass#self.signals.con_fail.emit(f'Serial communication failed: {'ser_ex'}')
         except NotImplementedError as imp_ex:
             # noinspection PyUnresolvedReferences
-            self.signals.imp_fail.emit(imp_ex)
+            pass#self.signals.imp_fail.emit('imp_ex')
         else:
             # noinspection PyUnresolvedReferences
-            self.signals.over.emit(result)
+            print(f"Worker {self.fn.__name__} result:", repr(result), type(result))
+            if result is not None:
+                self.signals.over.emit(result)
+            #self.signals.over.emit(result)

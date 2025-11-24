@@ -1,5 +1,5 @@
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QApplication
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
 
 from Interface.ElchMainWindow import ElchMainWindow
 from src.Engine.Engine import HeaterControlEngine
@@ -16,4 +16,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f'Error: {e}')

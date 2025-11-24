@@ -1,6 +1,6 @@
 import functools
 
-from PySide2.QtWidgets import QWidget, QPushButton, QCheckBox, QButtonGroup, QVBoxLayout, QLabel, QFileDialog
+from PySide6.QtWidgets import QWidget, QPushButton, QCheckBox, QButtonGroup, QVBoxLayout, QLabel, QFileDialog
 
 from src.Signals import gui_signals
 

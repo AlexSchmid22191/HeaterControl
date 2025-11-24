@@ -1,8 +1,8 @@
 import functools
 
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QFontDatabase
-from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QSizeGrip
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFontDatabase
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QSizeGrip
 
 from src.Interface.ElchMenu.ElchMenu import ElchMenu
 from src.Interface.ElchPlot import ElchPlot

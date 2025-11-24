@@ -2,7 +2,7 @@ import configparser
 import os
 import time
 
-from PySide2.QtCore import QTimer, QThreadPool
+from PySide6.QtCore import QTimer, QThreadPool
 from scipy.stats import linregress
 
 from src.Drivers.BaseClasses import AbstractController

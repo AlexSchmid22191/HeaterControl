@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QGridLayout, \
+from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QGridLayout, \
     QButtonGroup
 
 from src.Signals import engine_signals, gui_signals

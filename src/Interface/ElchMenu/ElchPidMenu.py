@@ -1,6 +1,6 @@
 import functools
 
-from PySide2.QtWidgets import QWidget, QComboBox, QSpinBox, QDoubleSpinBox, QVBoxLayout, QLabel, QFormLayout, \
+from PySide6.QtWidgets import QWidget, QComboBox, QSpinBox, QDoubleSpinBox, QVBoxLayout, QLabel, QFormLayout, \
     QPushButton
 
 from src.Signals import gui_signals, engine_signals

@@ -1,6 +1,6 @@
 import time
 
-from PySide2.QtCore import QTimer
+from PySide6.QtCore import QTimer
 
 from src.Signals import engine_signals
 
