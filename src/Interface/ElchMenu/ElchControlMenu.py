@@ -16,8 +16,16 @@ class ElchControlMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.labels = {key: QLabel(text=key, objectName='Header') for key in ['Setpoint', 'Rate', 'Power']}
-        self.entries = {key: QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000) for key in self.labels}
+        self.labels = {key: QLabel(key) for key in ['Setpoint', 'Rate', 'Power']}
+        for key, label in self.labels.items():
+            label.setObjectName('Header')
+        self.entries = {key: QDoubleSpinBox() for key in self.labels}
+        for key, entry in self.entries.items():
+            entry.setMaximum(1500)
+            entry.setMinimum(0)
+            entry.setSingleStep(1)
+            entry.setDecimals(1)
+
         self.entries['Power'].setMaximum(100)
         self.entries['Power'].setSuffix(' %')
         self.buttons = {key: QRadioButton(text=key) for key in ['Automatic', 'Manual']}
@@ -27,28 +35,37 @@ class ElchControlMenu(QWidget):
         vbox.setContentsMargins(10, 10, 10, 10)
         for label in self.labels:
             self.entries[label].setKeyboardTracking(False)
+            # noinspection PyUnresolvedReferences
             self.entries[label].valueChanged.connect(functools.partial(self.set_control_value, control=label))
             vbox.addWidget(self.labels[label], stretch=0)
             vbox.addWidget(self.entries[label], stretch=0)
             vbox.addSpacing(10)
 
-        vbox.addWidget(QLabel(text='Control mode', objectName='Header'))
+        vbox.addWidget(l := QLabel(text='Control mode'))
+        l.setObjectName('Header')
         for button in self.buttons:
             vbox.addWidget(self.buttons[button])
+            # noinspection PyUnresolvedReferences
             self.buttons[button].toggled.connect(functools.partial(self.set_control_mode, mode=button))
 
-        refresh_button = QPushButton(text='Refresh', objectName='Refresh')
+        refresh_button = QPushButton(text='Refresh')
+        refresh_button.setObjectName('Refresh')
+        # noinspection PyUnresolvedReferences
         refresh_button.clicked.connect(gui_signals.refresh_parameters.emit)
         vbox.addSpacing(10)
         vbox.addWidget(refresh_button)
         vbox.addSpacing(10)
 
-        enable_button = QPushButton(text='Output Enable', objectName='Enable')
+        enable_button = QPushButton(text='Output Enable')
+        enable_button.setObjectName('Enable')
         enable_button.setCheckable(True)
+        # noinspection PyUnresolvedReferences
         enable_button.clicked.connect(lambda: gui_signals.enable_output.emit(enable_button.isChecked()))
 
-        aiming_beam_button = QPushButton(text='Aiming Beam', objectName='Enable')
+        aiming_beam_button = QPushButton(text='Aiming Beam')
+        aiming_beam_button.setObjectName('Enable')
         aiming_beam_button.setCheckable(True)
+        # noinspection PyUnresolvedReferences
         aiming_beam_button.clicked.connect(lambda: gui_signals.toggle_aiming.emit(aiming_beam_button.isChecked()))
 
         vbox.addWidget(enable_button)
@@ -56,7 +73,9 @@ class ElchControlMenu(QWidget):
 
         vbox.addSpacing(10)
 
-        res_conf_button = QPushButton(text='Resistive Heater Config', objectName='Config')
+        res_conf_button = QPushButton(text='Resistive Heater Config')
+        res_conf_button.setObjectName('Config')
+        # noinspection PyUnresolvedReferences
         res_conf_button.clicked.connect(self.resistive_heater_config)
         vbox.addWidget(res_conf_button)
 
@@ -113,7 +132,8 @@ class ResConfDialog(QDialog):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel('Resistive heater configuration', objectName='Header'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(l := QLabel('Resistive heater configuration'), alignment=Qt.AlignHCenter)
+        l.setObjectName('Header')
         vbox.addWidget(QLabel('Warning: Do not change any values here\nunless you know exactly what you are doing!'))
 
         g_box = QGridLayout()
@@ -133,10 +153,13 @@ class ResConfDialog(QDialog):
 
         vbox.addLayout(g_box)
         vbox.addWidget(button3 := QPushButton('Calibrate'))
+        # noinspection PyUnresolvedReferences
         button3.clicked.connect(gui_signals.get_calibration_data.emit)
         vbox.addWidget(button := QPushButton('Save config'))
+        # noinspection PyUnresolvedReferences
         button.clicked.connect(self.save_config)
         vbox.addWidget(button2 := QPushButton('Close'))
+        # noinspection PyUnresolvedReferences
         button2.clicked.connect(self.close)
 
         self.setLayout(vbox)
@@ -169,9 +192,11 @@ class CalDialog(QDialog):
             vbox = QVBoxLayout()
             vbox.setContentsMargins(20, 20, 20, 20)
             vbox.setSpacing(10)
-            vbox.addWidget(QLabel('Calibration failed!\n Check if the circuit is clsoed\n and the output is enabled.',
-                                  objectName='Header'), alignment=Qt.AlignHCenter)
+            vbox.addWidget(l := QLabel('Calibration failed!\nCheck if the circuit is closed\n'
+                                       'and the output is enabled!'), alignment=Qt.AlignHCenter)
+            l.setObjectName('Header')
             vbox.addWidget(button2 := QPushButton('Close'))
+            # noinspection PyUnresolvedReferences
             button2.clicked.connect(self.reject)
             self.setLayout(vbox)
         else:
@@ -198,7 +223,8 @@ class CalDialog(QDialog):
             vbox = QVBoxLayout()
             vbox.setContentsMargins(20, 20, 20, 20)
             vbox.setSpacing(10)
-            vbox.addWidget(QLabel('Calibration results', objectName='Header'), alignment=Qt.AlignHCenter)
+            vbox.addWidget(l := QLabel('Calibration results'), alignment=Qt.AlignHCenter)
+            l.setObjectName('Header')
             vbox.addSpacing(20)
             vbox.addWidget(plot)
             g_box = QGridLayout()
@@ -212,8 +238,10 @@ class CalDialog(QDialog):
 
             vbox.addSpacing(20)
             vbox.addWidget(button := QPushButton('Accept calibration'))
+            # noinspection PyUnresolvedReferences
             button.clicked.connect(self.accept)
             vbox.addWidget(button2 := QPushButton('Discard calibration'))
+            # noinspection PyUnresolvedReferences
             button2.clicked.connect(self.reject)
 
             self.setLayout(vbox)

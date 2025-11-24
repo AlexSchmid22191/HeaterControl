@@ -10,25 +10,33 @@ class ElchDeviceMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.labels = {key: QLabel(text=key, objectName='Header') for key in ['Controller', 'Sensor']}
+        self.labels = {key: QLabel(text=key) for key in ['Controller', 'Sensor']}
+        for label in self.labels.values():
+            label.setObjectName('Header')
         self.device_menus = {key: QComboBox() for key in self.labels}
         self.port_menus = {key: QComboBox() for key in self.labels}
-        self.connect_buttons = {key: QPushButton(text='Connect', objectName=key) for key in self.labels}
+        self.connect_buttons = {key: QPushButton(text='Connect') for key in self.labels}
+        for key, button in self.connect_buttons.items():
+            button.setObjectName(key)
 
         self.buttongroup = QButtonGroup()
         self.buttongroup.setExclusive(False)
+        # noinspection PyUnresolvedReferences
         self.buttongroup.buttonToggled.connect(self.connect_device)
 
         self.unit_buttons = {key: QRadioButton(text=key) for key in ['Temperature', 'Voltage']}
-        self.refresh_button = QPushButton(text='Refresh Serial', objectName='Refresh')
+        self.refresh_button = QPushButton(text='Refresh Serial')
+        self.refresh_button.setObjectName('Refresh')
 
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
         vbox.setContentsMargins(10, 10, 10, 10)
 
-        vbox.addWidget(QLabel(text='Process Variable', objectName='Header'))
+        vbox.addWidget(l := QLabel(text='Process Variable'))
+        l.setObjectName('Header')
         for key, button in self.unit_buttons.items():
             vbox.addWidget(button)
+            # noinspection PyUnresolvedReferences
             button.toggled.connect(functools.partial(self.set_measurement_unit, unit=key))
         vbox.addSpacing(20)
 
@@ -42,6 +50,7 @@ class ElchDeviceMenu(QWidget):
             vbox.addSpacing(20)
 
         vbox.addWidget(self.refresh_button)
+        # noinspection PyUnresolvedReferences
         self.refresh_button.clicked.connect(gui_signals.request_ports.emit)
         vbox.addStretch()
         self.setLayout(vbox)

@@ -5,8 +5,8 @@ from PySide2.QtWidgets import QWidget, QVBoxLayout
 
 from src.Interface.ElchMenu.ElchControlMenu import ElchControlMenu
 from src.Interface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
-from src.Interface.ElchMenu.ElchPlotMenu import ElchPlotMenu
 from src.Interface.ElchMenu.ElchPidMenu import ElchPidMenu
+from src.Interface.ElchMenu.ElchPlotMenu import ElchPlotMenu
 from src.Interface.ElchMenu.ElchProgramMenu import ElchProgramMenu
 
 

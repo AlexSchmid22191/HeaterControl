@@ -17,10 +17,20 @@ class ElchPidMenu(QWidget):
                       'Set 3': {'P3': 'Proportional 3', 'I3': 'Integral 3', 'D3': 'Derivative 3'}}
 
         self.units = {'I1': ' s', 'I2': ' s', 'I3': ' s', 'D1': ' s', 'D2': ' s', 'D3': ' s'}
-        self.entries = {key: QComboBox() if key == 'GS' else QSpinBox(minimum=1, maximum=3) if key == 'AS'
-                        else QDoubleSpinBox(decimals=0, singleStep=10, minimum=0, maximum=100000)
-                        for subset in parameters for key in parameters[subset]}
-        self.entries['GS'].addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
+        self.entries = {key: QComboBox() if key == 'GS' else QSpinBox() if key == 'AS'
+        else QDoubleSpinBox() for subset in parameters for key in parameters[subset]}
+
+        for key, entry in self.entries.items():
+            if key == 'GS':
+                entry.addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
+            if key == 'AS':
+                entry.setMinimum(1)
+                entry.setMaximum(3)
+            else:
+                entry.setMinimum(0)
+                entry.setMaximum(100000)
+                entry.setSingleStep(10)
+                entry.setDecimals(0)
 
         for entry, suffix in self.units.items():
             self.entries[entry].setSuffix(suffix)
