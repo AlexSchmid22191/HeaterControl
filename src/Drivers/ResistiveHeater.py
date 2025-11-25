@@ -9,7 +9,7 @@ from src.Drivers.BaseClasses import AbstractController
 from src.Drivers.HCS import HCS34
 from src.Drivers.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma
-from src.Engine.ThreadDecorators import Worker
+from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
 
 

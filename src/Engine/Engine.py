@@ -17,7 +17,7 @@ from src.Drivers.Pyrometer import Pyrometer
 from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
 from src.Drivers.TestDevices import TestSensor, TestController, NiceTestController
 from src.Engine.SetProg import SetpointProgrammer
-from src.Engine.ThreadDecorators import Worker
+from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
 
 TEST_MODE = True
@@ -184,6 +184,8 @@ class HeaterControlEngine(QObject):
         if self.is_logging:
             worker.signals.over.connect(lambda result: self.add_log_data_point(data={'Sensor PV': result}))
         worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
+        worker.signals.con_fail.connect(lambda e: engine_signals.com_failed.emit(f'Error communicating with sensor: {e}'))
+        worker.signals.imp_fail.connect(lambda e: engine_signals.non_imp.emit(f'{e}'))
         self.pool.start(worker)
 
     def get_controller_status(self):

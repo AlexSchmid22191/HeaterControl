@@ -55,6 +55,9 @@ class EngineSignals(QObject):
     calibration_data_update = Signal(dict)
     resistive_heater_config_update = Signal(dict)
 
+    com_failed = Signal(str)
+    non_imp = Signal(str)
+
 
 gui_signals = GuiSignals()
 engine_signals = EngineSignals()
