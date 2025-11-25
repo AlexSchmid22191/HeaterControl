@@ -56,16 +56,16 @@ class ElchControlMenu(QWidget):
         vbox.addWidget(refresh_button)
         vbox.addSpacing(10)
 
-        enable_button = QPushButton(text='Output Enable')
+        vbox.addWidget(l := QLabel(text='Optional controls'))
+        l.setObjectName('Header')
+        enable_button = QPushButton('Output Enable')
         enable_button.setObjectName('Enable')
         enable_button.setCheckable(True)
-        # noinspection PyUnresolvedReferences
         enable_button.clicked.connect(lambda: gui_signals.enable_output.emit(enable_button.isChecked()))
 
-        aiming_beam_button = QPushButton(text='Aiming Beam')
+        aiming_beam_button = QPushButton('Aiming Beam')
         aiming_beam_button.setObjectName('Enable')
         aiming_beam_button.setCheckable(True)
-        # noinspection PyUnresolvedReferences
         aiming_beam_button.clicked.connect(lambda: gui_signals.toggle_aiming.emit(aiming_beam_button.isChecked()))
 
         vbox.addWidget(enable_button)
@@ -73,7 +73,7 @@ class ElchControlMenu(QWidget):
 
         vbox.addSpacing(10)
 
-        res_conf_button = QPushButton(text='Resistive Heater Config')
+        res_conf_button = QPushButton('Resistive Heater Config')
         res_conf_button.setObjectName('Config')
         # noinspection PyUnresolvedReferences
         res_conf_button.clicked.connect(self.resistive_heater_config)

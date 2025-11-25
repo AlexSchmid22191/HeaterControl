@@ -241,6 +241,12 @@ class ResistiveHeaterTenma(ResistiveHeater):
     def __init__(self, _port_name, *args, **kwargs):
         super().__init__(_port_name=_port_name, power_supply=Tenma, config_fname='Tenma.ini', *args, **kwargs)
 
+    def enable_output(self):
+        self.power_supply.enable_output()
+
+    def disable_output(self):
+        self.power_supply.disable_output()
+
 
 class ResistiveHeaterHCS(ResistiveHeater):
     def __init__(self, _port_name, *args, **kwargs):
