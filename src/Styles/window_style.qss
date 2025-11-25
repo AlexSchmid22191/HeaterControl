@@ -86,12 +86,13 @@ ElchMenu QPushButton#Refresh:hover{icon: url(Icons/Refresh_Glow.png)}
 ElchMenu QPushButton#Refresh:checked{icon: url(Icons/Refresh_Glow.png)}
 
 /*Comboboxes*/
-ElchMenu QComboBox{background-color:#2A2D56; border: 1px solid #15183b; color: #7b8ccb; font: 11pt "Roboto Light";}
+ElchMenu QComboBox{background-color:#2A2D56; border: 1px solid #15183b; color: #7b8ccb; font: 11pt "Roboto Light"; padding: 2px}
 ElchMenu QComboBox:on{background-color: #252a4e; color: #7f8ab7;}
 ElchMenu QComboBox::drop-down{border:none}
 ElchMenu QComboBox::down-arrow{image: url(Icons/Down.png); width: 10px}
 ElchMenu QComboBox::down-arrow:on{image: url(Icons/Down_Glow.png); width: 10px}
 ElchMenu QComboBox::down-arrow:hover{image: url(Icons/Down_Glow.png); width: 10px}
+ElchMenu QComboBox QAbstractItemView{background-color: #2A2D56; border:1px solid #15183b; color: #7b8ccb;}
 ElchMenu QToolTip{background-color: #2A2D56; color: #7b8ccb; font: 11pt "Roboto Light"; border: 1px solid #15183b}
 
 
