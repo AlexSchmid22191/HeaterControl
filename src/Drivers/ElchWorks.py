@@ -7,31 +7,32 @@ import serial
 from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 
 
-class Thermolino(AbstractSensor, serial.Serial):
+class Thermolino(AbstractSensor):
     mode = 'Temperature'
 
     def __init__(self, _port):
-        super().__init__(_port, timeout=1.5)
+        self.serial = serial.Serial(_port, timeout=1.5)
         self.com_lock = Lock()
         time.sleep(1)
         with self.com_lock:
-            self.write(":FUNC 'TEMP'\n".encode())
+            self.serial.write(":FUNC 'TEMP'\n".encode())
 
     def get_sensor_value(self):
         with self.com_lock:
-            self.write(':read?'.encode())
-            self.write('\n'.encode())
-            return float(self.readline().decode())
+            self.serial.write(':read?'.encode())
+            self.serial.write('\n'.encode())
+            return float(self.serial.readline().decode())
 
     def close(self):
-        serial.Serial.close(self)
+        self.serial.close()
 
 
 class Thermoplatino(AbstractSensor, serial.Serial):
     mode = 'Temperature'
 
     def __init__(self, _port):
-        super().__init__(_port, timeout=1.5, baudrate=115200)
+        self.serial = serial.Serial(_port, timeout=1.5, baudrate=115200)
+        super().__init__(_port, timeout=1.5, )
         self.com_lock = Lock()
         time.sleep(1)
         with self.com_lock:
