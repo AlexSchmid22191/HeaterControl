@@ -1,12 +1,14 @@
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
-from Interface.ElchMainWindow import ElchMainWindow
+from src.Interface.ElchMainWindow import ElchMainWindow
 from src.Engine.Engine import HeaterControlEngine
-
+import src.appinfo
 
 def main():
     app = QApplication()
+    app.setApplicationName(f"{src.appinfo.APP_NAME}")
+    app.setApplicationDisplayName(f"{src.appinfo.APP_NAME}")
     app.setWindowIcon(QIcon('Icons/Logo.ico'))
     engine = HeaterControlEngine()
     gui = ElchMainWindow()

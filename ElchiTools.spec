@@ -1,5 +1,46 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys, os
+
+project_root = os.path.abspath(os.getcwd())
+
+sys.path.insert(0, project_root)
+sys.path.insert(0, os.path.join(project_root, "src"))
+
+import src.appinfo
+
+version_str = f"""
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers={src.appinfo.APP_VERSION_NUMERIC},
+    prodvers={src.appinfo.APP_VERSION_NUMERIC},
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        '040904b0',
+        [
+          StringStruct('CompanyName', '{src.appinfo.APP_COMPANY}'),
+          StringStruct('FileDescription', '{src.appinfo.APP_DESCRIPTION}'),
+          StringStruct('FileVersion', '{src.appinfo.APP_VERSION}'),
+          StringStruct('InternalName', '{src.appinfo.APP_NAME}'),
+          StringStruct('OriginalFilename', '{src.appinfo.APP_NAME}'),
+          StringStruct('ProductName', '{src.appinfo.APP_NAME}'),
+          StringStruct('ProductVersion', '{src.appinfo.APP_VERSION}')
+        ]
+      )
+    ]),
+    VarFileInfo([VarStruct('Translation', [1033, 1200])])
+  ]
+)
+"""
+
 block_cipher = None
 
 
@@ -21,7 +62,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='ElchiTools',
+          name=src.appinfo.APP_NAME,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -36,4 +77,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='ElchiTools')
+               name=src.appinfo.APP_NAME)

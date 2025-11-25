@@ -1,4 +1,5 @@
 import sys
+import src.appinfo
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -58,19 +59,19 @@ class ElchTitlebar(QWidget):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(20, 20, 20, 20)
         vbox.setSpacing(10)
-        vbox.addWidget(l := QLabel(text='ElchiTools 2.10'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(l := QLabel(text=f'{src.appinfo.APP_NAME} {src.appinfo.APP_VERSION}'), alignment=Qt.AlignHCenter)
         l.setObjectName('Header')
 
         license_label = QLabel()
-        license_label.setText('License: GPL 3.0')
+        license_label.setText(f'License: {src.appinfo.APP_LICENSE}')
         license_label.setOpenExternalLinks(True)
         vbox.addWidget(license_label, alignment=Qt.AlignHCenter)
 
-        vbox.addWidget(QLabel('Maintainer: Alex Schmid'), alignment=Qt.AlignHCenter)
-        vbox.addWidget(QLabel('Contact: alex.schmid91@gmail.com'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel(f'Maintainer: {src.appinfo.APP_AUTHOR}'), alignment=Qt.AlignHCenter)
+        vbox.addWidget(QLabel(f'Contact: {src.appinfo.APP_CONTACT}'), alignment=Qt.AlignHCenter)
 
         source_label = QLabel()
-        source_label.setText('Source: https://github.com/AlexSchmid22191/HeaterControl')
+        source_label.setText(f'Source: {src.appinfo.APP_SOURCE}')
         source_label.setOpenExternalLinks(True)
         vbox.addWidget(source_label, alignment=Qt.AlignHCenter)
         vbox.addWidget(button2 := QPushButton('View GPL3'))
