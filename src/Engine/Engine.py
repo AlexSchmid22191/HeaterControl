@@ -3,7 +3,7 @@ from datetime import timezone, datetime
 from typing import Type
 
 import serial.tools.list_ports
-from PySide6.QtCore import QThreadPool, QTimer, QObject, Slot
+from PySide6.QtCore import QThreadPool, QTimer, QObject
 from minimalmodbus import NoResponseError
 from serial import SerialException
 
@@ -15,7 +15,7 @@ from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
 from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
-from src.Drivers.TestDevices import TestSensor, TestController, NiceTestController
+from src.Drivers.TestDevices import TestSensor, TestController, NiceTestController, FaultyTestController
 from src.Engine.SetProg import SetpointProgrammer
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
@@ -55,6 +55,7 @@ class HeaterControlEngine(QObject):
             self.sensor_types['Test Sensor'] = TestSensor
             self.controller_types['Test Controller'] = TestController
             self.controller_types['Nice Test Controller'] = NiceTestController
+            self.controller_types['Faulty Test Controller'] = FaultyTestController
             self.available_ports['COM Test'] = 'Test Port'
 
         self.controller_slave_address = 1
@@ -170,6 +171,16 @@ class HeaterControlEngine(QObject):
         finally:
             self.controller = None
 
+    def device_io(self, function, callbacks=None, *args, **kwargs):
+        self.workers.append(worker := Worker(function, *args, **kwargs))
+        for callback in callbacks if callbacks else []:
+            worker.signals.over.connect(callback)
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
+        worker.signals.con_fail.connect(
+            lambda e: engine_signals.com_failed.emit(f'Communication error during {function.__name__}: {e}'))
+        worker.signals.imp_fail.connect(lambda e: engine_signals.non_imp.emit(f'{e}'))
+        self.pool.start(worker)
+
     def refresh_status(self):
         if self.sensor:
             self.get_sensor_status()
@@ -178,61 +189,42 @@ class HeaterControlEngine(QObject):
 
     def get_sensor_status(self):
         runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0
-        self.workers.append(worker := Worker(self.sensor.get_sensor_value))
-        worker.signals.over.connect(lambda result:
-                                    engine_signals.sensor_status_update.emit({'Sensor PV': result}, runtime))
+        callbacks = [lambda result: engine_signals.sensor_status_update.emit({'Sensor PV': result}, runtime)]
         if self.is_logging:
-            worker.signals.over.connect(lambda result: self.add_log_data_point(data={'Sensor PV': result}))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        worker.signals.con_fail.connect(lambda e: engine_signals.com_failed.emit(f'Error communicating with sensor: {e}'))
-        worker.signals.imp_fail.connect(lambda e: engine_signals.non_imp.emit(f'{e}'))
-        self.pool.start(worker)
+            callbacks.append(lambda result: self.add_log_data_point(data={'Sensor PV': result}))
+        self.device_io(self.sensor.get_sensor_value, callbacks=callbacks)
 
     def get_controller_status(self):
         runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
                                     'Setpoint': self.controller.get_working_setpoint,
                                     'Power': self.controller.get_working_output}.items():
-            self.workers.append(worker := Worker(function))
-            worker.signals.over.connect(lambda result, _param=parameter:
-                                        engine_signals.controller_status_update.emit({_param: result}, runtime))
+            callbacks = [lambda result, _param=parameter: engine_signals.controller_status_update.emit({_param: result},
+                                                                                                       runtime)]
             if self.is_logging:
-                worker.signals.over.connect(lambda result, _param=parameter:
-                                            self.add_log_data_point(data={_param: result}))
-            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-            self.pool.start(worker)
+                callbacks.append(lambda result, _param=parameter: self.add_log_data_point(data={_param: result}))
+            self.device_io(function, callbacks=callbacks)
 
     def get_controller_parameters(self):
         for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
                                     'Power': self.controller.get_working_output,
                                     'Rate': self.controller.get_rate,
                                     'Mode': self.controller.get_control_mode}.items():
-            self.workers.append(worker := Worker(function))
-            worker.signals.over.connect(lambda result, _param=parameter:
-                                        engine_signals.controller_parameters_update.emit({_param: result}))
-            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-            self.pool.start(worker)
+            self.device_io(function, callbacks=[lambda result, _param=parameter:
+                                                engine_signals.controller_parameters_update.emit({_param: result})])
 
     def set_control_mode(self, mode):
         function = self.controller.set_manual_mode if mode == 'Manual' else self.controller.set_automatic_mode
-        self.workers.append(worker := Worker(function))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(function, None)
 
     def set_target_setpoint(self, setpoint):
-        self.workers.append(worker := Worker(self.controller.set_target_setpoint, setpoint))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(self.controller.set_target_setpoint, None, setpoint)
 
     def set_manual_output_power(self, power):
-        self.workers.append(worker := Worker(self.controller.set_manual_output_power, power))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(self.controller.set_manual_output_power,None, power)
 
     def set_rate(self, rate):
-        self.workers.append(worker := Worker(self.controller.set_rate, rate))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(self.controller.set_rate,None, rate)
 
     def get_pid_parameters(self):
         for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
@@ -242,11 +234,8 @@ class HeaterControlEngine(QObject):
                                     'D3': self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
                                     'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
                                     'GS': self.controller.get_gain_scheduling}.items():
-            self.workers.append(worker := Worker(function))
-            worker.signals.over.connect(lambda result, _param=parameter:
-                                        engine_signals.pid_parameters.emit({_param: result}))
-            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-            self.pool.start(worker)
+            self.device_io(function, callbacks=[lambda result, _param=parameter:
+                                                engine_signals.pid_parameters.emit({_param: result})])
 
     def set_pid_parameters(self, parameter, value):
         function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2, 'P3': self.controller.set_pid_p3,
@@ -254,21 +243,15 @@ class HeaterControlEngine(QObject):
                     'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
                     'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
                     'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
-        self.workers.append(worker := Worker(function, value))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(function,None, value)
 
     def toggle_output_enable(self, state):
         function = self.controller.enable_output if state else self.controller.disable_output
-        self.workers.append(worker := Worker(function))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(function)
 
     def toggle_aiming_beam(self, state):
         function = self.controller.enable_aiming_beam if state else self.controller.disable_aiming_beam
-        self.workers.append(worker := Worker(function))
-        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-        self.pool.start(worker)
+        self.device_io(function)
 
     def start_programmer(self, program):
         if self.programmer:

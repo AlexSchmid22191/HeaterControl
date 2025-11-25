@@ -1,5 +1,8 @@
+import random
 import threading
 import time
+
+import serial
 
 from src.Drivers.BaseClasses import AbstractSensor, AbstractController
 
@@ -146,3 +149,29 @@ class NiceTestController(TestController):
 
     def close(self):
         print('Nice Test Controller disconnected!')
+
+
+class FaultyTestController(TestController):
+    def _faulty_reading(self, function):
+        """ 5 % chance of simulated serial failure"""
+        if random.random() < 0.05:
+            with self.com_lock:
+                time.sleep(0.01)
+                raise serial.SerialException('Simulated serial port failure!')
+        else:
+            return function
+
+    def get_process_variable(self):
+        return self._faulty_reading(super().get_process_variable())
+
+    def get_working_setpoint(self):
+        return self._faulty_reading(super()).get_working_setpoint()
+
+    def get_working_output(self):
+        return self._faulty_reading(super().get_working_output())
+
+    def get_target_setpoint(self):
+        return self._faulty_reading(super().get_target_setpoint())
+
+    def get_rate(self):
+        return self._faulty_reading(super().get_rate())

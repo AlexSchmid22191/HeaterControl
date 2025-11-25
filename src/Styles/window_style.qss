@@ -26,6 +26,15 @@ CalDialog QPushButton:checked{background: #434778; color: #7b8ccb}
 
 QTextBrowser{background-color:#2A2D56; border:1px solid #15183b}
 
+QToolButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
+QToolButton:hover{background: #434778; color: #7b8ccb}
+QToolButton#up{background: url(Icons/Up.png) center no-repeat ; border: none}
+QToolButton#up:hover{background: url(Icons/Up_Glow.png) center no-repeat ; border: none}
+QToolButton#down{background: url(Icons/Down.png) center no-repeat ; border: none}
+QToolButton#down:hover{background: url(Icons/Down_Glow.png) center no-repeat ; border: none}
+QToolButton#clear{background: url(Icons/Clear.png) center no-repeat ; border: none}
+QToolButton#clear:hover{background: url(Icons/Clear_Glow.png) center no-repeat ; border: none}
+
 /*Styling of the Status Bar*/
 ElchStatusBar{background-color: #2A2D56; color:#7b8ccb;}
 ElchStatusBar QLabel#label{color: #7b8ccb; font: 8pt "Roboto Light";}
