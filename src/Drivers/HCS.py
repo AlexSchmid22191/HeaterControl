@@ -3,35 +3,35 @@ import threading
 from serial import Serial
 
 
-class HCS34(Serial):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class HCS34:
+    def __init__(self, port, baudrate=9600):
+        self.serial = Serial(port, baudrate)
         self.com_lock = threading.Lock()
 
-    def readline(self, *args, **kwargs):
-        return self.read_until(b'\r').rstrip(b'\r')
+    def readline(self):
+        return self.serial.read_until(b'\r').rstrip(b'\r')
 
     def set_voltage_limit(self, voltage):
         string = f'VOLT{int(voltage * 10):03d}'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
 
     def set_current_limit(self, current):
         string = f'CURR{int(current * 10):03d}'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', f'No or invalid response from device! Response {ack_answer}'
 
     def get_voltage_limit(self):
         string = f'GETS'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
@@ -40,8 +40,8 @@ class HCS34(Serial):
     def get_current_limit(self):
         string = f'GETS'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
@@ -50,8 +50,8 @@ class HCS34(Serial):
     def get_voltage(self):
         string = f'GETD'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
@@ -60,8 +60,8 @@ class HCS34(Serial):
     def get_current(self):
         string = f'GETD'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
@@ -70,8 +70,8 @@ class HCS34(Serial):
     def get_limit_mode(self):
         string = f'GETD'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'
@@ -80,8 +80,8 @@ class HCS34(Serial):
     def get_resistance(self):
         string = f'GETD'
         with self.com_lock:
-            self.write(string.encode())
-            self.write(b'\x0D')
+            self.serial.write(string.encode())
+            self.serial.write(b'\x0D')
             answer = self.readline()
             ack_answer = self.readline()
             assert ack_answer.decode() == 'OK', 'No response from device'

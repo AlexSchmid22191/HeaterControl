@@ -11,7 +11,7 @@ class TestSensor(AbstractSensor):
     def __init__(self, *args, **kwargs):
         print('Test Sensor connected!')
         self.com_lock = threading.Lock()
-        print(args, kwargs)
+        print(f'Called with args {args} and kwargs {kwargs}')
 
     def get_sensor_value(self):
         with self.com_lock:
@@ -29,7 +29,7 @@ class TestSensorVoltage(AbstractSensor):
     def __init__(self, *args, **kwargs):
         print('Test Sensor Voltage connected!')
         self.com_lock = threading.Lock()
-        print(args, kwargs)
+        print(f'Called with args {args} and kwargs {kwargs}')
 
     def get_sensor_value(self):
         with self.com_lock:
@@ -48,7 +48,7 @@ class TestController(AbstractController):
     def __init__(self, *args, **kwargs):
         self.com_lock = threading.Lock()
         print('Test Controller connected!')
-        print(args, kwargs)
+        print(f'Called with args {args} and kwargs {kwargs}')
 
     def get_process_variable(self):
         with self.com_lock:
@@ -145,4 +145,4 @@ class NiceTestController(TestController):
             return self.wsp
 
     def close(self):
-        print('Test Sensor disconnected!')
+        print('Nice Test Controller disconnected!')
