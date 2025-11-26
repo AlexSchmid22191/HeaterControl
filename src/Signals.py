@@ -34,6 +34,8 @@ class GuiSignals(QObject):
     get_resistive_heater_config = Signal()
     set_resistive_heater_config = Signal(dict)
 
+    set_external_pv_mode = Signal(bool)
+
 
 class EngineSignals(QObject):
     available_ports = Signal(dict)
@@ -54,6 +56,9 @@ class EngineSignals(QObject):
     pid_parameters_update = Signal(dict)
     calibration_data_update = Signal(dict)
     resistive_heater_config_update = Signal(dict)
+
+    error = Signal(str)
+    message = Signal(str)
 
     com_failed = Signal(str)
     non_imp = Signal(str)

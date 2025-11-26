@@ -217,6 +217,14 @@ class AbstractController(ABC):
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('disable_output',
                                                                                       self.__class__.__name__))
 
+    def update_external_pv(self, value):
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('update_external_pv',
+                                                                                      self.__class__.__name__))
+
+    def set_external_pv_mode(self, mode):
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('set_external_pv_mode',
+                                                                                      self.__class__.__name__))
+
 
 class AbstractSensor(ABC):
     """

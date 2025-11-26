@@ -45,6 +45,8 @@ class ElchNotificationBar(QWidget):
         self.engine_signals.connection_failed.connect(self.display_connection_fail)
         self.engine_signals.ramp_segment_started.connect(self.display_ramp_started)
         self.engine_signals.hold_segment_started.connect(self.display_hold_started)
+        self.engine_signals.message.connect(self.display_message)
+        self.engine_signals.error.connect(self.display_message)
 
         self.engine_signals.com_failed.connect(self.display_message)
         self.engine_signals.non_imp.connect(self.display_message)
@@ -99,4 +101,3 @@ class ElchNotificationBar(QWidget):
 
     def display_hold_started(self, segment):
         self.display_message(f'Hold segment {segment} started!')
-

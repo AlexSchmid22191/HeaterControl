@@ -59,9 +59,9 @@ class ResistiveHeater(AbstractController):
         # Used for ensuring that sensor values arrive at least every 2 seconds in external pv mode
         self.external_pv_mode = False
         self.external_pv = 0
-        self.sentinel_timer = QTimer()
+        self.sentinel_timer = QTimer(singleShot=True)
         self.sentinel_timer.setInterval(2000)
-        self.sentinel_timer.timeout.connect(self.set_automatic_mode)
+        self.sentinel_timer.timeout.connect(self.sentinel_trip)
 
         gui_signals.get_resistive_heater_config.connect(self.report_heater_config)
         gui_signals.set_resistive_heater_config.connect(self.update_config)
@@ -77,14 +77,18 @@ class ResistiveHeater(AbstractController):
         self.pid_controller.output_sum = 0
         if self.external_pv_mode:
             self.sentinel_timer.start()
+        else:
+            self.sentinel_timer.stop()
 
     def update_external_pv(self, value):
         self.external_pv = value
-        self.sentinel_timer.start()
+        if self.external_pv_mode:
+            self.sentinel_timer.start()
 
     def sentinel_trip(self):
         self.external_pv = 0
-        self.external_pv_mode = False
+        self.set_external_pv_mode(False)
+        engine_signals.error.emit('Did not receive PV value from sensor in time. Reverting to normal control mode!')
 
     def _control_loop(self):
         if self.control_mode == 'Manual':

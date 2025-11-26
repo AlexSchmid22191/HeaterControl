@@ -71,6 +71,7 @@ class HeaterControlEngine(QObject):
         gui_signals.request_ports.connect(self.refresh_available_ports)
         gui_signals.connect_controller.connect(self.add_controller)
         gui_signals.connect_sensor.connect(self.add_sensor)
+        gui_signals.set_external_pv_mode.connect(self.set_external_pv_mode)
 
         gui_signals.export_log.connect(self.export_log)
         gui_signals.start_log.connect(self.start_logging)
@@ -81,6 +82,11 @@ class HeaterControlEngine(QObject):
         self.refresh_timer.setSingleShot(False)
         self.refresh_timer.timeout.connect(self.refresh_status)
         self.refresh_timer.start()
+
+        self.external_pv_timer = QTimer()
+        self.external_pv_timer.setInterval(1000)
+        self.external_pv_timer.setSingleShot(False)
+        self.external_pv_timer.timeout.connect(self.transfer_external_pv)
 
         self.programmer = None
 
@@ -170,6 +176,25 @@ class HeaterControlEngine(QObject):
             engine_signals.controller_disconnected.emit()
         finally:
             self.controller = None
+
+    def set_external_pv_mode(self, mode):
+        if not self.controller or not self.sensor:
+            engine_signals.error.emit('Cannot set external PV mode without a controller and a sensor connected.')
+            return
+        if mode:
+            self.transfer_external_pv()
+            self.external_pv_timer.start()
+            engine_signals.message.emit('External PV mode activated!')
+        else:
+            self.external_pv_timer.stop()
+            engine_signals.message.emit('External PV mode deactivated!')
+        self.controller.set_external_pv_mode(mode)
+
+    def transfer_external_pv(self):
+        if not self.controller or not self.sensor:
+            engine_signals.error.emit('Cannot transfer external PV without a controller and a sensor connected.')
+            return
+        self.device_io(self.sensor.get_sensor_value, callbacks=[lambda res: self.controller.update_external_pv(res)])
 
     def device_io(self, function, callbacks=None, *args, **kwargs):
         self.workers.append(worker := Worker(function, *args, **kwargs))
