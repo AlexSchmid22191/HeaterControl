@@ -26,6 +26,9 @@ class ElchControlMenu(QWidget):
             entry.setSingleStep(1)
             entry.setDecimals(1)
 
+        self.entries['Setpoint'].setSuffix(' \u00B0C')
+        self.entries['Rate'].setSuffix(' \u00B0C/min')
+
         self.entries['Power'].setMaximum(100)
         self.entries['Power'].setSuffix(' %')
         self.buttons = {key: QRadioButton(text=key) for key in ['Automatic', 'Manual']}
