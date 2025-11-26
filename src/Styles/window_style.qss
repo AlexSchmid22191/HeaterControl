@@ -117,7 +117,7 @@ ElchMenu QAbstractSpinBox::down-button {image: url(Icons/Down.png); width: 10px}
 ElchMenu QAbstractSpinBox::down-button:hover {image: url(Icons/Down_Glow.png); width: 10px}
 
 /*Radiobuttons*/
-ElchMenu QRadioButton{color: #7b8ccb; font: 11pt "Roboto Light"}
+ElchMenu QRadioButton{color: #7b8ccb; font: 11pt "Roboto Light"; padding: 0px; margin: 0px; }
 ElchMenu QRadioButton::indicator{width:15px; height: 15px}
 ElchMenu QRadioButton::indicator:unchecked{image: url(Icons/Radio_Off.png)}
 ElchMenu QRadioButton::indicator:unchecked:hover{image: url(Icons/Radio_Off_Glow.png)}

@@ -24,7 +24,7 @@ class ElchMainWindow(QWidget):
         with open('Styles/window_style.qss') as style_file:
             self.setStyleSheet(style_file.read())
 
-        self.control_menu = ElchMenu()
+        self.control_menu = ElchMenu(parent=self)
         self.ribbon = ElchRibbon(menus=self.control_menu.menus)
         self.matplot_frame = ElchPlot()
         self.titlebar = ElchTitlebar()
@@ -38,7 +38,7 @@ class ElchMainWindow(QWidget):
         vbox_innermost.addWidget(self.notification_bar, stretch=0)
 
         hbox_inner = QHBoxLayout()
-        hbox_inner.addLayout(vbox_innermost)
+        hbox_inner.addLayout(vbox_innermost, stretch=1)
         hbox_inner.addWidget(self.control_menu, stretch=0)
         hbox_inner.setSpacing(panel_spacing)
         hbox_inner.setContentsMargins(0, 0, 0, 0)

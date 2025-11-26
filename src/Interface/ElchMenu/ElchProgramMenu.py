@@ -95,10 +95,11 @@ class ElchProgramMenu(QWidget):
 
     @staticmethod
     def make_entry_row():
-        return {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, value=5),
-                'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=1200),
-                'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000)
-                }
+        row = {'Rate': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=120, value=5),
+               'Setpoint': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=1200),
+               'Hold': QDoubleSpinBox(decimals=1, singleStep=1, minimum=0, maximum=10000)
+               }
+        return row
 
     def start_program(self):
         if self.start_button.isChecked():

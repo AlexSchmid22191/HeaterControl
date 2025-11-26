@@ -1,7 +1,7 @@
 import functools
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QStackedLayout
 
 from src.Interface.ElchMenu.ElchControlMenu import ElchControlMenu
 from src.Interface.ElchMenu.ElchDeviceMenu import ElchDeviceMenu
@@ -16,22 +16,24 @@ class ElchMenu(QWidget):
         self.setFixedWidth(260)
         self.setAttribute(Qt.WA_StyledBackground, True)
 
-        self.menus = {'Devices': ElchDeviceMenu(), 'Control': ElchControlMenu(), 'Plotting': ElchPlotMenu(),
-                      'PID': ElchPidMenu(), 'Programmer': ElchProgramMenu()}
+        # Create submenus
+        self.menus = {
+            'Devices': ElchDeviceMenu(parent=self),
+            'Control': ElchControlMenu(parent=self),
+            'Plotting': ElchPlotMenu(parent=self),
+            'PID': ElchPidMenu(parent=self),
+            'Programmer': ElchProgramMenu(parent=self)
+        }
 
-        vbox = QVBoxLayout()
-        for menu in self.menus:
-            self.menus[menu].setVisible(False)
-            vbox.addWidget(self.menus[menu])
-        vbox.setSpacing(0)
-        vbox.setContentsMargins(0, 0, 0, 0)
+        self.stacked = QStackedLayout()
+        self.stacked.setSpacing(0)
+        self.stacked.setContentsMargins(0, 0, 0, 0)
 
-        self.setLayout(vbox)
+        for widget in self.menus.values():
+            self.stacked.addWidget(widget)
 
-        for key, button in self.menus['Devices'].unit_buttons.items():
-            button.clicked.connect(functools.partial(self.menus['Control'].change_units, key))
-            button.clicked.connect(functools.partial(self.menus['PID'].set_unit, key))
+        self.setLayout(self.stacked)
 
     def adjust_visibility(self, button, visibility):
         menu = button.objectName()
-        self.menus[menu].setVisible(visibility)
+        self.stacked.setCurrentWidget(self.menus[menu])
