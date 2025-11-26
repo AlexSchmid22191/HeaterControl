@@ -56,6 +56,13 @@ class ResistiveHeater(AbstractController):
         td = config['PID']['D']
         self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time / 1000)
 
+        # Used for ensuring that sensor values arrive at least every 2 seconds in external pv mode
+        self.external_pv_mode = False
+        self.external_pv = 0
+        self.sentinel_timer = QTimer()
+        self.sentinel_timer.setInterval(2000)
+        self.sentinel_timer.timeout.connect(self.set_automatic_mode)
+
         gui_signals.get_resistive_heater_config.connect(self.report_heater_config)
         gui_signals.set_resistive_heater_config.connect(self.update_config)
         gui_signals.get_calibration_data.connect(self.calibrate)
@@ -64,12 +71,28 @@ class ResistiveHeater(AbstractController):
         self.timer.stop()
         self.power_supply.close()
 
+    def set_external_pv_mode(self, mode):
+        self.external_pv_mode = mode
+        self.working_setpoint = self.external_pv if mode else self.get_process_variable()
+        self.pid_controller.output_sum = 0
+        if self.external_pv_mode:
+            self.sentinel_timer.start()
+
+    def update_external_pv(self, value):
+        self.external_pv = value
+        self.sentinel_timer.start()
+
+    def sentinel_trip(self):
+        self.external_pv = 0
+        self.external_pv_mode = False
+
     def _control_loop(self):
         if self.control_mode == 'Manual':
             self.working_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
-            pid_result = (self.pid_controller.calculate_output(self.get_process_variable(), self.working_setpoint)
+            pv = self.external_pv if self.external_pv_mode else self.get_process_variable()
+            pid_result = (self.pid_controller.calculate_output(pv, self.working_setpoint)
                           or self.working_power)
 
             self.working_power = max(pid_result, self.min_output)
