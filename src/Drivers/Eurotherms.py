@@ -13,8 +13,12 @@ class Eurotherm3216(AbstractController):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
         self.instrument.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
+        with self.com_lock:
+            self.sensor_type = self.instrument.read_register(12290)
 
     def close(self):
+        with self.com_lock:
+            self.instrument.write_register(12290, self.sensor_type)
         self.instrument.serial.close()
 
     def get_process_variable(self):
@@ -108,6 +112,17 @@ class Eurotherm3216(AbstractController):
     def get_pid_d(self):
         with self.com_lock:
             return self.instrument.read_register(9, number_of_decimals=0)
+
+    def set_external_pv_mode(self, mode):
+        with self.com_lock:
+            if mode:
+                self.instrument.write_register(12290, 10)
+            else:
+                self.instrument.write_register(12290, self.sensor_type)
+
+    def update_external_pv(self, value):
+        with self.com_lock:
+            self.instrument.write_register(203, value, number_of_decimals=0)
 
 
 class Eurotherm2408(AbstractController):
