@@ -67,6 +67,7 @@ class HeaterControlEngine(QObject):
         self.mode = 'Temperature'
         self.units = {'Temperature': '°C', 'Voltage': 'mV'}
 
+        gui_signals.shutdown.connect(self.shutdown)
         gui_signals.set_units.connect(self.set_units)
         gui_signals.request_ports.connect(self.refresh_available_ports)
         gui_signals.connect_controller.connect(self.add_controller)
@@ -96,6 +97,16 @@ class HeaterControlEngine(QObject):
     def set_units(self, unit):
         self.mode = unit
         self.report_devices()
+
+    def shutdown(self):
+        engine_signals.message.emit('Shutting down!')
+        self.refresh_timer.stop()
+        self.external_pv_timer.stop()
+        self.pool.waitForDone(2000)
+        if self.sensor:
+            self.remove_sensor()
+        if self.controller:
+            self.remove_controller()
 
     def report_devices(self):
         mode = self.mode
@@ -260,7 +271,7 @@ class HeaterControlEngine(QObject):
                                     'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
                                     'GS': self.controller.get_gain_scheduling}.items():
             self.device_io(function, callbacks=[lambda result, _param=parameter:
-                                                engine_signals.pid_parameters.emit({_param: result})])
+                                                engine_signals.pid_parameters_update.emit({_param: result})])
 
     def set_pid_parameters(self, parameter, value):
         function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2, 'P3': self.controller.set_pid_p3,

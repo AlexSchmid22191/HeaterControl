@@ -79,7 +79,8 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon='src/Icons/Logo.ico')
+          icon='src/Icons/Logo.ico',
+          contents_directory='.')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

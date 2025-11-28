@@ -33,6 +33,7 @@ class GuiSignals(QObject):
     get_calibration_data = Signal()
     get_resistive_heater_config = Signal()
     set_resistive_heater_config = Signal(dict)
+    shutdown = Signal()
 
     set_external_pv_mode = Signal(bool)
 
