@@ -53,13 +53,13 @@ class ElchPlot(FigureCanvasQTAgg):
                                      np.append(self.plots[key].get_data()[1], value))
 
             if self.autoscale:
-                self.axes[key].relim()
+                self.axes[key].relim(visible_only=True)
                 self.axes[key].autoscale()
             self.figure.canvas.draw()
             self.figure.tight_layout()
 
     def set_plot_visibility(self, plot, visible):
-        self.plots[plot.objectName()].set_linestyle('-' if visible else '')
+        self.plots[plot.objectName()].set_visible(visible)
 
     def start_plotting(self, plotting):
         if plotting:
