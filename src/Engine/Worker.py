@@ -7,6 +7,7 @@ class Signals(QObject):
     over = Signal(object)
     con_fail = Signal(str)
     imp_fail = Signal(str)
+    error = Signal(str)
     finished = Signal()
 
 
@@ -27,6 +28,8 @@ class Worker(QRunnable):
         except NotImplementedError as imp_ex:
             # noinspection PyUnresolvedReferences
             self.signals.imp_fail.emit(f'{imp_ex}')
+        except Exception as ex:
+            self.signals.error.emit(f'Error: {ex}')
         else:
             # noinspection PyUnresolvedReferences
             self.signals.over.emit(result)

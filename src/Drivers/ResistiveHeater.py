@@ -241,7 +241,7 @@ class ResistiveHeater(AbstractController):
         engine_signals.resistive_heater_config_update.emit(parameters)
 
     def calibrate(self):
-        print('Calibrating')
+        engine_signals.message.emit('Calibrating heater. Please wait...')
 
         def _calib():
             u = []
@@ -261,6 +261,7 @@ class ResistiveHeater(AbstractController):
         worker = Worker(_calib)
         worker.signals.over.connect(
             lambda result: engine_signals.calibration_data_update.emit(result))
+        worker.signals.error.connect(lambda error: engine_signals.error.emit(error))
         QThreadPool.globalInstance().start(worker)
 
 
