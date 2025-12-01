@@ -89,3 +89,6 @@ class Tenma:
         with self.com_lock:
             self.serial.write(string.encode())
             self.serial.write(b'\x0D')
+
+    def close(self):
+        self.serial.close()

@@ -91,3 +91,6 @@ class HCS34:
                 return -1
             else:
                 return voltage / current
+
+    def close(self):
+        self.serial.close()
