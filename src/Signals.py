@@ -19,7 +19,7 @@ class GuiSignals(QObject):
     toggle_aiming = Signal(bool)
     refresh_parameters = Signal()
     refresh_pid = Signal()
-    set_pid_parameters = Signal(str, str)
+    set_pid_parameters = Signal(str, object)
 
     start_log = Signal()
     stop_log = Signal()

@@ -261,10 +261,10 @@ class HeaterControlEngine(QObject):
         self.device_io(self.controller.set_target_setpoint, None, setpoint)
 
     def set_manual_output_power(self, power):
-        self.device_io(self.controller.set_manual_output_power,None, power)
+        self.device_io(self.controller.set_manual_output_power, None, power)
 
     def set_rate(self, rate):
-        self.device_io(self.controller.set_rate,None, rate)
+        self.device_io(self.controller.set_rate, None, rate)
 
     def get_pid_parameters(self):
         for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
@@ -283,7 +283,7 @@ class HeaterControlEngine(QObject):
                     'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
                     'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
                     'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
-        self.device_io(function,None, value)
+        self.device_io(function, None, value)
 
     def toggle_output_enable(self, state):
         function = self.controller.enable_output if state else self.controller.disable_output
