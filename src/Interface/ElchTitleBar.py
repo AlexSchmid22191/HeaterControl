@@ -74,8 +74,8 @@ class ElchTitlebar(QWidget):
         source_label.setText(f'Source: {src.appinfo.APP_SOURCE}')
         source_label.setOpenExternalLinks(True)
         vbox.addWidget(source_label, alignment=Qt.AlignHCenter)
-        vbox.addWidget(button2 := QPushButton('View GPL3'))
         vbox.addWidget(button3 := QPushButton('View license info'))
+        vbox.addWidget(button2 := QPushButton('View GPL3'))
         vbox.addWidget(button := QPushButton('Close'))
         # noinspection PyUnresolvedReferences
         button.clicked.connect(dlg.close)
@@ -91,6 +91,7 @@ class ElchTitlebar(QWidget):
         dlg = QDialog(self)
         dlg.setWindowTitle('License')
         dlg.setSizeGripEnabled(True)
+        dlg.setMinimumSize(600, 400)
         dlg.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
 
         dlg.text_browser = QTextBrowser()
@@ -120,6 +121,7 @@ class ElchTitlebar(QWidget):
         dlg = QDialog(self)
         dlg.setWindowTitle('License')
         dlg.setSizeGripEnabled(True)
+        dlg.setMinimumSize(600, 400)
         dlg.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
 
         dlg.text_browser = QTextBrowser()
