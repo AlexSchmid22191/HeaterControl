@@ -16,8 +16,9 @@ from src.Signals import engine_signals, gui_signals
 class ResistiveHeater(AbstractController):
     mode = 'Temperature'
 
-    def __init__(self, _port_name, power_supply=None, config_fname=None, *args, **kwargs):
+    def __init__(self, parent_engine, _port_name, power_supply=None, config_fname=None, *args, **kwargs):
 
+        self.engine = parent_engine
         self.config_fname = config_fname
         self.power_supply = power_supply(_port_name)
 
