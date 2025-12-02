@@ -1,3 +1,4 @@
+import argparse
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
@@ -7,12 +8,17 @@ import src.appinfo
 from Signals import gui_signals
 
 
+
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test_mode", action="store_true")
+    args = parser.parse_args()
+
     app = QApplication()
     app.setApplicationName(f"{src.appinfo.APP_NAME}")
     app.setApplicationDisplayName(f"{src.appinfo.APP_NAME}")
     app.setWindowIcon(QIcon('Icons/Logo.ico'))
-    engine = HeaterControlEngine()
+    engine = HeaterControlEngine(args.test_mode)
     gui = ElchMainWindow()
     app.aboutToQuit.connect(engine.shutdown)
     gui.show()

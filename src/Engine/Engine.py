@@ -20,16 +20,15 @@ from src.Engine.SetProg import SetpointProgrammer
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
 
-TEST_MODE = True
-
 
 class HeaterControlEngine(QObject):
     sensor: AbstractSensor | None = None
     controller: AbstractController | None = None
     programmer: SetpointProgrammer | None = None
 
-    def __init__(self):
+    def __init__(self, test_mode=False):
         super().__init__()
+        self.test_mode = test_mode
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
         self.controller_types: dict[str, Type[AbstractController]] = {
             'Eurotherm2408': Eurotherm2408,
@@ -51,7 +50,7 @@ class HeaterControlEngine(QObject):
             'Eurotherm3508': Eurotherm3508S
         }
 
-        if TEST_MODE:
+        if test_mode:
             self.sensor_types['Test Sensor'] = TestSensor
             self.controller_types['Test Controller'] = TestController
             self.controller_types['Nice Test Controller'] = NiceTestController
@@ -116,7 +115,7 @@ class HeaterControlEngine(QObject):
 
     def refresh_available_ports(self):
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
-        if TEST_MODE:
+        if self.test_mode:
             self.available_ports['COM Test'] = 'Test Port'
         engine_signals.available_ports.emit(self.available_ports)
 
