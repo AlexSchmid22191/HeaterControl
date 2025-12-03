@@ -5,8 +5,6 @@ from PySide6.QtWidgets import QApplication
 from src.Interface.ElchMainWindow import ElchMainWindow
 from src.Engine.Engine import HeaterControlEngine
 import src.appinfo
-from Signals import gui_signals
-
 
 
 def main():
