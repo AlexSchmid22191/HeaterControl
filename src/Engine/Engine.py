@@ -9,6 +9,7 @@ from serial import SerialException
 
 from src.Drivers.BaseClasses import AbstractController, AbstractSensor
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
+from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantrol
 from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
@@ -43,6 +44,7 @@ class HeaterControlEngine(QObject):
         }
         self.sensor_types: dict[str, Type[AbstractSensor]] = {
             'Pyrometer': Pyrometer,
+            'Micro Epsilon CTL': ME_CTL,
             'Thermolino': Thermolino,
             'Thermoplatino': Thermoplatino,
             'Keithley2000 Temperature': Keithley2000Temp,
