@@ -76,9 +76,15 @@ class ElchControlMenu(QWidget):
         external_pv_button.setCheckable(True)
         external_pv_button.clicked.connect(lambda: gui_signals.set_external_pv_mode.emit(external_pv_button.isChecked()))
 
+        sensor_laser_button = QPushButton('Sensor Laser')
+        sensor_laser_button.setObjectName('Sensor Laser')
+        sensor_laser_button.setCheckable(True)
+        sensor_laser_button.clicked.connect(lambda: gui_signals.switch_sensor_aiming_beam.emit(sensor_laser_button.isChecked()))
+
         vbox.addWidget(enable_button)
         vbox.addWidget(aiming_beam_button)
         vbox.addWidget(external_pv_button)
+        vbox.addWidget(sensor_laser_button)
 
         vbox.addSpacing(10)
 

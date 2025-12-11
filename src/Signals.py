@@ -36,6 +36,7 @@ class GuiSignals(QObject):
     shutdown = Signal()
 
     set_external_pv_mode = Signal(bool)
+    switch_sensor_aiming_beam = Signal(bool)
 
 
 class EngineSignals(QObject):

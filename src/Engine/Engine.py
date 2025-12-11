@@ -128,11 +128,13 @@ class HeaterControlEngine(QObject):
             engine_signals.connection_failed.emit(e)
         else:
             engine_signals.sensor_connected.emit(sensor_type, sensor_port)
+            gui_signals.switch_sensor_aiming_beam.connect(self.switch_sensor_aiming_beam)
             gui_signals.disconnect_sensor.connect(self.remove_sensor)
             gui_signals.connect_sensor.disconnect()
 
     def remove_sensor(self):
         gui_signals.disconnect_sensor.disconnect(self.remove_sensor)
+        gui_signals.switch_sensor_aiming_beam.disconnect(self.switch_sensor_aiming_beam)
         gui_signals.connect_sensor.connect(self.add_sensor)
         try:
             self.sensor.close()
@@ -234,6 +236,9 @@ class HeaterControlEngine(QObject):
         if self.is_logging:
             callbacks.append(lambda result: self.add_log_data_point(data={'Sensor PV': result}))
         self.device_io(self.sensor.get_sensor_value, callbacks=callbacks)
+
+    def switch_sensor_aiming_beam(self, state):
+        self.device_io(self.sensor.switch_aiming_beam, None, state)
 
     def get_controller_status(self):
         runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0

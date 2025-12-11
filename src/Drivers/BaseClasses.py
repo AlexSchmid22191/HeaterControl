@@ -246,3 +246,7 @@ class AbstractSensor(ABC):
     def close(self):
         """Close the sensors serial port"""
         pass
+
+    def switch_aiming_beam(self, state):
+        raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('switch_aiming_beam',
+                                                                                      self.__class__.__name__))
