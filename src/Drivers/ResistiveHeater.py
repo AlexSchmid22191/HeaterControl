@@ -21,6 +21,8 @@ class ResistiveHeater(AbstractController):
         self.config_fname = config_fname
         self.power_supply = power_supply(_port_name)
 
+        self.workers =[]
+
         config = self.read_from_config()
 
         self.working_setpoint = 25
@@ -259,9 +261,11 @@ class ResistiveHeater(AbstractController):
                 return {'State': 'Fail'}
 
         worker = Worker(_calib)
+        self.workers.append(worker)
         worker.signals.over.connect(
             lambda result: engine_signals.calibration_data_update.emit(result))
         worker.signals.error.connect(lambda error: engine_signals.error.emit(error))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         QThreadPool.globalInstance().start(worker)
 
 
