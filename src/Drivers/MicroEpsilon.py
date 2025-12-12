@@ -31,8 +31,8 @@ class ME_CTL(AbstractSensor):
     def switch_aiming_beam(self, state):
         command = b'\xA5\x01' if state else b'\xA5\x00'
         command += self._checksum(command)
-        print(command)
         self.serial.write(command)
+        self.serial.read(1)
 
     def close(self):
         self.serial.close()
