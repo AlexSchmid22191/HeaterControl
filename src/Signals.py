@@ -37,6 +37,7 @@ class GuiSignals(QObject):
 
     set_external_pv_mode = Signal(bool)
     switch_sensor_aiming_beam = Signal(bool)
+    set_heater_tc = Signal(str)
 
 
 class EngineSignals(QObject):

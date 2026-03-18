@@ -3,9 +3,9 @@ import functools
 import matplotlib.font_manager as fm
 import matplotlib.style
 import matplotlib.ticker
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QDialog, \
-    QGridLayout
+from PySide6.QtCore import Qt, QSignalBlocker, QTimer
+from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QVBoxLayout, QPushButton, QDialog, \
+    QGridLayout, QFormLayout, QComboBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
@@ -16,83 +16,99 @@ class ElchControlMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.labels = {key: QLabel(key) for key in ['Setpoint', 'Rate', 'Power']}
-        for key, label in self.labels.items():
-            label.setObjectName('Header')
-        self.entries = {key: QDoubleSpinBox() for key in self.labels}
-        for key, entry in self.entries.items():
-            entry.setMaximum(1500)
-            entry.setMinimum(0)
-            entry.setSingleStep(1)
-            entry.setDecimals(1)
+        self.timer = QTimer(interval=1000)
+        self.timer.timeout.connect(gui_signals.refresh_parameters.emit)
+        self.timer.start()
+
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.setContentsMargins(10, 10, 10, 10)
+
+        label = QLabel(text='Controller')
+        label.setObjectName('Header')
+        vbox.addWidget(label)
+
+        self.labels = {'Setpoint': 'Target setpoint', 'Rate': 'Rate', 'Power': 'Manual power', 'Mode': 'Control mode',
+                       'External_PV': 'Sensor as PV', 'Enable': 'Output Enable', 'Aiming': 'Aiming beam',
+                       'controller_tc': 'Thermocouple', 'sensor_tc': 'Thermocouple',
+                       'Sensor_Aiming': 'Aiming beam', 'res_config': 'Configure resistive heater'}
+
+        self.entries = {key: QDoubleSpinBox() for key in ['Setpoint', 'Rate', 'Power']}
+        for key, param in self.entries.items():
+            param.setMaximum(1500)
+            param.setMinimum(0)
+            param.setSingleStep(1)
+            param.setDecimals(1)
 
         self.entries['Setpoint'].setSuffix(' \u00B0C')
         self.entries['Rate'].setSuffix(' \u00B0C/min')
 
         self.entries['Power'].setMaximum(100)
         self.entries['Power'].setSuffix(' %')
-        self.buttons = {key: QRadioButton(text=key) for key in ['Automatic', 'Manual']}
 
-        vbox = QVBoxLayout()
-        vbox.setSpacing(10)
-        vbox.setContentsMargins(10, 10, 10, 10)
-        for label in self.labels:
-            self.entries[label].setKeyboardTracking(False)
-            # noinspection PyUnresolvedReferences
-            self.entries[label].valueChanged.connect(functools.partial(self.set_control_value, control=label))
-            vbox.addWidget(self.labels[label], stretch=0)
-            vbox.addWidget(self.entries[label], stretch=0)
-            vbox.addSpacing(10)
+        self.entries.update({key: QComboBox() for key in ['Mode', 'controller_tc', 'sensor_tc']})
 
-        vbox.addWidget(l := QLabel(text='Control mode'))
-        l.setObjectName('Header')
-        for button in self.buttons:
-            vbox.addWidget(self.buttons[button])
-            # noinspection PyUnresolvedReferences
-            self.buttons[button].toggled.connect(functools.partial(self.set_control_mode, mode=button))
+        self.entries['Mode'].addItems(['Manual', 'Automatic'])
+        self.entries['controller_tc'].addItems(['S', 'K', 'J', 'T', 'E', 'N', 'R', 'B'])
+        self.entries['sensor_tc'].addItems(['S', 'K', 'J', 'T', 'E', 'N', 'R', 'B'])
 
-        refresh_button = QPushButton(text='Refresh')
-        refresh_button.setObjectName('Refresh')
-        # noinspection PyUnresolvedReferences
-        refresh_button.clicked.connect(gui_signals.refresh_parameters.emit)
-        vbox.addSpacing(10)
-        vbox.addWidget(refresh_button)
-        vbox.addSpacing(10)
+        self.buttons = {key: QPushButton(text=self.labels[key]) for key in ['External_PV', 'Enable', 'Aiming',
+                                                                            'Sensor_Aiming', 'res_config']}
 
-        vbox.addWidget(l := QLabel(text='Optional controls'))
-        l.setObjectName('Header')
-        enable_button = QPushButton('Output Enable')
-        enable_button.setObjectName('Enable')
-        enable_button.setCheckable(True)
-        enable_button.clicked.connect(lambda: gui_signals.enable_output.emit(enable_button.isChecked()))
+        form = QFormLayout()
+        form.setSpacing(5)
+        form.setHorizontalSpacing(20)
+        form.setContentsMargins(0, 0, 0, 0)
 
-        aiming_beam_button = QPushButton('Aiming Beam')
-        aiming_beam_button.setObjectName('Aiming')
-        aiming_beam_button.setCheckable(True)
-        aiming_beam_button.clicked.connect(lambda: gui_signals.toggle_aiming.emit(aiming_beam_button.isChecked()))
+        for param in ['Setpoint', 'Rate', 'Power', 'Mode', 'controller_tc']:
+            form.addRow(self.labels[param], self.entries[param])
+            match param:
+                case 'Mode':
+                    self.entries[param].currentTextChanged.connect(gui_signals.set_control_mode.emit)
+                case 'controller_tc':
+                    self.entries[param].currentTextChanged.connect(gui_signals.set_heater_tc.emit)
+                case 'Setpoint' | 'Rate' | 'Power':
+                    self.entries[param].setKeyboardTracking(False)
+                    # noinspection PyUnresolvedReferences
+                    self.entries[param].valueChanged.connect(functools.partial(self.set_control_value, control=label))
 
-        external_pv_button = QPushButton('External PV')
-        external_pv_button.setObjectName('External')
-        external_pv_button.setCheckable(True)
-        external_pv_button.clicked.connect(lambda: gui_signals.set_external_pv_mode.emit(external_pv_button.isChecked()))
+        vbox.addLayout(form)
+        vbox.addSpacing(20)
 
-        sensor_laser_button = QPushButton('Sensor Laser')
-        sensor_laser_button.setObjectName('Sensor Laser')
-        sensor_laser_button.setCheckable(True)
-        sensor_laser_button.clicked.connect(lambda: gui_signals.switch_sensor_aiming_beam.emit(sensor_laser_button.isChecked()))
+        for param in ['External_PV', 'Enable', 'Aiming', 'res_config']:
+            vbox.addWidget(self.buttons[param])
+            match param:
+                case 'External_PV':
+                    self.buttons[param].setCheckable(True)
+                    self.buttons[param].clicked.connect(lambda state: gui_signals.set_external_pv_mode.emit(state))
+                case 'Enable':
+                    self.buttons[param].setCheckable(True)
+                    self.buttons[param].clicked.connect(lambda state: gui_signals.enable_output.emit(state))
+                case 'Aiming':
+                    self.buttons[param].setCheckable(True)
+                    self.buttons[param].clicked.connect(lambda state: gui_signals.toggle_aiming.emit(state))
+                case 'res_config':
+                    self.buttons[param].clicked.connect(self.resistive_heater_config)
 
-        vbox.addWidget(enable_button)
-        vbox.addWidget(aiming_beam_button)
-        vbox.addWidget(external_pv_button)
-        vbox.addWidget(sensor_laser_button)
+        vbox.addLayout(form)
+        vbox.addSpacing(20)
 
-        vbox.addSpacing(10)
+        label = QLabel(text='Sensor')
+        label.setObjectName('Header')
+        vbox.addWidget(label)
 
-        res_conf_button = QPushButton('Resistive Heater Config')
-        res_conf_button.setObjectName('Config')
-        # noinspection PyUnresolvedReferences
-        res_conf_button.clicked.connect(self.resistive_heater_config)
-        vbox.addWidget(res_conf_button)
+        form = QFormLayout()
+        form.setSpacing(5)
+        form.setHorizontalSpacing(20)
+        form.setContentsMargins(0, 0, 0, 0)
+
+        form.addRow(self.labels['sensor_tc'], self.entries['sensor_tc'])
+
+        vbox.addLayout(form)
+
+        vbox.addWidget(self.buttons['Sensor_Aiming'])
+        self.buttons['Sensor_Aiming'].setCheckable(True)
+        self.buttons['Sensor_Aiming'].clicked.connect(lambda state: gui_signals.switch_sensor_aiming_beam.emit(state))
 
         vbox.addStretch()
         self.setLayout(vbox)
@@ -109,11 +125,6 @@ class ElchControlMenu(QWidget):
             case 'Power':
                 gui_signals.set_manual_output_power.emit(value)
 
-    @staticmethod
-    def set_control_mode(checked, mode):
-        if checked:
-            gui_signals.set_control_mode.emit(mode)
-
     def change_units(self, mode):
         self.entries['Setpoint'].setSuffix({'Temperature': ' \u00B0C', 'Voltage': ' mV'}[mode])
         self.entries['Rate'].setSuffix({'Temperature': ' \u00B0C/min', 'Voltage': ' mV/min'}[mode])
@@ -121,15 +132,13 @@ class ElchControlMenu(QWidget):
     def update_control_values(self, control_parameters):
         assert isinstance(control_parameters, dict), 'Illegal type received: {:s}'.format(str(type(control_parameters)))
         for key in control_parameters:
-            assert key in self.entries or key == 'Mode', 'Illegal key received: {:s}'.format(key)
+            assert key in self.entries, 'Illegal key received: {:s}'.format(key)
             if key == 'Mode':
-                self.buttons[control_parameters[key]].blockSignals(True)
-                self.buttons[control_parameters[key]].setChecked(True)
-                self.buttons[control_parameters[key]].blockSignals(False)
+                with QSignalBlocker(self.entries[key]):
+                    self.entries[key].setCurrentText(control_parameters[key])
             else:
-                self.entries[key].blockSignals(True)
-                self.entries[key].setValue(control_parameters[key])
-                self.entries[key].blockSignals(False)
+                with QSignalBlocker(self.entries[key]):
+                    self.entries[key].setValue(control_parameters[key])
 
     def resistive_heater_config(self):
         dlg = ResConfDialog(self)
