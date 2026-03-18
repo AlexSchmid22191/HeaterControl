@@ -39,6 +39,8 @@ class GuiSignals(QObject):
     switch_sensor_aiming_beam = Signal(bool)
     set_heater_tc = Signal(str)
 
+    emergency_shutdown = Signal()
+
 
 class EngineSignals(QObject):
     available_ports = Signal(dict)

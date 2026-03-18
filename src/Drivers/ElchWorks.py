@@ -168,3 +168,9 @@ class ElchLaser(AbstractController):
     def disable_aiming_beam(self):
         with self.com_lock:
             self.instrument.write_register(13, 0)
+
+    def emergency_stop(self):
+        self.disable_output()
+        self.set_manual_mode()
+        self.disable_aiming_beam()
+        self.set_manual_output_power(0)

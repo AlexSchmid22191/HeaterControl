@@ -60,6 +60,10 @@ class AbstractController(ABC):
     def close(self):
         """Close the controller serial port"""
 
+    @abstractmethod
+    def emergency_stop(self):
+        """Stop the controller immediately"""
+
     # Optional methods -------------------------------------------------------------------------------------------------
 
     def set_manual_output_power(self, output):

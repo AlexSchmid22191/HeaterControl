@@ -268,6 +268,10 @@ class ResistiveHeater(AbstractController):
         worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         QThreadPool.globalInstance().start(worker)
 
+    def emergency_stop(self):
+        self.set_manual_mode()
+        self.set_manual_output_power(0)
+
 
 class ResistiveHeaterTenma(ResistiveHeater):
     def __init__(self, _port_name, *args, **kwargs):

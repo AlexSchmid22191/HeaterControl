@@ -164,6 +164,7 @@ class HeaterControlEngine(QObject):
             gui_signals.refresh_parameters.connect(self.get_controller_parameters)
             gui_signals.set_pid_parameters.connect(self.set_pid_parameters)
             gui_signals.start_program.connect(self.start_programmer)
+            gui_signals.emergency_shutdown.connect(self.emergency_shutdown)
             gui_signals.connect_controller.disconnect()
 
             self.get_controller_parameters()
@@ -215,6 +216,21 @@ class HeaterControlEngine(QObject):
         self.device_io(self.sensor.get_sensor_value, callbacks=[lambda res: self.controller.update_external_pv(res)])
 
     def device_io(self, function, callbacks=None, *args, **kwargs):
+        """
+        Executes a function in a worker thread, manages callback connections, and handles emitted signals.
+
+        This method creates a worker thread that executes the given function with the provided
+        arguments and keyword arguments. It connects any given callbacks to the worker's completion
+        signal and manages the worker's lifecycle, including removing it from the active workers' list
+        when finished. Additionally, it handles specific error signals emitted by the worker.
+
+        Parameters:
+            function (Callable): The function to be executed within the worker thread.
+            callbacks (list[Callable], optional): A list of callback functions to be connected to the
+                                                  worker's completion signal. Defaults to None.
+            *args: Variable-length argument list for the function being executed.
+            **kwargs: Arbitrary keyword arguments for the function being executed.
+        """
         self.workers.append(worker := Worker(function, *args, **kwargs))
         for callback in callbacks if callbacks else []:
             worker.signals.over.connect(callback)
@@ -239,6 +255,9 @@ class HeaterControlEngine(QObject):
 
     def switch_sensor_aiming_beam(self, state):
         self.device_io(self.sensor.switch_aiming_beam, None, state)
+
+    def emergency_shutdown(self):
+        self.device_io(self.controller.emergency_stop)
 
     def get_controller_status(self):
         runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0

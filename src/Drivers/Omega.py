@@ -133,3 +133,7 @@ class OmegaPt(AbstractController):
         self.get_pid_p()
         with self.com_lock:
             self.instrument.write_float(680, self.kp * d / 100)
+
+    def emergency_stop(self):
+        self.set_manual_mode()
+        self.set_manual_output_power(0)

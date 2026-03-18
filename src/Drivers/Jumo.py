@@ -82,3 +82,8 @@ class JumoQuantrol(AbstractController):
     def get_pid_d(self):
         with self.com_lock:
             return self.instrument.read_float(0x3004, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
+
+    def emergency_stop(self):
+        self.set_target_setpoint(0)
+        self.set_rate(1200)
+        raise NotImplementedError('Emergency stop not possible for JumoQuantrol. Cooling to 0 with maximum rate!')

@@ -53,6 +53,11 @@ class TestController(AbstractController):
         print('Test Controller connected!')
         print(f'Called with args {args} and kwargs {kwargs}')
 
+    def emergency_stop(self):
+        self.set_manual_mode()
+        self.set_manual_output_power(0)
+        print('Test Controller: Emergency stop!')
+
     def get_process_variable(self):
         with self.com_lock:
             time.sleep(0.01)

@@ -124,6 +124,10 @@ class Eurotherm3216(AbstractController):
         with self.com_lock:
             self.instrument.write_register(203, value, number_of_decimals=0)
 
+    def emergency_stop(self):
+        self.set_manual_mode()
+        self.set_manual_output_power(0)
+
 
 class Eurotherm2408(AbstractController):
     """Instrument class for Eurotherm 2408 process controller."""
@@ -191,6 +195,10 @@ class Eurotherm2408(AbstractController):
     def get_rate(self):
         with self.com_lock:
             return self.instrument.read_register(35, number_of_decimals=0)
+
+    def emergency_stop(self):
+        self.set_manual_mode()
+        self.set_manual_output_power(0)
 
 
 class Eurotherm3508(AbstractController):
@@ -396,6 +404,11 @@ class Eurotherm3508(AbstractController):
     def set_active_set(self, active_set):
         with self.com_lock:
             self.instrument.write_register(72, active_set)
+
+    def emergency_stop(self):
+        self.set_manual_mode()
+        self.set_manual_output_power(0)
+
 
 
 class Eurotherm3508S(AbstractSensor):
