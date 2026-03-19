@@ -18,7 +18,7 @@ class ElchRibbon(QWidget):
         elchi_icon.setPixmap(QPixmap('Icons/ElchiHead.png'))
 
         self.kill_button = QPushButton(parent=self)
-        self.kill_button.setObjectName('Kill')
+        self.kill_button.setObjectName('Shutdown')
         self.kill_button.setFixedSize(150, 100)
 
         vbox = QVBoxLayout()

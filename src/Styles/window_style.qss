@@ -78,6 +78,10 @@ ElchRibbon QPushButton#Programmer{border-image: url(Icons/Programmer.png)}
 ElchRibbon QPushButton#Programmer:hover{border-image: url(Icons/Programmer_Glow.png)}
 ElchRibbon QPushButton#Programmer:checked{border-image: url(Icons/Programmer_Glow.png)}
 
+ElchRibbon QPushButton#Shutdown{border-image: url(Icons/Shutdown.png)}
+ElchRibbon QPushButton#Shutdown:hover{border-image: url(Icons/Shutdown_Glow.png)}
+ElchRibbon QPushButton#Shutdown:checked{border-image: url(Icons/Shutdown_Glow.png)}
+
 
 /*Styling of the ElchMenu*/
 ElchMenu{background-color: #2A2D56;}
