@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QVBoxLayout, QPus
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
-from src.Drivers.BaseClasses import ControllerFeatures
+from src.Drivers.BaseClasses import ControllerFeatures, SensorFeatures
 from src.Signals import gui_signals, engine_signals
 
 
@@ -106,11 +106,14 @@ class ElchControlMenu(QWidget):
         form.setContentsMargins(0, 0, 0, 0)
 
         form.addRow(self.labels['sensor_tc'], self.entries['sensor_tc'])
+        self.entries['sensor_tc'].setEnabled(False)
+        self.entries['sensor_tc'].currentTextChanged.connect(gui_signals.set_sensor_tc.emit)
 
         vbox.addLayout(form)
 
         vbox.addWidget(self.buttons['Sensor_Aiming'])
         self.buttons['Sensor_Aiming'].setCheckable(True)
+        self.buttons['Sensor_Aiming'].setEnabled(False)
         self.buttons['Sensor_Aiming'].clicked.connect(lambda state: gui_signals.switch_sensor_aiming_beam.emit(state))
 
         vbox.addStretch()
@@ -119,6 +122,8 @@ class ElchControlMenu(QWidget):
         engine_signals.controller_parameters_update.connect(self.update_control_values)
         engine_signals.controller_connected.connect(self.enable_controller_features)
         engine_signals.controller_disconnected.connect(self.disable_controller_features)
+        engine_signals.sensor_connected.connect(self.enable_sensor_features)
+        engine_signals.sensor_disconnected.connect(self.disable_sensor_features)
 
     @staticmethod
     def set_control_value(value, control):
@@ -157,6 +162,16 @@ class ElchControlMenu(QWidget):
             button.setEnabled(False)
         for entry in self.entries.values():
             entry.setEnabled(False)
+
+    def enable_sensor_features(self, features):
+        if SensorFeatures.AIMING_BEAM in features:
+            self.buttons['Sensor_Aiming'].setEnabled(True)
+        if SensorFeatures.TC_SELECT in features:
+            self.entries['sensor_tc'].setEnabled(True)
+
+    def disable_sensor_features(self):
+        self.buttons['Sensor_Aiming'].setEnabled(False)
+        self.entries['sensor_tc'].setEnabled(False)
 
     def update_control_values(self, control_parameters):
         assert isinstance(control_parameters, dict), 'Illegal type received: {:s}'.format(str(type(control_parameters)))

@@ -38,6 +38,7 @@ class GuiSignals(QObject):
     set_external_pv_mode = Signal(bool)
     switch_sensor_aiming_beam = Signal(bool)
     set_heater_tc = Signal(str)
+    set_sensor_tc = Signal(str)
 
     emergency_shutdown = Signal()
 
@@ -48,7 +49,7 @@ class EngineSignals(QObject):
 
     controller_connected = Signal(str, str, object)
     controller_disconnected = Signal()
-    sensor_connected = Signal(str, str)
+    sensor_connected = Signal(str, str, object)
     sensor_disconnected = Signal()
     connection_failed = Signal(Exception)
 
