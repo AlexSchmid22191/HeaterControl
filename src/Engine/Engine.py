@@ -152,7 +152,8 @@ class HeaterControlEngine(QObject):
         except (SerialException, NoResponseError) as e:
             engine_signals.connection_failed.emit(e)
         else:
-            engine_signals.controller_connected.emit(controller_type, controller_port)
+            engine_signals.controller_connected.emit(controller_type, controller_port,
+                                                     self.controller_types[controller_type].features)
 
             gui_signals.disconnect_controller.connect(self.remove_controller)
             gui_signals.set_target_setpoint.connect(self.set_target_setpoint)
@@ -179,7 +180,9 @@ class HeaterControlEngine(QObject):
         gui_signals.enable_output.disconnect(self.toggle_output_enable)
         gui_signals.toggle_aiming.disconnect(self.toggle_aiming_beam)
         gui_signals.set_pid_parameters.disconnect(self.set_pid_parameters)
+        gui_signals.refresh_parameters.disconnect(self.get_controller_parameters)
         gui_signals.start_program.disconnect(self.start_programmer)
+        gui_signals.emergency_shutdown.disconnect(self.emergency_shutdown)
 
         gui_signals.connect_controller.connect(self.add_controller)
 

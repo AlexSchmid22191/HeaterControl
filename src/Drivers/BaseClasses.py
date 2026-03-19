@@ -10,6 +10,7 @@ class UnitType(Enum):
 
 class SensorFeatures(Enum):
     AIMING_BEAM = auto()
+    TC_SELECT = auto()
 
 
 class ControllerFeatures(Enum):
@@ -19,6 +20,8 @@ class ControllerFeatures(Enum):
     OUTPUT_ENABLE = auto()
     EXTERNAL_PV = auto()
     MANUAL_POWER = auto()
+    EXT_CONFIG = auto()
+    TC_SELECT = auto()
 
 
 class AbstractController(ABC):

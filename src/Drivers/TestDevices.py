@@ -47,7 +47,7 @@ class TestController(AbstractController):
     """Mock controller to test engine to GUI connection"""
 
     type = UnitType.TEMPERATURE
-    features = {ControllerFeatures.MANUAL_POWER}
+    features = {ControllerFeatures.MANUAL_POWER, ControllerFeatures.AIMING_BEAM}
 
     def __init__(self, *args, **kwargs):
         self.com_lock = threading.Lock()
@@ -108,6 +108,12 @@ class TestController(AbstractController):
     def set_rate(self, rate):
         with self.com_lock:
             print('Test Controller: Set rate {:f}'.format(rate))
+
+    def enable_aiming_beam(self):
+        print('Test Controller: Enable aiming beam')
+
+    def disable_aiming_beam(self):
+        print('Test Controller: Disable aiming beam')
 
     def close(self):
         print('Test Sensor disconnected!')

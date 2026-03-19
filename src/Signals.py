@@ -46,7 +46,7 @@ class EngineSignals(QObject):
     available_ports = Signal(dict)
     available_devices = Signal(dict)
 
-    controller_connected = Signal(str, str)
+    controller_connected = Signal(str, str, object)
     controller_disconnected = Signal()
     sensor_connected = Signal(str, str)
     sensor_disconnected = Signal()

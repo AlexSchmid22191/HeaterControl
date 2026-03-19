@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QVBoxLayout, QPus
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
+from src.Drivers.BaseClasses import ControllerFeatures
 from src.Signals import gui_signals, engine_signals
 
 
@@ -62,6 +63,7 @@ class ElchControlMenu(QWidget):
 
         for param in ['Setpoint', 'Rate', 'Power', 'Mode', 'controller_tc']:
             form.addRow(self.labels[param], self.entries[param])
+            self.entries[param].setEnabled(False)
             match param:
                 case 'Mode':
                     self.entries[param].currentTextChanged.connect(gui_signals.set_control_mode.emit)
@@ -77,6 +79,7 @@ class ElchControlMenu(QWidget):
 
         for param in ['External_PV', 'Enable', 'Aiming', 'res_config']:
             vbox.addWidget(self.buttons[param])
+            self.buttons[param].setEnabled(False)
             match param:
                 case 'External_PV':
                     self.buttons[param].setCheckable(True)
@@ -114,6 +117,8 @@ class ElchControlMenu(QWidget):
         self.setLayout(vbox)
 
         engine_signals.controller_parameters_update.connect(self.update_control_values)
+        engine_signals.controller_connected.connect(self.enable_controller_features)
+        engine_signals.controller_disconnected.connect(self.disable_controller_features)
 
     @staticmethod
     def set_control_value(value, control):
@@ -128,6 +133,30 @@ class ElchControlMenu(QWidget):
     def change_units(self, mode):
         self.entries['Setpoint'].setSuffix({'Temperature': ' \u00B0C', 'Voltage': ' mV'}[mode])
         self.entries['Rate'].setSuffix({'Temperature': ' \u00B0C/min', 'Voltage': ' mV/min'}[mode])
+
+    def enable_controller_features(self, controller_type, controller_port, features):
+        self.entries['Mode'].setEnabled(True)
+        self.entries['Rate'].setEnabled(True)
+        self.entries['Setpoint'].setEnabled(True)
+
+        if ControllerFeatures.AIMING_BEAM in features:
+            self.buttons['Aiming'].setEnabled(True)
+        if ControllerFeatures.EXTERNAL_PV in features:
+            self.buttons['External_PV'].setEnabled(True)
+        if ControllerFeatures.OUTPUT_ENABLE in features:
+            self.buttons['Enable'].setEnabled(True)
+        if ControllerFeatures.EXT_CONFIG in features:
+            self.buttons['res_config'].setEnabled(True)
+        if ControllerFeatures.TC_SELECT in features:
+            self.entries['controller_tc'].setEnabled(True)
+        if ControllerFeatures.MANUAL_POWER in features:
+            self.entries['Power'].setEnabled(True)
+
+    def disable_controller_features(self):
+        for button in self.buttons.values():
+            button.setEnabled(False)
+        for entry in self.entries.values():
+            entry.setEnabled(False)
 
     def update_control_values(self, control_parameters):
         assert isinstance(control_parameters, dict), 'Illegal type received: {:s}'.format(str(type(control_parameters)))
