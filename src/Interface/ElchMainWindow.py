@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QSizeGrip
 
+from src.Drivers.BaseClasses import UnitType
 from src.Interface.ElchMenu.ElchMenu import ElchMenu
 from src.Interface.ElchPlot import ElchPlot
 from src.Interface.ElchRibbon import ElchRibbon
@@ -82,6 +83,6 @@ class ElchMainWindow(QWidget):
             button.clicked.connect(functools.partial(self.matplot_frame.set_units, key))
             button.clicked.connect(functools.partial(self.control_menu.menus['Programmer'].change_units, key))
 
-        self.control_menu.menus['Devices'].unit_buttons['Temperature'].click()
+        self.control_menu.menus['Devices'].unit_buttons[UnitType.TEMPERATURE].click()
 
         self.setLayout(hbox_outer)

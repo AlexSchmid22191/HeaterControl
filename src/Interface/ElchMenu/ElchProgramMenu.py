@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QRadioButton, QVBoxLayout, QPushButton, QGridLayout, \
     QButtonGroup
 
+from src.Drivers.BaseClasses import UnitType
 from src.Signals import engine_signals, gui_signals
 
 
@@ -116,8 +117,10 @@ class ElchProgramMenu(QWidget):
         self.radios[segment]['hold'].setChecked(True)
 
     def change_units(self, mode):
-        self.labels['Rate'].setText({'Temperature': 'Rate\n(\u00B0C/min)', 'Voltage': 'Rate\n(mV/min)'}[mode])
-        self.labels['Setpoint'].setText({'Temperature': 'Setpoint\n(\u00B0C)', 'Voltage': 'Setpoint\n(mV)'}[mode])
+        self.labels['Rate'].setText(
+            {UnitType.TEMPERATURE: 'Rate\n(\u00B0C/min)', UnitType.VOLTAGE: 'Rate\n(mV/min)'}[mode])
+        self.labels['Setpoint'].setText(
+            {UnitType.TEMPERATURE: 'Setpoint\n(\u00B0C)', UnitType.VOLTAGE: 'Setpoint\n(mV)'}[mode])
 
     @staticmethod
     def skip_segment():

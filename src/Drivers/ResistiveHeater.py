@@ -5,7 +5,7 @@ import time
 from PySide6.QtCore import QTimer, QThreadPool
 from scipy.stats import linregress
 
-from src.Drivers.BaseClasses import AbstractController
+from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, UnitType
 from src.Drivers.HCS import HCS34
 from src.Drivers.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma
@@ -14,7 +14,8 @@ from src.Signals import engine_signals, gui_signals
 
 
 class ResistiveHeater(AbstractController):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER, ControllerFeatures.EXTERNAL_PV}
 
     def __init__(self, _port_name, power_supply=None, config_fname=None, *args, **kwargs):
 
@@ -274,6 +275,9 @@ class ResistiveHeater(AbstractController):
 
 
 class ResistiveHeaterTenma(ResistiveHeater):
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER, ControllerFeatures.EXTERNAL_PV,
+                ControllerFeatures.OUTPUT_ENABLE}
+
     def __init__(self, _port_name, *args, **kwargs):
         super().__init__(_port_name=_port_name, power_supply=Tenma, config_fname='Tenma.ini', *args, **kwargs)
 

@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QPushButton, QButtonGroup, QRadioButton, QVBoxLayout
 
 from src.Signals import gui_signals, engine_signals
+from src.Drivers.BaseClasses import UnitType
 
 
 class ElchDeviceMenu(QWidget):
@@ -24,7 +25,9 @@ class ElchDeviceMenu(QWidget):
         # noinspection PyUnresolvedReferences
         self.buttongroup.buttonToggled.connect(self.connect_device)
 
-        self.unit_buttons = {key: QRadioButton(text=key) for key in ['Temperature', 'Voltage']}
+        unit_labels = {UnitType.TEMPERATURE: 'Temperature', UnitType.VOLTAGE: 'Voltage'}
+
+        self.unit_buttons = {key: QRadioButton(text=label) for key, label in unit_labels.items()}
         self.refresh_button = QPushButton(text='Refresh Serial')
         self.refresh_button.setObjectName('Refresh')
 

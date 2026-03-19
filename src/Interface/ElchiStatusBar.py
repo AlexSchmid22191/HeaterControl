@@ -2,6 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
 
+from src.Drivers.BaseClasses import UnitType
 from src.Signals import engine_signals
 
 
@@ -39,11 +40,11 @@ class ElchStatusBar(QWidget):
         engine_signals.controller_status_update.connect(self.update_values)
         engine_signals.sensor_status_update.connect(self.update_values)
 
-        self.exp_labels = {'Sensor PV': {'Temperature': 'Sample Temperature', 'Voltage': 'Pump Voltage'},
-                           'Controller PV': {'Temperature': 'Oven Temperature', 'Voltage': '\u03bb Probe Voltage'},
-                           'Setpoint': {'Temperature': 'Target Oven Temperature',
-                                        'Voltage': 'Target \u03bb Probe Voltage'},
-                           'Power': {'Temperature': 'Oven Power', 'Voltage': 'Pump Power'}}
+        self.exp_labels = {'Sensor PV': {UnitType.TEMPERATURE: 'Sample Temperature', UnitType.VOLTAGE: 'Pump Voltage'},
+                           'Controller PV': {UnitType.TEMPERATURE: 'Oven Temperature', UnitType.VOLTAGE: '\u03bb Probe Voltage'},
+                           'Setpoint': {UnitType.TEMPERATURE: 'Target Oven Temperature',
+                                        UnitType.VOLTAGE: 'Target \u03bb Probe Voltage'},
+                           'Power': {UnitType.TEMPERATURE: 'Oven Power', UnitType.VOLTAGE: 'Pump Power'}}
 
     def update_values(self, status_values):
         assert isinstance(status_values, dict), 'Illegal data type received: {:s}'.format(str(type(status_values)))
@@ -55,11 +56,11 @@ class ElchStatusBar(QWidget):
             else:
                 self.values[key].setText('{:.1f} {:s}'.format(value, self.unit))
 
-    def change_units(self, mode):
-        match mode:
-            case 'Temperature':
+    def change_units(self, utype):
+        match utype:
+            case UnitType.TEMPERATURE:
                 self.unit = '\u00B0C'
-            case 'Voltage':
+            case UnitType.VOLTAGE:
                 self.unit = 'mV'
         for key, label in self.exp_labels.items():
-            self.labels[key].setText(key + '\n' + label[mode])
+            self.labels[key].setText(key + '\n' + label[utype])

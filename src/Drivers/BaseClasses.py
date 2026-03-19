@@ -1,5 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import Literal
+from typing import Literal, Set
+from enum import Enum, auto
+
+
+class UnitType(Enum):
+    TEMPERATURE = auto()
+    VOLTAGE = auto()
+
+
+class SensorFeatures(Enum):
+    AIMING_BEAM = auto()
+
+
+class ControllerFeatures(Enum):
+    SIMPLE_PID = auto()
+    GAIN_SCHEDULING = auto()
+    AIMING_BEAM = auto()
+    OUTPUT_ENABLE = auto()
+    EXTERNAL_PV = auto()
+    MANUAL_POWER = auto()
 
 
 class AbstractController(ABC):
@@ -8,7 +27,8 @@ class AbstractController(ABC):
     Core functionality is mandatory and has to be overridden.
     Optional functionality raises an exception if the methods are not overwritten in derived subclasses.
     """
-    mode: Literal["auto", "manual"]
+    type: UnitType
+    features: Set[ControllerFeatures] = set()
 
     # Mandatory methods ------------------------------------------------------------------------------------------------
 
@@ -236,7 +256,8 @@ class AbstractSensor(ABC):
     Raises a NotImplementedException if the methods are not overwritten in derived subclasses.
     """
 
-    mode: Literal["auto", "manual"]
+    type: UnitType
+    features: Set[SensorFeatures] = set()
 
     @abstractmethod
     def __init__(self, _port):

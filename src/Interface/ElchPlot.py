@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
 
+from src.Drivers.BaseClasses import UnitType
 from src.Signals import engine_signals
 
 colors = {'blue': '#86b3f9', 'green': '#86f8ab', 'pink': '#f488f9', 'yellow': '#faf0b1', 'purple': '#9686f8'}
@@ -75,8 +76,9 @@ class ElchPlot(FigureCanvasQTAgg):
         self.figure.canvas.draw()
 
     def set_units(self, unit):
-        self.axes['Sensor PV'].set_ylabel({'Temperature': 'Temperature (°C)', 'Voltage': 'Voltage (mV)'}[unit],
-                                          fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
+        self.axes['Sensor PV'].set_ylabel(
+            {UnitType.TEMPERATURE: 'Temperature (°C)', UnitType.VOLTAGE: 'Voltage (mV)'}[unit],
+            fontproperties=fm.FontProperties(fname='Fonts/Roboto-Regular.ttf', size=14))
         self.figure.canvas.draw()
         self.figure.tight_layout()
 

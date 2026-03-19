@@ -1,10 +1,10 @@
 import serial
 import threading
-from src.Drivers.BaseClasses import AbstractSensor
+from src.Drivers.BaseClasses import AbstractSensor, UnitType
 
 
 class Pyrometer(AbstractSensor):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
 
     def __init__(self, _port):
         self.serial = serial.Serial(_port, timeout=1.5)

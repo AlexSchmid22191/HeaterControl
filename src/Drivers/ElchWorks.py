@@ -4,11 +4,11 @@ from threading import Lock
 import minimalmodbus
 import serial
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType, ControllerFeatures
 
 
 class Thermolino(AbstractSensor):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
 
     def __init__(self, _port):
         self.serial = serial.Serial(_port, timeout=1.5)
@@ -28,7 +28,7 @@ class Thermolino(AbstractSensor):
 
 
 class Thermoplatino(AbstractSensor):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
 
     def __init__(self, _port):
         self.serial = serial.Serial(_port, timeout=1.5, baudrate=115200)
@@ -52,7 +52,9 @@ class Thermoplatino(AbstractSensor):
 
 
 class ElchLaser(AbstractController):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {ControllerFeatures.AIMING_BEAM, ControllerFeatures.SIMPLE_PID, ControllerFeatures.OUTPUT_ENABLE,
+                ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name, _slave_address, baudrate=9600):
         time.sleep(1)

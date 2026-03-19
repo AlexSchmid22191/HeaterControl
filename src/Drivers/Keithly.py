@@ -3,11 +3,11 @@ import time
 
 import serial
 
-from src.Drivers.BaseClasses import AbstractSensor
+from src.Drivers.BaseClasses import AbstractSensor, UnitType
 
 
 class Keithley2000(AbstractSensor):
-    mode = None
+    type = None
 
     def __init__(self, _port):
         self.serial = serial.Serial(_port, timeout=1.5)
@@ -23,7 +23,7 @@ class Keithley2000(AbstractSensor):
 
 
 class Keithley2000Temp(Keithley2000):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
 
     def __init__(self, _port):
         super().__init__(_port)
@@ -37,7 +37,7 @@ class Keithley2000Temp(Keithley2000):
 
 
 class Keithley2000Volt(Keithley2000):
-    mode = 'Voltage'
+    type = UnitType.VOLTAGE
 
     def __init__(self, _port):
         super().__init__(_port)

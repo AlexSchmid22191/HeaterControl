@@ -7,7 +7,7 @@ from PySide6.QtCore import QThreadPool, QTimer, QObject
 from minimalmodbus import NoResponseError
 from serial import SerialException
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
@@ -65,8 +65,8 @@ class HeaterControlEngine(QObject):
         self.log_start_time = None
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
 
-        self.mode = 'Temperature'
-        self.units = {'Temperature': '°C', 'Voltage': 'mV'}
+        self.unit_type = UnitType.TEMPERATURE
+        self.units = {UnitType.TEMPERATURE: '°C', UnitType.VOLTAGE: 'mV'}
 
         gui_signals.shutdown.connect(self.shutdown)
         gui_signals.set_units.connect(self.set_units)
@@ -95,8 +95,8 @@ class HeaterControlEngine(QObject):
         self.pool = QThreadPool()
         self.workers = []
 
-    def set_units(self, unit):
-        self.mode = unit
+    def set_units(self, unit_type):
+        self.unit_type = unit_type
         self.report_devices()
 
     def shutdown(self):
@@ -110,9 +110,9 @@ class HeaterControlEngine(QObject):
             self.remove_controller()
 
     def report_devices(self):
-        mode = self.mode
-        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.mode == mode],
-                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.mode == mode]}
+        utype = self.unit_type
+        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.type == utype],
+                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
         engine_signals.available_devices.emit(devices)
 
     def refresh_available_ports(self):
@@ -361,7 +361,7 @@ class HeaterControlEngine(QObject):
                     else:
                         sorted_data[timestamp].update({parameter: value})
 
-            unit = self.units[self.mode]
+            unit = self.units[self.unit_type]
 
             with open(filepath, 'w+') as file:
                 file.write('UTC, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.

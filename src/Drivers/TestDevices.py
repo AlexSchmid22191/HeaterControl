@@ -4,12 +4,12 @@ import time
 
 import serial
 
-from src.Drivers.BaseClasses import AbstractSensor, AbstractController
+from src.Drivers.BaseClasses import AbstractSensor, AbstractController, UnitType, ControllerFeatures
 
 
 class TestSensor(AbstractSensor):
     """Mock Sensor to test engine to GUI connection"""
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
 
     def __init__(self, *args, **kwargs):
         print('Test Sensor connected!')
@@ -27,7 +27,7 @@ class TestSensor(AbstractSensor):
 
 class TestSensorVoltage(AbstractSensor):
     """Mock Sensor to test engine to GUI connection"""
-    mode = 'Voltage'
+    type = UnitType.VOLTAGE
 
     def __init__(self, *args, **kwargs):
         print('Test Sensor Voltage connected!')
@@ -46,7 +46,8 @@ class TestSensorVoltage(AbstractSensor):
 class TestController(AbstractController):
     """Mock controller to test engine to GUI connection"""
 
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, *args, **kwargs):
         self.com_lock = threading.Lock()

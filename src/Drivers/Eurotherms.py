@@ -2,12 +2,13 @@ import threading
 
 import minimalmodbus
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, UnitType
 
 
 class Eurotherm3216(AbstractController):
     """Instrument class for Eurotherm 3216 process controller."""
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name, _slave_address, baudrate=9600):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
@@ -131,7 +132,8 @@ class Eurotherm3216(AbstractController):
 
 class Eurotherm2408(AbstractController):
     """Instrument class for Eurotherm 2408 process controller."""
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name, _slave_address, baudrate=9600):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
@@ -210,7 +212,8 @@ class Eurotherm3508(AbstractController):
     * _slave_address (int): slave address in the range 1 to 247
     """
 
-    mode = 'Voltage'
+    type = UnitType.VOLTAGE
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.GAIN_SCHEDULING, ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name, _slave_address, baudrate=9600):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
@@ -410,7 +413,6 @@ class Eurotherm3508(AbstractController):
         self.set_manual_output_power(0)
 
 
-
 class Eurotherm3508S(AbstractSensor):
     """
         Instrument class for Eurotherm 3508 process controller.
@@ -419,7 +421,7 @@ class Eurotherm3508S(AbstractSensor):
         * _port_name (str): port name
         * _slave_address (int): slave address in the range 1 to 247
         """
-    mode = 'Voltage'
+    type = UnitType.VOLTAGE
 
     def __init__(self, _port, _slave_address=1, baudrate=9600):
         self.instrument = minimalmodbus.Instrument(_port, _slave_address)

@@ -1,11 +1,11 @@
 from PySide6.QtCore import QObject, Signal
-
+from src.Drivers.BaseClasses import UnitType
 
 class GuiSignals(QObject):
     request_ports = Signal()
     request_sensors = Signal()
     request_controllers = Signal()
-    set_units = Signal(str)
+    set_units = Signal(UnitType)
     connect_sensor = Signal(str, str)
     disconnect_sensor = Signal()
     connect_controller = Signal(str, str)

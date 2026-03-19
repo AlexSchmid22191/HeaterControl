@@ -2,11 +2,12 @@ import serial
 import threading
 import functools
 from operator import ixor
-from src.Drivers.BaseClasses import AbstractSensor
+from src.Drivers.BaseClasses import AbstractSensor, UnitType, SensorFeatures
 
 
 class ME_CTL(AbstractSensor):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {SensorFeatures.AIMING_BEAM}
 
     def __init__(self, _port):
         self.serial = serial.Serial(_port, baudrate=115200, timeout=1.5)

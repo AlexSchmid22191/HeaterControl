@@ -2,11 +2,12 @@ import threading
 
 import minimalmodbus
 
-from src.Drivers.BaseClasses import AbstractController
+from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, UnitType
 
 
 class OmegaPt(AbstractController):
-    mode = 'Temperature'
+    type = UnitType.TEMPERATURE
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name, _slave_address):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
