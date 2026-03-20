@@ -1,24 +1,23 @@
-import functools
 import math
-from datetime import timezone, datetime
+from datetime import datetime, timezone
 from typing import Type
 
 import serial.tools.list_ports
-from PySide6.QtCore import QThreadPool, QTimer, QObject
 from minimalmodbus import NoResponseError
+from PySide6.QtCore import QObject, QThreadPool, QTimer
 from serial import SerialException
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType, ControllerFeatures, SensorFeatures
-from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
-from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, SensorFeatures, UnitType
+from src.Drivers.ElchWorks import ElchLaser, Thermolino, Thermoplatino
+from src.Drivers.Eurotherms import Eurotherm2408, Eurotherm3216, Eurotherm3508, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantrol
 from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
 from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
-from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
-from src.Drivers.TestDevices import ExtendedTestSensor, TestSensor, TestController, NiceTestController, \
-    FaultyTestController
+from src.Drivers.ResistiveHeater import ResistiveHeaterHCS, ResistiveHeaterTenma
+from src.Drivers.TestDevices import ExtendedTestController, ExtendedTestSensor, FaultyTestController, TestController, \
+    TestSensor
 from src.Engine.SetProg import SetpointProgrammer
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
@@ -58,7 +57,7 @@ class HeaterControlEngine(QObject):
         if test_mode:
             self.sensor_types['Test Sensor'] = TestSensor
             self.controller_types['Test Controller'] = TestController
-            self.controller_types['Nice Test Controller'] = NiceTestController
+            self.controller_types['Extended Test Controller'] = ExtendedTestController
             self.controller_types['Faulty Test Controller'] = FaultyTestController
             self.available_ports['COM Test'] = 'Test Port'
 
@@ -176,6 +175,7 @@ class HeaterControlEngine(QObject):
             gui_signals.refresh_parameters.connect(self.get_controller_parameters)
             gui_signals.start_program.connect(self.start_programmer)
             # Optional functionality
+
             if ControllerFeatures.OUTPUT_ENABLE in self.controller_types[controller_type].features:
                 gui_signals.enable_output.connect(self.toggle_output_enable)
             if ControllerFeatures.EXTERNAL_PV in self.controller_types[controller_type].features:
@@ -184,6 +184,9 @@ class HeaterControlEngine(QObject):
                 gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
             if ControllerFeatures.MANUAL_POWER in self.controller_types[controller_type].features:
                 gui_signals.set_manual_output_power.connect(self.set_manual_output_power)
+            if ControllerFeatures.TC_SELECT in self.controller_types[controller_type].features:
+                gui_signals.set_heater_tc.connect(self.set_controller_tc)
+                self.get_controller_tc()
             if ControllerFeatures.GAIN_SCHEDULING in self.controller_types[controller_type].features:
                 gui_signals.set_pid_parameters.connect(self.set_extended_pid)
                 gui_signals.refresh_pid.connect(self.get_extended_pid)
@@ -213,6 +216,8 @@ class HeaterControlEngine(QObject):
             gui_signals.toggle_aiming.disconnect(self.toggle_aiming_beam)
         if ControllerFeatures.MANUAL_POWER in self.controller.features:
             gui_signals.set_manual_output_power.disconnect(self.set_manual_output_power)
+        if ControllerFeatures.TC_SELECT in self.controller.features:
+            gui_signals.set_heater_tc.disconnect(self.set_controller_tc)
         if ControllerFeatures.GAIN_SCHEDULING in self.controller.features:
             gui_signals.set_pid_parameters.disconnect(self.set_extended_pid)
             gui_signals.refresh_pid.disconnect(self.get_extended_pid)
@@ -291,6 +296,13 @@ class HeaterControlEngine(QObject):
             self.get_sensor_status()
         if self.controller:
             self.get_controller_status()
+
+    def set_controller_tc(self, tc):
+        self.device_io(self.controller.set_tc_type, None, tc)
+
+    def get_controller_tc(self):
+        self.device_io(self.controller.get_tc_type,
+                       callbacks=[lambda result: engine_signals.heater_tc_update.emit(result)])
 
     def get_sensor_status(self):
         runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0

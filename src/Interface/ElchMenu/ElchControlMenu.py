@@ -17,9 +17,9 @@ class ElchControlMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.timer = QTimer(interval=1000)
-        self.timer.timeout.connect(gui_signals.refresh_parameters.emit)
-        self.timer.start()
+        #self.timer = QTimer(interval=1000)
+        #self.timer.timeout.connect(gui_signals.refresh_parameters.emit)
+        #self.timer.start()
 
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
@@ -72,7 +72,7 @@ class ElchControlMenu(QWidget):
                 case 'Setpoint' | 'Rate' | 'Power':
                     self.entries[param].setKeyboardTracking(False)
                     # noinspection PyUnresolvedReferences
-                    self.entries[param].valueChanged.connect(functools.partial(self.set_control_value, control=label))
+                    self.entries[param].valueChanged.connect(functools.partial(self.set_control_value, control=param))
 
         vbox.addLayout(form)
         vbox.addSpacing(20)
