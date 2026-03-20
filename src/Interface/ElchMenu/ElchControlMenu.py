@@ -163,7 +163,7 @@ class ElchControlMenu(QWidget):
         for entry in self.entries.values():
             entry.setEnabled(False)
 
-    def enable_sensor_features(self, features):
+    def enable_sensor_features(self, sensor_type, sensor_port, features):
         if SensorFeatures.AIMING_BEAM in features:
             self.buttons['Sensor_Aiming'].setEnabled(True)
         if SensorFeatures.TC_SELECT in features:

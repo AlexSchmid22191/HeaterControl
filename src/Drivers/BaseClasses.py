@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Literal, Set
 from enum import Enum, auto
+from typing import Set
 
 
 class UnitType(Enum):
@@ -278,3 +278,11 @@ class AbstractSensor(ABC):
     def switch_aiming_beam(self, state):
         raise NotImplementedError('Operation {:s} not supported for {:s} yet!'.format('switch_aiming_beam',
                                                                                       self.__class__.__name__))
+
+    def set_sensor_tc(self, tc):
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('set_sensor_tc', self.__class__.__name__))
+
+    def get_sensor_tc(self):
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('get_sensor_tc', self.__class__.__name__))

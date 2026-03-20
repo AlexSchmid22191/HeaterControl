@@ -8,7 +8,7 @@ from PySide6.QtCore import QThreadPool, QTimer, QObject
 from minimalmodbus import NoResponseError
 from serial import SerialException
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType, ControllerFeatures
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType, ControllerFeatures, SensorFeatures
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantrol
@@ -128,15 +128,22 @@ class HeaterControlEngine(QObject):
         except SerialException as e:
             engine_signals.connection_failed.emit(e)
         else:
-            engine_signals.sensor_connected.emit(sensor_type, sensor_port)
-            gui_signals.switch_sensor_aiming_beam.connect(self.switch_sensor_aiming_beam)
+            engine_signals.sensor_connected.emit(sensor_type, sensor_port, self.sensor_types[sensor_type].features)
             gui_signals.disconnect_sensor.connect(self.remove_sensor)
             gui_signals.connect_sensor.disconnect()
+            if SensorFeatures.AIMING_BEAM in self.sensor_types[sensor_type].features:
+                gui_signals.switch_sensor_aiming_beam.connect(self.switch_sensor_aiming_beam)
+            if SensorFeatures.TC_SELECT in self.sensor_types[sensor_type].features:
+                gui_signals.set_sensor_tc.connect(self.set_sensor_tc)
+            self.get_sensor_status()
 
     def remove_sensor(self):
         gui_signals.disconnect_sensor.disconnect(self.remove_sensor)
-        gui_signals.switch_sensor_aiming_beam.disconnect(self.switch_sensor_aiming_beam)
         gui_signals.connect_sensor.connect(self.add_sensor)
+        if SensorFeatures.AIMING_BEAM in self.sensor.features:
+            gui_signals.switch_sensor_aiming_beam.disconnect(self.switch_sensor_aiming_beam)
+        if SensorFeatures.TC_SELECT in self.sensor.features:
+            gui_signals.set_sensor_tc.disconnect(self.set_sensor_tc)
         try:
             self.sensor.close()
         except SerialException as e:
@@ -221,6 +228,12 @@ class HeaterControlEngine(QObject):
             engine_signals.controller_disconnected.emit()
         finally:
             self.controller = None
+
+    def set_sensor_tc(self, tc):
+        self.device_io(self.sensor.set_sensor_tc(tc))
+
+    def get_sensor_tc(self):
+        self.device_io(self.sensor.get_sensor_tc, callbacks=[lambda result: engine_signals.sensor_tc_update.emit(result)])
 
     def set_external_pv_mode(self, mode):
         if not self.controller or not self.sensor:
