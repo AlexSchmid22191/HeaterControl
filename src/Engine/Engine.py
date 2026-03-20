@@ -330,7 +330,7 @@ class HeaterControlEngine(QObject):
 
     def get_controller_parameters(self):
         for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
-                                    'Power': self.controller.get_working_output,
+                                    'Power': self.controller.get_manual_output_power,
                                     'Rate': self.controller.get_rate,
                                     'Mode': self.controller.get_control_mode}.items():
             self.device_io(function, callbacks=[lambda result, _param=parameter:

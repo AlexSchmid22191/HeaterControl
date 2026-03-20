@@ -42,6 +42,10 @@ class Eurotherm3216(AbstractController):
         with self.com_lock:
             self.instrument.write_register(3, output, number_of_decimals=1)
 
+    def get_manual_output_power(self):
+        with self.com_lock:
+            return self.instrument.read_register(3, number_of_decimals=1)
+
     def get_working_output(self):
         """Return the current power output of the controller"""
         with self.com_lock:
@@ -153,6 +157,10 @@ class Eurotherm2408(AbstractController):
         with self.com_lock:
             self.instrument.write_register(3, output, number_of_decimals=1)
 
+    def get_manual_output_power(self):
+        with self.com_lock:
+            return self.instrument.read_register(3, number_of_decimals=1)
+
     def get_working_output(self):
         """Return the current power output of the controller"""
         with self.com_lock:
@@ -253,10 +261,14 @@ class Eurotherm3508(AbstractController):
         with self.com_lock:
             self.instrument.write_register(35, rate / 1000, number_of_decimals=1, signed=True)
 
+    def get_manual_output_power(self):
+        with self.com_lock:
+            return self.instrument.read_register(3, number_of_decimals=1)
+
     def get_working_output(self):
         """Return the current power output of the instrument"""
         with self.com_lock:
-            return self.instrument.read_register(3, number_of_decimals=1)
+            return self.instrument.read_register(4, number_of_decimals=1)
 
     def get_working_setpoint(self):
         """Get the current working setpoint of the instrument"""

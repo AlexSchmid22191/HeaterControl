@@ -139,6 +139,9 @@ class ResistiveHeater(AbstractController):
     def get_working_output(self):
         return self.working_power
 
+    def get_manual_output_power(self):
+        return self.manual_output_power
+
     def get_rate(self):
         return self.rate
 

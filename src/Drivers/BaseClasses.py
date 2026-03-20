@@ -94,6 +94,11 @@ class AbstractController(ABC):
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('set_manual_output_power', self.__class__.__name__))
 
+    def get_manual_output_power(self):
+        """Get the power output of the controller in percent"""
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('get_manual_output_power', self.__class__.__name__))
+
     def get_pid_p(self):
         """Get the P (Proportional band) for the PID controller"""
         raise NotImplementedError(

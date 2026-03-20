@@ -85,6 +85,10 @@ class ElchLaser(AbstractController):
         with self.com_lock:
             self.instrument.write_register(2, output, number_of_decimals=2)
 
+    def get_manual_output_power(self):
+        with self.com_lock:
+            return self.instrument.read_register(2, number_of_decimals=2)
+
     def get_working_output(self):
         """Return the current power output of the controller"""
         with self.com_lock:

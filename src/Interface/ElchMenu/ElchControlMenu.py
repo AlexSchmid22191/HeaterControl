@@ -17,10 +17,6 @@ class ElchControlMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        #self.timer = QTimer(interval=1000)
-        #self.timer.timeout.connect(gui_signals.refresh_parameters.emit)
-        #self.timer.start()
-
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
         vbox.setContentsMargins(10, 10, 10, 10)
@@ -117,6 +113,10 @@ class ElchControlMenu(QWidget):
         self.buttons['Sensor_Aiming'].clicked.connect(lambda state: gui_signals.switch_sensor_aiming_beam.emit(state))
 
         vbox.addStretch()
+
+        button = QPushButton('Refresh parameters')
+        button.clicked.connect(gui_signals.refresh_parameters.emit)
+        vbox.addWidget(button)
         self.setLayout(vbox)
 
         engine_signals.controller_parameters_update.connect(self.update_control_values)

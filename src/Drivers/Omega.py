@@ -7,7 +7,7 @@ from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, Unit
 
 class OmegaPt(AbstractController):
     type = UnitType.TEMPERATURE
-    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER}
+    features = {ControllerFeatures.SIMPLE_PID}
 
     def __init__(self, _port_name, _slave_address):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
@@ -92,10 +92,6 @@ class OmegaPt(AbstractController):
     def get_control_mode(self):
         with self.com_lock:
             return 'Manual' if self.instrument.read_register(576) == 3 else 'Automatic'
-
-    def set_manual_output_power(self, output):
-        with self.com_lock:
-            self.instrument.write_float(554, output)
 
     def set_automatic_mode(self):
         with self.com_lock:

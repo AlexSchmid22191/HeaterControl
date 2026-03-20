@@ -90,7 +90,7 @@ class TestController(AbstractController):
         self.pid_d = 1
 
         self.mode = 'Automatic'
-        self.manual_power = 0
+        self.manual_power = 1
 
     def set_rate(self, rate):
         with self.com_lock:
