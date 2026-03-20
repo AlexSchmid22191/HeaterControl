@@ -3,6 +3,7 @@ import functools
 from PySide6.QtWidgets import QWidget, QComboBox, QSpinBox, QDoubleSpinBox, QVBoxLayout, QLabel, QFormLayout, \
     QPushButton
 
+from src.Drivers.BaseClasses import UnitType, ControllerFeatures
 from src.Signals import gui_signals, engine_signals
 
 
@@ -21,6 +22,7 @@ class ElchPidMenu(QWidget):
                         for subset in parameters for key in parameters[subset]}
 
         for key, entry in self.entries.items():
+            entry.setEnabled(False)
             if key == 'GS':
                 entry.addItems(['None', 'Set', 'Process Variable', 'Setpoint', 'Output'])
             elif key == 'AS':
@@ -71,6 +73,8 @@ class ElchPidMenu(QWidget):
                 entry.valueChanged.connect(functools.partial(self.set_pid_parameter, control=key))
 
         engine_signals.pid_parameters_update.connect(self.update_pid_parameters)
+        engine_signals.controller_connected.connect(self.enable_widgets)
+        engine_signals.controller_disconnected.connect(self.disable_widgets)
 
     @staticmethod
     def set_pid_parameter(value, control):
@@ -87,4 +91,19 @@ class ElchPidMenu(QWidget):
 
     def set_unit(self, unit):
         for entry in ['B12', 'B23', 'P1', 'P2', 'P3']:
-            self.entries[entry].setSuffix({'Temperature': ' \u00B0C', 'Voltage': ' mv'}[unit])
+            self.entries[entry].setSuffix({UnitType.TEMPERATURE: ' \u00B0C',
+                                           UnitType.VOLTAGE: ' mv'}[unit])
+
+    def disable_widgets(self):
+        for entry in self.entries.values():
+            entry.setEnabled(False)
+
+    def enable_widgets(self, heater_type, controller_type, features):
+        if ControllerFeatures.GAIN_SCHEDULING in features:
+            for key, entry in self.entries.items():
+                entry.setEnabled(True)
+
+        elif ControllerFeatures.SIMPLE_PID in features:
+            for key, entry in self.entries.items():
+                if key in ['P1', 'I1', 'D1']:
+                    entry.setEnabled(True)

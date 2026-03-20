@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QVBoxLayout, QPus
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
-from src.Drivers.BaseClasses import ControllerFeatures, SensorFeatures
+from src.Drivers.BaseClasses import ControllerFeatures, SensorFeatures, UnitType
 from src.Signals import gui_signals, engine_signals
 
 
@@ -136,8 +136,8 @@ class ElchControlMenu(QWidget):
                 gui_signals.set_manual_output_power.emit(value)
 
     def change_units(self, mode):
-        self.entries['Setpoint'].setSuffix({'Temperature': ' \u00B0C', 'Voltage': ' mV'}[mode])
-        self.entries['Rate'].setSuffix({'Temperature': ' \u00B0C/min', 'Voltage': ' mV/min'}[mode])
+        self.entries['Setpoint'].setSuffix({UnitType.TEMPERATURE: ' \u00B0C', UnitType.VOLTAGE: ' mV'}[mode])
+        self.entries['Rate'].setSuffix({UnitType.TEMPERATURE: ' \u00B0C/min', UnitType.VOLTAGE: ' mV/min'}[mode])
 
     def enable_controller_features(self, controller_type, controller_port, features):
         self.entries['Mode'].setEnabled(True)

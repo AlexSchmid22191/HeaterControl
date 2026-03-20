@@ -82,6 +82,8 @@ class ElchMainWindow(QWidget):
             button.clicked.connect(functools.partial(self.statusbar.change_units, key))
             button.clicked.connect(functools.partial(self.matplot_frame.set_units, key))
             button.clicked.connect(functools.partial(self.control_menu.menus['Programmer'].change_units, key))
+            button.clicked.connect(functools.partial(self.control_menu.menus['PID'].set_unit, key))
+            button.clicked.connect(functools.partial(self.control_menu.menus['Control'].change_units, key))
 
         self.control_menu.menus['Devices'].unit_buttons[UnitType.TEMPERATURE].click()
 
