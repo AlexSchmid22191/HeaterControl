@@ -1,3 +1,4 @@
+import functools
 import math
 from datetime import timezone, datetime
 from typing import Type
@@ -7,12 +8,12 @@ from PySide6.QtCore import QThreadPool, QTimer, QObject
 from minimalmodbus import NoResponseError
 from serial import SerialException
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType, ControllerFeatures
 from src.Drivers.ElchWorks import Thermolino, Thermoplatino, ElchLaser
-from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Eurotherms import Eurotherm3216, Eurotherm3508, Eurotherm2408, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantrol
 from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
+from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
 from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
@@ -156,33 +157,59 @@ class HeaterControlEngine(QObject):
                                                      self.controller_types[controller_type].features)
 
             gui_signals.disconnect_controller.connect(self.remove_controller)
+            gui_signals.connect_controller.disconnect()
+            # Mandatory signals all controllers must support
+            gui_signals.emergency_shutdown.connect(self.emergency_shutdown)
             gui_signals.set_target_setpoint.connect(self.set_target_setpoint)
             gui_signals.set_rate.connect(self.set_rate)
-            gui_signals.set_manual_output_power.connect(self.set_manual_output_power)
             gui_signals.set_control_mode.connect(self.set_control_mode)
-            gui_signals.enable_output.connect(self.toggle_output_enable)
-            gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
             gui_signals.refresh_parameters.connect(self.get_controller_parameters)
-            gui_signals.set_pid_parameters.connect(self.set_pid_parameters)
             gui_signals.start_program.connect(self.start_programmer)
-            gui_signals.emergency_shutdown.connect(self.emergency_shutdown)
-            gui_signals.connect_controller.disconnect()
+            # Optional functionality
+            if ControllerFeatures.OUTPUT_ENABLE in self.controller_types[controller_type].features:
+                gui_signals.enable_output.connect(self.toggle_output_enable)
+            if ControllerFeatures.EXTERNAL_PV in self.controller_types[controller_type].features:
+                gui_signals.set_external_pv_mode.connect(self.set_external_pv_mode)
+            if ControllerFeatures.AIMING_BEAM in self.controller_types[controller_type].features:
+                gui_signals.toggle_aiming.connect(self.toggle_aiming_beam)
+            if ControllerFeatures.MANUAL_POWER in self.controller_types[controller_type].features:
+                gui_signals.set_manual_output_power.connect(self.set_manual_output_power)
+            if ControllerFeatures.GAIN_SCHEDULING in self.controller_types[controller_type].features:
+                gui_signals.set_pid_parameters.connect(self.set_extended_pid)
+                gui_signals.refresh_pid.connect(self.get_extended_pid)
+                self.get_extended_pid()
+            elif ControllerFeatures.SIMPLE_PID in self.controller_types[controller_type].features:
+                gui_signals.set_pid_parameters.connect(self.set_pid_parameters)
+                gui_signals.refresh_pid.connect(self.get_pid_parameters)
+                self.get_pid_parameters()
 
             self.get_controller_parameters()
-            self.get_pid_parameters()
 
     def remove_controller(self):
         gui_signals.disconnect_controller.disconnect(self.remove_controller)
+        # Mandatory signals all controllers must support
         gui_signals.set_target_setpoint.disconnect(self.set_target_setpoint)
         gui_signals.set_rate.disconnect(self.set_rate)
-        gui_signals.set_manual_output_power.disconnect(self.set_manual_output_power)
         gui_signals.set_control_mode.disconnect(self.set_control_mode)
-        gui_signals.enable_output.disconnect(self.toggle_output_enable)
-        gui_signals.toggle_aiming.disconnect(self.toggle_aiming_beam)
-        gui_signals.set_pid_parameters.disconnect(self.set_pid_parameters)
         gui_signals.refresh_parameters.disconnect(self.get_controller_parameters)
-        gui_signals.start_program.disconnect(self.start_programmer)
         gui_signals.emergency_shutdown.disconnect(self.emergency_shutdown)
+        gui_signals.start_program.disconnect(self.start_programmer)
+        # Optional functionality
+        if ControllerFeatures.OUTPUT_ENABLE in self.controller.features:
+            gui_signals.enable_output.disconnect(self.toggle_output_enable)
+        if ControllerFeatures.EXTERNAL_PV in self.controller.features:
+            gui_signals.set_external_pv_mode.disconnect(self.set_external_pv_mode)
+        if ControllerFeatures.AIMING_BEAM in self.controller.features:
+            gui_signals.toggle_aiming.disconnect(self.toggle_aiming_beam)
+        if ControllerFeatures.MANUAL_POWER in self.controller.features:
+            gui_signals.set_manual_output_power.disconnect(self.set_manual_output_power)
+        if ControllerFeatures.GAIN_SCHEDULING in self.controller.features:
+            gui_signals.set_pid_parameters.disconnect(self.set_extended_pid)
+            gui_signals.refresh_pid.disconnect(self.get_extended_pid)
+        elif ControllerFeatures.SIMPLE_PID in self.controller.features:
+            gui_signals.set_pid_parameters.disconnect(self.set_pid_parameters)
+            gui_signals.refresh_pid.disconnect(self.get_pid_parameters)
+            self.get_pid_parameters()
 
         gui_signals.connect_controller.connect(self.add_controller)
 
@@ -295,6 +322,17 @@ class HeaterControlEngine(QObject):
         self.device_io(self.controller.set_rate, None, rate)
 
     def get_pid_parameters(self):
+        for parameter, function in {'P1': self.controller.get_pid_p, 'I1': self.controller.get_pid_i,
+                                    'D1': self.controller.get_pid_d}.items():
+            self.device_io(function, callbacks=[lambda result, _param=parameter:
+                                                engine_signals.pid_parameters_update.emit({_param: result})])
+
+    def set_pid_parameters(self, parameter, value):
+        function = {'P1': self.controller.set_pid_p, 'I1': self.controller.set_pid_i,
+                    'D1': self.controller.set_pid_d}[parameter]
+        self.device_io(function, None, value)
+
+    def get_extended_pid(self):
         for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
                                     'P3': self.controller.get_pid_p3, 'I1': self.controller.get_pid_i,
                                     'I2': self.controller.get_pid_i2, 'I3': self.controller.get_pid_i3,
@@ -305,10 +343,12 @@ class HeaterControlEngine(QObject):
             self.device_io(function, callbacks=[lambda result, _param=parameter:
                                                 engine_signals.pid_parameters_update.emit({_param: result})])
 
-    def set_pid_parameters(self, parameter, value):
-        function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2, 'P3': self.controller.set_pid_p3,
-                    'I1': self.controller.set_pid_i, 'I2': self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
-                    'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2, 'D3': self.controller.set_pid_d3,
+    def set_extended_pid(self, parameter, value):
+        function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2,
+                    'P3': self.controller.set_pid_p3, 'I1': self.controller.set_pid_i,
+                    'I2': self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
+                    'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2,
+                    'D3': self.controller.set_pid_d3,
                     'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
                     'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
         self.device_io(function, None, value)

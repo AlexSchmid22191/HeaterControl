@@ -47,7 +47,8 @@ class TestController(AbstractController):
     """Mock controller to test engine to GUI connection"""
 
     type = UnitType.TEMPERATURE
-    features = {ControllerFeatures.MANUAL_POWER, ControllerFeatures.AIMING_BEAM}
+    features = {ControllerFeatures.MANUAL_POWER, ControllerFeatures.AIMING_BEAM, ControllerFeatures.SIMPLE_PID,
+                ControllerFeatures.GAIN_SCHEDULING, ControllerFeatures.OUTPUT_ENABLE}
 
     def __init__(self, *args, **kwargs):
         self.com_lock = threading.Lock()
