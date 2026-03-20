@@ -52,6 +52,14 @@ class ElchProgramMenu(QWidget):
         self.skip_button = QPushButton('Skip segment')
         self.skip_button.clicked.connect(self.skip_segment)
 
+        self.start_button.setEnabled(False)
+        self.skip_button.setEnabled(False)
+
+        engine_signals.controller_connected.connect(lambda args: self.start_button.setEnabled(True))
+        engine_signals.controller_connected.connect(lambda args: self.skip_button.setEnabled(True))
+        engine_signals.controller_disconnected.connect(lambda: self.start_button.setEnabled(False))
+        engine_signals.controller_disconnected.connect(lambda: self.skip_button.setEnabled(False))
+
         vbox = QVBoxLayout()
         vbox.setSpacing(0)
         vbox.setContentsMargins(10, 10, 10, 10)
