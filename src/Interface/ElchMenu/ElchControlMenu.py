@@ -124,6 +124,7 @@ class ElchControlMenu(QWidget):
         engine_signals.controller_disconnected.connect(self.disable_controller_features)
         engine_signals.sensor_connected.connect(self.enable_sensor_features)
         engine_signals.sensor_disconnected.connect(self.disable_sensor_features)
+        engine_signals.sensor_tc_update.connect(self.update_sensor_tc)
 
     @staticmethod
     def set_control_value(value, control):
@@ -183,6 +184,10 @@ class ElchControlMenu(QWidget):
             else:
                 with QSignalBlocker(self.entries[key]):
                     self.entries[key].setValue(control_parameters[key])
+
+    def update_sensor_tc(self, tc):
+        with QSignalBlocker(self.entries['sensor_tc']):
+            self.entries['sensor_tc'].setCurrentText(tc)
 
     def resistive_heater_config(self):
         dlg = ResConfDialog(self)

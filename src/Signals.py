@@ -64,6 +64,7 @@ class EngineSignals(QObject):
     resistive_heater_config_update = Signal(dict)
 
     sensor_tc_update = Signal(str)
+    heater_tc_update = Signal(str)
 
     error = Signal(str)
     message = Signal(str)

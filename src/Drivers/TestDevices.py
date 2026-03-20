@@ -4,7 +4,7 @@ import time
 
 import serial
 
-from src.Drivers.BaseClasses import AbstractSensor, AbstractController, UnitType, ControllerFeatures
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, SensorFeatures, UnitType
 
 
 class TestSensor(AbstractSensor):
@@ -23,6 +23,28 @@ class TestSensor(AbstractSensor):
 
     def close(self):
         print('Test Sensor disconnected!')
+
+
+class ExtendedTestSensor(TestSensor):
+    """ Mock Sensor to test engine to GUI connection Supports all optional sensor features"""
+    features = {SensorFeatures.TC_SELECT, SensorFeatures.AIMING_BEAM}
+
+    def __init__(self, *args, **kwargs):
+        self.tc = 'K'
+        super().__init__(*args, **kwargs)
+
+    def switch_aiming_beam(self, state):
+        with self.com_lock:
+            print(f'Test sensor aiming beam switched {'on' if state else 'off'}!')
+
+    def set_sensor_tc(self, tc):
+        with self.com_lock:
+            self.tc = tc
+            print(f'Test sensor TC set to {tc}!')
+
+    def get_sensor_tc(self):
+        with self.com_lock:
+            return self.tc
 
 
 class TestSensorVoltage(AbstractSensor):

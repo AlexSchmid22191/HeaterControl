@@ -17,7 +17,8 @@ from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
 from src.Drivers.ResistiveHeater import ResistiveHeaterTenma, ResistiveHeaterHCS
-from src.Drivers.TestDevices import TestSensor, TestController, NiceTestController, FaultyTestController
+from src.Drivers.TestDevices import ExtendedTestSensor, TestSensor, TestController, NiceTestController, \
+    FaultyTestController
 from src.Engine.SetProg import SetpointProgrammer
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
@@ -50,7 +51,8 @@ class HeaterControlEngine(QObject):
             'Thermoplatino': Thermoplatino,
             'Keithley2000 Temperature': Keithley2000Temp,
             'Keithley2000 Voltage': Keithley2000Volt,
-            'Eurotherm3508': Eurotherm3508S
+            'Eurotherm3508': Eurotherm3508S,
+            'Extended Test Sensor': ExtendedTestSensor,
         }
 
         if test_mode:
@@ -135,6 +137,7 @@ class HeaterControlEngine(QObject):
                 gui_signals.switch_sensor_aiming_beam.connect(self.switch_sensor_aiming_beam)
             if SensorFeatures.TC_SELECT in self.sensor_types[sensor_type].features:
                 gui_signals.set_sensor_tc.connect(self.set_sensor_tc)
+                self.get_sensor_tc()
             self.get_sensor_status()
 
     def remove_sensor(self):
