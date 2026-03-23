@@ -225,9 +225,6 @@ class HeaterControlEngine(QObject):
         elif ControllerFeatures.SIMPLE_PID in self.controller.features:
             gui_signals.set_pid_parameters.disconnect(self.set_pid_parameters)
             gui_signals.refresh_pid.disconnect(self.get_pid_parameters)
-            self.get_pid_parameters()
-
-        gui_signals.connect_controller.connect(self.add_controller)
 
         try:
             self.controller.close()
@@ -237,6 +234,7 @@ class HeaterControlEngine(QObject):
             engine_signals.controller_disconnected.emit()
         finally:
             self.controller = None
+            gui_signals.connect_controller.connect(self.add_controller)
 
     def set_sensor_tc(self, tc):
         self.device_io(self.sensor.set_sensor_tc(tc))
