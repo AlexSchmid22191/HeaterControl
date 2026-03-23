@@ -51,15 +51,18 @@ class Thermoplatino(AbstractSensor):
         self.serial.close()
 
 
-class ElchLaser(AbstractController):
+class ElchiTherm(AbstractController):
     type = UnitType.TEMPERATURE
-    features = {ControllerFeatures.AIMING_BEAM, ControllerFeatures.SIMPLE_PID, ControllerFeatures.OUTPUT_ENABLE,
-                ControllerFeatures.MANUAL_POWER}
+    features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.OUTPUT_ENABLE, ControllerFeatures.MANUAL_POWER,
+                ControllerFeatures.TC_SELECT}
+
+    tc_ids = {'B': 0, 'E': 1, 'J': 2, 'K': 3, 'N': 4, 'R': 5, 'S': 6, 'T': 7}
+    tc_types = {value: key for key, value in tc_ids.items()}
 
     def __init__(self, _port_name, _slave_address, baudrate=9600):
-        time.sleep(1)
         self.instrument = minimalmodbus.Instrument(port=_port_name, slaveaddress=_slave_address)
         self.instrument.serial.baudrate = baudrate
+        time.sleep(2)
         self.com_lock = Lock()
 
     def close(self):
@@ -167,6 +170,25 @@ class ElchLaser(AbstractController):
         with self.com_lock:
             return self.instrument.read_register(12)
 
+    def set_tc_type(self, tc):
+        with self.com_lock:
+            self.instrument.write_register(11, ElchiTherm.tc_ids[tc], number_of_decimals=0)
+
+    def get_tc_type(self):
+        with self.com_lock:
+            return ElchiTherm.tc_types[self.instrument.read_register(11)]
+
+    def emergency_stop(self):
+        self.disable_output()
+        self.set_manual_mode()
+        self.disable_aiming_beam()
+        self.set_manual_output_power(0)
+
+
+class ElchLaser(ElchiTherm):
+    features = {ControllerFeatures.AIMING_BEAM, ControllerFeatures.SIMPLE_PID, ControllerFeatures.OUTPUT_ENABLE,
+                ControllerFeatures.MANUAL_POWER, ControllerFeatures.TC_SELECT}
+
     def enable_aiming_beam(self):
         with self.com_lock:
             self.instrument.write_register(13, 1)
@@ -174,9 +196,3 @@ class ElchLaser(AbstractController):
     def disable_aiming_beam(self):
         with self.com_lock:
             self.instrument.write_register(13, 0)
-
-    def emergency_stop(self):
-        self.disable_output()
-        self.set_manual_mode()
-        self.disable_aiming_beam()
-        self.set_manual_output_power(0)

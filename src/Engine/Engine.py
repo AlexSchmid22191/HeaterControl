@@ -8,7 +8,7 @@ from PySide6.QtCore import QObject, QThreadPool, QTimer
 from serial import SerialException
 
 from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, SensorFeatures, UnitType
-from src.Drivers.ElchWorks import ElchLaser, Thermolino, Thermoplatino
+from src.Drivers.ElchWorks import ElchLaser, Thermolino, Thermoplatino, ElchiTherm
 from src.Drivers.Eurotherms import Eurotherm2408, Eurotherm3216, Eurotherm3508, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantrol
 from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
@@ -39,7 +39,7 @@ class HeaterControlEngine(QObject):
             'Omega Pt': OmegaPt,
             'Jumo Quantrol': JumoQuantrol,
             'Elchi Laser Control': ElchLaser,
-            'Elchi Heater Controller': ElchLaser,
+            'Elchi Heater Controller': ElchiTherm,
             'Resistive Heater Tenma': ResistiveHeaterTenma,
             'Resistive Heater HCS': ResistiveHeaterHCS
         }
@@ -186,6 +186,7 @@ class HeaterControlEngine(QObject):
                 gui_signals.set_manual_output_power.connect(self.set_manual_output_power)
             if ControllerFeatures.TC_SELECT in self.controller_types[controller_type].features:
                 gui_signals.set_heater_tc.connect(self.set_controller_tc)
+                gui_signals.refresh_parameters.connect(self.get_controller_tc)
                 self.get_controller_tc()
             if ControllerFeatures.GAIN_SCHEDULING in self.controller_types[controller_type].features:
                 gui_signals.set_pid_parameters.connect(self.set_extended_pid)
