@@ -254,7 +254,10 @@ class HeaterControlEngine(QObject):
             self.external_pv_timer.stop()
             engine_signals.message.emit('External PV mode deactivated!')
         # Delay before switching modes to allow time for the first sensor value to be transmitted
-        self.controller.set_external_pv_mode(mode)
+        timer = QTimer()
+        timer.setInterval(1000)
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: self.controller.set_external_pv_mode(mode))
 
     def transfer_external_pv(self):
         if not self.controller or not self.sensor:
