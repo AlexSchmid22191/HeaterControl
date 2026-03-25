@@ -8,7 +8,7 @@ from PySide6.QtCore import QObject, QThreadPool, QTimer
 from serial import SerialException
 
 from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, SensorFeatures, UnitType
-from src.Drivers.ElchWorks import ElchLaser, Thermolino, Thermoplatino, ElchiTherm
+from src.Drivers.ElchWorks import ElchiTherm, ElchLaser, Thermolino, Thermoplatino
 from src.Drivers.Eurotherms import Eurotherm2408, Eurotherm3216, Eurotherm3508, Eurotherm3508S
 from src.Drivers.Jumo import JumoQuantrol
 from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
@@ -32,30 +32,26 @@ class HeaterControlEngine(QObject):
         super().__init__()
         self.test_mode = test_mode
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
-        self.controller_types: dict[str, Type[AbstractController]] = {
-            'Eurotherm2408': Eurotherm2408,
-            'Eurotherm3216': Eurotherm3216,
-            'Eurotherm3508': Eurotherm3508,
-            'Omega Pt': OmegaPt,
-            'Jumo Quantrol': JumoQuantrol,
-            'Elchi Laser Control': ElchLaser,
-            'Elchi Heater Controller': ElchiTherm,
-            'Resistive Heater Tenma': ResistiveHeaterTenma,
-            'Resistive Heater HCS': ResistiveHeaterHCS
-        }
-        self.sensor_types: dict[str, Type[AbstractSensor]] = {
-            'Pyrometer': Pyrometer,
-            'Micro Epsilon CTL': ME_CTL,
-            'Thermolino': Thermolino,
-            'Thermoplatino': Thermoplatino,
-            'Keithley2000 Temperature': Keithley2000Temp,
-            'Keithley2000 Voltage': Keithley2000Volt,
-            'Eurotherm3508': Eurotherm3508S,
-            'Extended Test Sensor': ExtendedTestSensor,
-        }
+        self.controller_types: dict[str, Type[AbstractController]] = {'Eurotherm2408':           Eurotherm2408,
+                                                                      'Eurotherm3216':           Eurotherm3216,
+                                                                      'Eurotherm3508':           Eurotherm3508,
+                                                                      'Omega Pt':                OmegaPt,
+                                                                      'Jumo Quantrol':           JumoQuantrol,
+                                                                      'Elchi Laser Control':     ElchLaser,
+                                                                      'Elchi Heater Controller': ElchiTherm,
+                                                                      'Resistive Heater Tenma':  ResistiveHeaterTenma,
+                                                                      'Resistive Heater HCS':    ResistiveHeaterHCS}
+        self.sensor_types: dict[str, Type[AbstractSensor]] = {'Pyrometer':                Pyrometer,
+                                                              'Micro Epsilon CTL':        ME_CTL,
+                                                              'Thermolino':               Thermolino,
+                                                              'Thermoplatino':            Thermoplatino,
+                                                              'Keithley2000 Temperature': Keithley2000Temp,
+                                                              'Keithley2000 Voltage':     Keithley2000Volt,
+                                                              'Eurotherm3508':            Eurotherm3508S, }
 
         if test_mode:
             self.sensor_types['Test Sensor'] = TestSensor
+            self.sensor_types['Extended Test Sensor']: ExtendedTestSensor
             self.controller_types['Test Controller'] = TestController
             self.controller_types['Extended Test Controller'] = ExtendedTestController
             self.controller_types['Faulty Test Controller'] = FaultyTestController
@@ -115,7 +111,7 @@ class HeaterControlEngine(QObject):
     def report_devices(self):
         utype = self.unit_type
         devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.type == utype],
-                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
+                   'Sensor':     [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
         engine_signals.available_devices.emit(devices)
 
     def refresh_available_ports(self):
@@ -241,7 +237,8 @@ class HeaterControlEngine(QObject):
         self.device_io(self.sensor.set_sensor_tc(tc))
 
     def get_sensor_tc(self):
-        self.device_io(self.sensor.get_sensor_tc, callbacks=[lambda result: engine_signals.sensor_tc_update.emit(result)])
+        self.device_io(self.sensor.get_sensor_tc,
+                       callbacks=[lambda result: engine_signals.sensor_tc_update.emit(result)])
 
     def set_external_pv_mode(self, mode):
         if not self.controller or not self.sensor:
@@ -320,8 +317,8 @@ class HeaterControlEngine(QObject):
     def get_controller_status(self):
         runtime = (datetime.now() - self.log_start_time).total_seconds() if self.log_start_time else 0.0
         for parameter, function in {'Controller PV': self.controller.get_process_variable,
-                                    'Setpoint': self.controller.get_working_setpoint,
-                                    'Power': self.controller.get_working_output}.items():
+                                    'Setpoint':      self.controller.get_working_setpoint,
+                                    'Power':         self.controller.get_working_output}.items():
             callbacks = [lambda result, _param=parameter: engine_signals.controller_status_update.emit({_param: result},
                                                                                                        runtime)]
             if self.is_logging:
@@ -330,11 +327,11 @@ class HeaterControlEngine(QObject):
 
     def get_controller_parameters(self):
         for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
-                                    'Power': self.controller.get_manual_output_power,
-                                    'Rate': self.controller.get_rate,
-                                    'Mode': self.controller.get_control_mode}.items():
-            self.device_io(function, callbacks=[lambda result, _param=parameter:
-                                                engine_signals.controller_parameters_update.emit({_param: result})])
+                                    'Power':    self.controller.get_manual_output_power,
+                                    'Rate':     self.controller.get_rate,
+                                    'Mode':     self.controller.get_control_mode}.items():
+            self.device_io(function, callbacks=[
+                lambda result, _param=parameter: engine_signals.controller_parameters_update.emit({_param: result})])
 
     def set_control_mode(self, mode):
         function = self.controller.set_manual_mode if mode == 'Manual' else self.controller.set_automatic_mode
@@ -352,33 +349,33 @@ class HeaterControlEngine(QObject):
     def get_pid_parameters(self):
         for parameter, function in {'P1': self.controller.get_pid_p, 'I1': self.controller.get_pid_i,
                                     'D1': self.controller.get_pid_d}.items():
-            self.device_io(function, callbacks=[lambda result, _param=parameter:
-                                                engine_signals.pid_parameters_update.emit({_param: result})])
+            self.device_io(function, callbacks=[
+                lambda result, _param=parameter: engine_signals.pid_parameters_update.emit({_param: result})])
 
     def set_pid_parameters(self, parameter, value):
-        function = {'P1': self.controller.set_pid_p, 'I1': self.controller.set_pid_i,
-                    'D1': self.controller.set_pid_d}[parameter]
+        function = {'P1': self.controller.set_pid_p, 'I1': self.controller.set_pid_i, 'D1': self.controller.set_pid_d}[
+            parameter]
         self.device_io(function, None, value)
 
     def get_extended_pid(self):
-        for parameter, function in {'P1': self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
-                                    'P3': self.controller.get_pid_p3, 'I1': self.controller.get_pid_i,
-                                    'I2': self.controller.get_pid_i2, 'I3': self.controller.get_pid_i3,
-                                    'D1': self.controller.get_pid_d, 'D2': self.controller.get_pid_d2,
-                                    'D3': self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
+        for parameter, function in {'P1':  self.controller.get_pid_p, 'P2': self.controller.get_pid_p2,
+                                    'P3':  self.controller.get_pid_p3, 'I1': self.controller.get_pid_i,
+                                    'I2':  self.controller.get_pid_i2, 'I3': self.controller.get_pid_i3,
+                                    'D1':  self.controller.get_pid_d, 'D2': self.controller.get_pid_d2,
+                                    'D3':  self.controller.get_pid_d3, 'B23': self.controller.get_boundary_23,
                                     'B12': self.controller.get_boundary_12, 'AS': self.controller.get_active_set,
-                                    'GS': self.controller.get_gain_scheduling}.items():
-            self.device_io(function, callbacks=[lambda result, _param=parameter:
-                                                engine_signals.pid_parameters_update.emit({_param: result})])
+                                    'GS':  self.controller.get_gain_scheduling}.items():
+            self.device_io(function, callbacks=[
+                lambda result, _param=parameter: engine_signals.pid_parameters_update.emit({_param: result})])
 
     def set_extended_pid(self, parameter, value):
-        function = {'P1': self.controller.set_pid_p, 'P2': self.controller.set_pid_p2,
-                    'P3': self.controller.set_pid_p3, 'I1': self.controller.set_pid_i,
-                    'I2': self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
-                    'D1': self.controller.set_pid_d, 'D2': self.controller.set_pid_d2,
-                    'D3': self.controller.set_pid_d3,
-                    'B23': self.controller.set_boundary_23, 'B12': self.controller.set_boundary_12,
-                    'GS': self.controller.set_gain_scheduling, 'AS': self.controller.set_active_set}[parameter]
+        function = {'P1':  self.controller.set_pid_p, 'P2': self.controller.set_pid_p2,
+                    'P3':  self.controller.set_pid_p3, 'I1': self.controller.set_pid_i,
+                    'I2':  self.controller.set_pid_i2, 'I3': self.controller.set_pid_i3,
+                    'D1':  self.controller.set_pid_d, 'D2': self.controller.set_pid_d2,
+                    'D3':  self.controller.set_pid_d3, 'B23': self.controller.set_boundary_23,
+                    'B12': self.controller.set_boundary_12, 'GS': self.controller.set_gain_scheduling,
+                    'AS':  self.controller.set_active_set}[parameter]
         self.device_io(function, None, value)
 
     def toggle_output_enable(self, state):
@@ -435,15 +432,17 @@ class HeaterControlEngine(QObject):
             unit = self.units[self.unit_type]
 
             with open(filepath, 'w+') as file:
-                file.write('UTC, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.
-                           format(unit, unit))
+                file.write(
+                    'UTC, Unix timestamp (s), Process Variable ({:s}), Output Power (%), Sensor Value ({:s})\n'.format(
+                        unit, unit))
                 for timestamp, datapoint in sorted_data.items():
                     timestring = datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
                     power = datapoint['Power'] if 'Power' in datapoint.keys() else math.nan
                     controller_pv = datapoint['Controller PV'] if 'Controller PV' in datapoint.keys() else math.nan
                     sensor_pv = datapoint['Sensor PV'] if 'Sensor PV' in datapoint.keys() else math.nan
-                    file.write('{:s}, {:d}, {:.1f}, {:.1f}, {:.1f}\n'.
-                               format(timestring, timestamp, controller_pv, power, sensor_pv))
+                    file.write(
+                        '{:s}, {:d}, {:.1f}, {:.1f}, {:.1f}\n'.format(timestring, timestamp, controller_pv, power,
+                                                                      sensor_pv))
 
         worker = Worker(_work)
         self.pool.start(worker)
