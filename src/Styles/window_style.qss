@@ -92,7 +92,8 @@ ElchMenu QLabel#Header{font: 14pt "Roboto"}
 ElchMenu QPushButton{background:#2A2D56; color:#7b8ccb; border:1px solid #15183b; padding: 2px; font: 11pt "Roboto Light";}
 ElchMenu QPushButton:hover{background: #434778; color: #7b8ccb}
 ElchMenu QPushButton:checked:hover{background: #434778; color: #7b8ccb}
-ElchMenu QPushButton:checked{background: #434778; color: #7b8ccb}
+ElchMenu QPushButton:checked{background: #3c406b; color: #7b8ccb}
+ElchMenu QPushButton:disabled{background: #2b2d4d; color: #7b8ccb}
 
 ElchMenu QPushButton#Refresh{icon: url(Icons/Refresh.png)}
 ElchMenu QPushButton#Refresh:hover{icon: url(Icons/Refresh_Glow.png)}
@@ -107,6 +108,7 @@ ElchMenu QComboBox::down-arrow:on{image: url(Icons/Down_Glow.png); width: 10px}
 ElchMenu QComboBox::down-arrow:hover{image: url(Icons/Down_Glow.png); width: 10px}
 ElchMenu QComboBox QAbstractItemView{background-color: #2A2D56; border:1px solid #15183b; color: #7b8ccb;}
 ElchMenu QToolTip{background-color: #2A2D56; color: #7b8ccb; font: 11pt "Roboto Light"; border: 1px solid #15183b}
+ElchMenu QComboBox:disabled{background-color:#2b2d4d}
 
 
 ElchMenu QAbstractItemView {background-color: #2A2D56; border:1px solid #15183b; color: #7b8ccb;
@@ -114,11 +116,13 @@ ElchMenu QAbstractItemView {background-color: #2A2D56; border:1px solid #15183b;
 
 /*Spinboxes*/
 ElchMenu QAbstractSpinBox{background-color:#2A2D56; border: 1px solid #15183b;  ; color: #7b8ccb; font: 11pt "Roboto Light";}
+ElchMenu QAbstractSpinBox:disabled{background-color:#2b2d4d}
 ElchMenu QAbstractSpinBox:focus{selection-background-color:#393b67; selection-color: #7b8ccb;}
 ElchMenu QAbstractSpinBox::up-button {image: url(Icons/Up.png); width: 10px}
 ElchMenu QAbstractSpinBox::up-button:hover {image: url(Icons/Up_Glow.png); width: 10px}
 ElchMenu QAbstractSpinBox::down-button {image: url(Icons/Down.png); width: 10px}
 ElchMenu QAbstractSpinBox::down-button:hover {image: url(Icons/Down_Glow.png); width: 10px}
+
 
 /*Radiobuttons*/
 ElchMenu QRadioButton{color: #7b8ccb; font: 11pt "Roboto Light"; padding: 0px; margin: 0px; }
