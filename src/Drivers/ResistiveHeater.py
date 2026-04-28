@@ -103,12 +103,16 @@ class ResistiveHeater(AbstractController):
             self.working_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
-            pv = self.external_pv if self.external_pv_mode else self.get_process_variable()
+            pv = self.external_pv if self.external_pv_mode else self.smoothed_temperature
             pid_result = (self.pid_controller.calculate_output(pv, self.working_setpoint) or self.working_power)
 
             self.working_power = max(pid_result, self.min_output)
 
-        self.power_supply.set_current_limit(self.working_power / 100 * self.max_current)
+            worker = Worker(lambda: self.power_supply.set_current_limit(self.working_power / 100 * self.max_current))
+            self.workers.append(worker)
+            worker.signals.error.connect(lambda error: engine_signals.error.emit(error))
+            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
+            QThreadPool.globalInstance().start(worker)
 
     def _working_setpoint_adjust(self):
         increment = self.rate * self.loop_time / 1000 / 60
