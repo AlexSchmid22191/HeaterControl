@@ -24,7 +24,7 @@ class GuiSignals(QObject):
     start_log = Signal()
     stop_log = Signal()
     clear_log = Signal()
-    export_log = Signal()
+    export_log = Signal(object)
 
     start_program = Signal(object)
     skip_program = Signal()
