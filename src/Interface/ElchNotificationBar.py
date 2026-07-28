@@ -1,6 +1,7 @@
 from datetime import datetime
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QToolButton
+from PySide6.QtGui import QFontMetrics
+from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QToolButton, QSizePolicy
 
 from src.Signals import engine_signals
 
@@ -14,6 +15,9 @@ class ElchNotificationBar(QWidget):
         self._current_index = -1
 
         self._label = QLabel("")
+        self._label.setWordWrap(False)
+        self._label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        self._label.setTextInteractionFlags(Qt.NoTextInteraction)
         self._label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
         self._btn_up = QToolButton()
@@ -59,9 +63,14 @@ class ElchNotificationBar(QWidget):
 
     def _show_current(self):
         if 0 <= self._current_index < len(self._messages):
-            self._label.setText(self._messages[self._current_index])
+            text = self._messages[self._current_index]
+            metrics = QFontMetrics(self._label.font())
+            elided = metrics.elidedText(text, Qt.ElideRight, max(0, self._label.width()))
+            self._label.setText(elided)
+            self._label.setToolTip(text)
         else:
             self._label.setText("")
+            self._label.setToolTip("")
 
     def show_previous(self):
         if not self._messages:
