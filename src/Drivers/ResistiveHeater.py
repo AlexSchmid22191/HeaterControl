@@ -108,11 +108,11 @@ class ResistiveHeater(AbstractController):
 
             self.working_power = max(pid_result, self.min_output)
 
-            worker = Worker(lambda: self.power_supply.set_current_limit(self.working_power / 100 * self.max_current))
-            self.workers.append(worker)
-            worker.signals.error.connect(lambda error: engine_signals.error.emit(error))
-            worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
-            QThreadPool.globalInstance().start(worker)
+        worker = Worker(lambda: self.power_supply.set_current_limit(self.working_power / 100 * self.max_current))
+        self.workers.append(worker)
+        worker.signals.error.connect(lambda error: engine_signals.error.emit(error))
+        worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
+        QThreadPool.globalInstance().start(worker)
 
     def _working_setpoint_adjust(self):
         increment = self.rate * self.loop_time / 1000 / 60
