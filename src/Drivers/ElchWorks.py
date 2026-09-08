@@ -10,42 +10,39 @@ from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType
 class Thermolino(AbstractSensor):
     type = UnitType.TEMPERATURE
 
-    def __init__(self, _port):
+    def __init__(self, _port:str):
         self.serial = serial.Serial(_port, timeout=1.5)
         self.com_lock = Lock()
         time.sleep(1)
         with self.com_lock:
             self.serial.write(":FUNC 'TEMP'\n".encode())
 
-    def get_sensor_value(self):
+    def get_sensor_value(self) -> float:
         with self.com_lock:
             self.serial.write(':read?'.encode())
             self.serial.write('\n'.encode())
             return float(self.serial.readline().decode())
 
-    def close(self):
+    def close(self) -> None:
         self.serial.close()
 
 
 class Thermoplatino(AbstractSensor):
     type = UnitType.TEMPERATURE
 
-    def __init__(self, _port):
+    def __init__(self, _port:str):
         self.serial = serial.Serial(_port, timeout=1.5, baudrate=115200)
         self.com_lock = Lock()
         time.sleep(1)
         with self.com_lock:
             self.serial.write(":FUNC 'TEMP'\n".encode())
 
-    def get_sensor_value(self):
+    def get_sensor_value(self) -> float:
         with self.com_lock:
             self.serial.write(':read?'.encode())
             self.serial.write('\n'.encode())
             answer = self.serial.readline().decode()
-            try:
-                return float(answer)
-            except ValueError:
-                return answer
+            return float(answer)
 
     def close(self):
         self.serial.close()
@@ -59,126 +56,126 @@ class ElchiTherm(AbstractController):
     tc_ids = {'B': 0, 'E': 1, 'J': 2, 'K': 3, 'N': 4, 'R': 5, 'S': 6, 'T': 7}
     tc_types = {value: key for key, value in tc_ids.items()}
 
-    def __init__(self, _port_name, _slave_address, baudrate=9600):
+    def __init__(self, _port_name:str, _slave_address:int, baudrate=9600):
         self.instrument = minimalmodbus.Instrument(port=_port_name, slaveaddress=_slave_address)
         self.instrument.serial.baudrate = baudrate
         time.sleep(2)
         self.com_lock = Lock()
 
-    def close(self):
+    def close(self) -> None:
         self.instrument.serial.close()
 
-    def get_process_variable(self):
+    def get_process_variable(self) -> float:
         """Return the current process variable"""
         with self.com_lock:
             return self.instrument.read_register(0, number_of_decimals=1)
 
-    def set_target_setpoint(self, setpoint):
+    def set_target_setpoint(self, setpoint: float) -> None:
         """Set the target setpoint"""
         with self.com_lock:
             self.instrument.write_register(1, setpoint, number_of_decimals=1)
 
-    def get_target_setpoint(self):
+    def get_target_setpoint(self) -> float:
         """Get the target setpoint"""
         with self.com_lock:
             return self.instrument.read_register(1, number_of_decimals=1)
 
-    def set_manual_output_power(self, output):
+    def set_manual_output_power(self, output:float) -> None:
         """Set the power output of the controller in percent"""
         with self.com_lock:
             self.instrument.write_register(2, output, number_of_decimals=2)
 
-    def get_manual_output_power(self):
+    def get_manual_output_power(self) -> float:
         with self.com_lock:
             return self.instrument.read_register(2, number_of_decimals=2)
 
-    def get_working_output(self):
+    def get_working_output(self) -> float:
         """Return the current power output of the controller"""
         with self.com_lock:
             return self.instrument.read_register(3, number_of_decimals=2)
 
-    def get_working_setpoint(self):
+    def get_working_setpoint(self) -> float:
         """Get the current working setpoint of the instrument"""
         with self.com_lock:
             return self.instrument.read_register(4, number_of_decimals=1)
 
-    def set_rate(self, rate):
+    def set_rate(self, rate: float) -> None:
         """Set the rate of change for the working setpoint i.e., the heating/cooling rate"""
         with self.com_lock:
             self.instrument.write_register(5, rate, number_of_decimals=1)
 
-    def get_rate(self):
+    def get_rate(self) -> float:
         """Get the rate of change for the working setpoint i.e., the heating/cooling rate"""
         with self.com_lock:
             return self.instrument.read_register(5, number_of_decimals=1)
 
-    def set_automatic_mode(self):
+    def set_automatic_mode(self) -> None:
         """Set controller to automatic mode"""
         with self.com_lock:
             self.instrument.write_register(6, 0)
 
-    def set_manual_mode(self):
+    def set_manual_mode(self) -> None:
         """Set controller to manual mode"""
         with self.com_lock:
             self.instrument.write_register(6, 1)
 
-    def get_control_mode(self):
+    def get_control_mode(self) -> str:
         """get the active control mode"""
         with self.com_lock:
             return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(6, 0)]
 
-    def set_pid_p(self, p):
+    def set_pid_p(self, p: float) -> None:
         """Set the P (Proportional band) for the PID controller"""
         with self.com_lock:
             self.instrument.write_register(7, p, number_of_decimals=1)
 
-    def set_pid_i(self, i):
+    def set_pid_i(self, i: float) -> None:
         """Set the I (Integral time) for the PID controller"""
         with self.com_lock:
             self.instrument.write_register(8, i, number_of_decimals=0)
 
-    def set_pid_d(self, d):
+    def set_pid_d(self, d: float) -> None:
         """Set the D (Derivative time) for the PID controller"""
         with self.com_lock:
             self.instrument.write_register(9, d, number_of_decimals=0)
 
-    def get_pid_p(self):
+    def get_pid_p(self) -> float:
         with self.com_lock:
             return self.instrument.read_register(7, number_of_decimals=1)
 
-    def get_pid_i(self):
+    def get_pid_i(self) -> float:
         with self.com_lock:
             return self.instrument.read_register(8, number_of_decimals=0)
 
-    def get_pid_d(self):
+    def get_pid_d(self) -> float:
         with self.com_lock:
             return self.instrument.read_register(9, number_of_decimals=0)
 
-    def enable_output(self):
+    def enable_output(self) -> None:
         with self.com_lock:
             self.instrument.write_register(10, 1)
 
-    def disable_output(self):
+    def disable_output(self) -> None:
         with self.com_lock:
             self.instrument.write_register(10, 0)
 
-    def get_enable_state(self):
+    def get_enable_state(self) -> int:
         with self.com_lock:
             return self.instrument.read_register(10)
 
-    def get_tc_fault(self):
+    def get_tc_fault(self) -> int:
         with self.com_lock:
             return self.instrument.read_register(12)
 
-    def set_tc_type(self, tc):
+    def set_tc_type(self, tc: str) -> None:
         with self.com_lock:
             self.instrument.write_register(11, ElchiTherm.tc_ids[tc], number_of_decimals=0)
 
-    def get_tc_type(self):
+    def get_tc_type(self) -> str:
         with self.com_lock:
             return ElchiTherm.tc_types[self.instrument.read_register(11)]
 
-    def emergency_stop(self):
+    def emergency_stop(self) -> None:
         self.disable_output()
         self.set_manual_mode()
         self.disable_aiming_beam()
@@ -189,10 +186,10 @@ class ElchLaser(ElchiTherm):
     features = {ControllerFeatures.AIMING_BEAM, ControllerFeatures.SIMPLE_PID, ControllerFeatures.OUTPUT_ENABLE,
                 ControllerFeatures.MANUAL_POWER, ControllerFeatures.TC_SELECT}
 
-    def enable_aiming_beam(self):
+    def enable_aiming_beam(self) -> None:
         with self.com_lock:
             self.instrument.write_register(13, 1)
 
-    def disable_aiming_beam(self):
+    def disable_aiming_beam(self) -> None:
         with self.com_lock:
             self.instrument.write_register(13, 0)

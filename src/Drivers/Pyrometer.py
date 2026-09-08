@@ -6,14 +6,14 @@ from src.Drivers.BaseClasses import AbstractSensor, UnitType
 class Pyrometer(AbstractSensor):
     type = UnitType.TEMPERATURE
 
-    def __init__(self, _port):
+    def __init__(self, _port: str):
         self.serial = serial.Serial(_port, timeout=1.5)
         self.com_lock = threading.Lock()
         with self.com_lock:
             self.serial.write('TRIG SP OFF\r'.encode())
         self.serial.reset_input_buffer()
 
-    def get_sensor_value(self):
+    def get_sensor_value(self) -> float:
         with self.com_lock:
             self.serial.write('TEMP'.encode())
             self.serial.write('\r'.encode())
@@ -22,5 +22,5 @@ class Pyrometer(AbstractSensor):
             temp = float(answer.split()[0])
             return temp
 
-    def close(self):
+    def close(self) -> None:
         self.serial.close()
