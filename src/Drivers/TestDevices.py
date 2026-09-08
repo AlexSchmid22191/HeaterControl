@@ -4,8 +4,7 @@ import time
 
 import serial
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor, AbstractPowerSupply, ControllerFeatures, \
-    PowerSupplyFeatures, SensorFeatures, UnitType
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, SensorFeatures, UnitType
 
 
 class TestSensor(AbstractSensor):
@@ -73,7 +72,7 @@ class TestController(AbstractController):
     PID is mocked; the process variable always approaches the target setpoint asymptotically
     """
 
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.MANUAL_POWER, ControllerFeatures.SIMPLE_PID}
 
     def __init__(self, *args, **kwargs):
@@ -81,17 +80,17 @@ class TestController(AbstractController):
         print('Test Controller connected!')
         print(f'Called with args {args} and kwargs {kwargs}')
 
-        self.target_sp = 0
-        self.working_sp = 0
-        self.pv = 0
-        self.rate = 5
+        self.target_sp: float = 0
+        self.working_sp: float = 0
+        self.pv: float = 0
+        self.rate: float = 5
 
-        self.pid_p = 1
-        self.pid_i = 1
-        self.pid_d = 1
+        self.pid_p: float = 1
+        self.pid_i: float = 1
+        self.pid_d: float = 1
 
-        self.mode = 'Automatic'
-        self.manual_power = 1
+        self.mode: str = 'Automatic'
+        self.manual_power: float = 1
 
     def set_rate(self, rate):
         with self.com_lock:

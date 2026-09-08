@@ -14,25 +14,25 @@ from src.Signals import engine_signals, gui_signals
 
 
 class ResistiveHeater(AbstractController):
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER, ControllerFeatures.EXTERNAL_PV,
                 ControllerFeatures.EXT_CONFIG}
 
-    def __init__(self, _port_name: str, power_supply: type[AbstractPowerSupply], config_name: str, *args, **kwargs):
+    def __init__(self, _port_name: str, power_supply: type[AbstractPowerSupply], config_name: str):
 
         self.config_name = config_name
         self.port = _port_name
         self.power_supply: AbstractPowerSupply = power_supply(_port_name)
 
-        self.workers = []
+        self.workers: list[Worker] = []
 
         config = self.read_from_config()
 
-        self.working_setpoint = 25
-        self.target_setpoint = 25
+        self.working_setpoint: float = 25
+        self.target_setpoint: float = 25
 
-        self.smoothed_temperature = 25
-        self.smoothing_factor = 0.8
+        self.smoothed_temperature: float = 25
+        self.smoothing_factor: float = 0.8
 
         self.max_voltage = config['Heater']['U_max']
         self.max_current = config['Heater']['I_max']
@@ -41,33 +41,34 @@ class ResistiveHeater(AbstractController):
         self.power_supply.set_voltage_limit(self.max_voltage)
         self.control_mode = 'Manual'
 
-        self.manual_output_power = 0
-        self.working_power = 0
+        self.manual_output_power: float = 0
+        self.working_power: float = 0
 
-        self.offset = config['Material']['Offset']
-        self.slope = config['Material']['Slope']
+        self.offset: float = config['Material']['Offset']
+        self.slope: float = config['Material']['Slope']
 
-        self.rate = config['Control']['Rate']
+        self.rate: float = config['Control']['Rate']
 
         # Timer for automatic ramping mode
-        self.loop_time = 250
+        self.loop_time: int = 250
         self.timer = QTimer()
         self.timer.timeout.connect(self._control_loop)
         self.timer.start(self.loop_time)
 
         # Take heater resistance from the config file
-        self.r_cold = config['Heater']['R_cold']
-        self.wire_geometry_factor = 0.2075 / self.r_cold
+        self.r_cold: float = config['Heater']['R_cold']
+        self.wire_geometry_factor: float = 0.2075 / self.r_cold
 
-        pb = config['PID']['P']
-        ti = config['PID']['I']
-        td = config['PID']['D']
+        pb: float = config['PID']['P']
+        ti: float = config['PID']['I']
+        td: float = config['PID']['D']
         self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time / 1000)
 
         # Used for ensuring that sensor values arrive at least every 2 seconds in external pv mode
-        self.external_pv_mode = False
-        self.external_pv = 0
-        self.sentinel_timer = QTimer(singleShot=True)
+        self.external_pv_mode: bool = False
+        self.external_pv: float = 0
+        self.sentinel_timer = QTimer()
+        self.sentinel_timer.setSingleShot(True)
         self.sentinel_timer.setInterval(2000)
         self.sentinel_timer.timeout.connect(self.sentinel_trip)
 
@@ -200,12 +201,16 @@ class ResistiveHeater(AbstractController):
 
     def write_config_to_file(self) -> None:
         config = configparser.ConfigParser()
-        config_file_path = os.path.join(directory := os.path.join(os.getenv('APPDATA'), 'ElchWorks', 'ElchiTools'),
-                                        self.config_name)
+        app_data = os.getenv('APPDATA')
+        if not app_data:
+            raise ValueError("APPDATA environment variable not found")
+        else:
+            config_file_dir = os.path.join(app_data, 'ElchWorks', 'ElchiTools')
+        config_file_path = os.path.join(config_file_dir, self.config_name)
         if os.path.exists(config_file_path):
             config.read(config_file_path)
         else:
-            os.makedirs(directory)
+            os.makedirs(config_file_dir, exist_ok=True)
 
         config[self.port] = {'P':     str(self.pid_controller.pb), 'I': str(self.pid_controller.ti),
                              'D':     str(self.pid_controller.td), 'Rate': str(self.rate), 'R_cold': str(self.r_cold),
@@ -217,7 +222,11 @@ class ResistiveHeater(AbstractController):
 
     def read_from_config(self) -> dict:
         config = configparser.ConfigParser()
-        config_file_path = os.path.join(os.getenv('APPDATA'), 'ElchWorks', 'ElchiTools', self.config_name)
+        app_data = os.getenv('APPDATA')
+        if not app_data:
+            raise ValueError('APPDATA environment variable not set')
+        else:
+            config_file_path = os.path.join(app_data, 'ElchWorks', 'ElchiTools', self.config_name)
         if os.path.exists(config_file_path):
             config.read(config_file_path)
             if self.port in config.sections():
@@ -253,7 +262,7 @@ class ResistiveHeater(AbstractController):
                       'maximum voltage': self.max_voltage, 'minimum output': self.min_output}
         engine_signals.resistive_heater_config_update.emit(parameters)
 
-    def calibrate(self) -> None:
+    def calibrate(self):
         engine_signals.message.emit('Calibrating heater. Please wait...')
 
         def _calib():
@@ -266,7 +275,7 @@ class ResistiveHeater(AbstractController):
                 j.append(self.power_supply.get_current())
             self.set_manual_output_power(0)
             try:
-                slope, intercept, r_value, p_value, std_err = linregress(j, u)
+                slope, intercept, r_value, *_ = linregress(j, u)
                 return {'U': u, 'I': j, 'R': slope, 'OS': intercept, 'R2': r_value, 'State': 'Success'}
             except ValueError:
                 return {'State': 'Fail'}
@@ -286,8 +295,8 @@ class ResistiveHeater(AbstractController):
 class ResistiveHeaterTenma(ResistiveHeater):
     features = ResistiveHeater.features | {ControllerFeatures.OUTPUT_ENABLE}
 
-    def __init__(self, _port_name: str, *args, **kwargs):
-        super().__init__(_port_name=_port_name, power_supply=Tenma, config_name='Tenma.ini', *args, **kwargs)
+    def __init__(self, _port_name: str):
+        super().__init__(_port_name=_port_name, power_supply=Tenma, config_name='Tenma.ini')
 
     def enable_output(self) -> None:
         self.power_supply.enable_output()
@@ -297,5 +306,5 @@ class ResistiveHeaterTenma(ResistiveHeater):
 
 
 class ResistiveHeaterHCS(ResistiveHeater):
-    def __init__(self, _port_name: str, *args, **kwargs):
-        super().__init__(_port_name=_port_name, power_supply=HCS34, config_name='HCS.ini', *args, **kwargs)
+    def __init__(self, _port_name: str):
+        super().__init__(_port_name=_port_name, power_supply=HCS34, config_name='HCS.ini')

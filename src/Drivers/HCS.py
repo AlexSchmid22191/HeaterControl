@@ -27,7 +27,7 @@ class HCS34(AbstractPowerSupply):
             self.serial.write(string.encode())
             self.serial.write(b'\x0D')
             ack_answer = self.readline()
-            assert ack_answer.decode() == 'OK', f'No or invalid response from device! Response {ack_answer}'
+            assert ack_answer.decode() == 'OK', f'No or invalid response from device! Response {ack_answer!r}'
 
     def get_voltage_limit(self) -> float:
         string = f'GETS'

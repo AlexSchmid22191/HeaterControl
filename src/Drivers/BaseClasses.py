@@ -34,7 +34,7 @@ class AbstractController(ABC):
     Core functionality is mandatory and has to be overridden.
     Optional functionality raises an exception if the methods are not overwritten in derived subclasses.
     """
-    type: UnitType
+    controller_type: UnitType
     features: Set[ControllerFeatures] = set()
 
     # Mandatory methods ------------------------------------------------------------------------------------------------

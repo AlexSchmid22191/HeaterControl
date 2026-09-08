@@ -4,13 +4,13 @@ from threading import Lock
 import minimalmodbus
 import serial
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor, UnitType, ControllerFeatures
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, UnitType
 
 
 class Thermolino(AbstractSensor):
     type = UnitType.TEMPERATURE
 
-    def __init__(self, _port:str):
+    def __init__(self, _port: str):
         self.serial = serial.Serial(_port, timeout=1.5)
         self.com_lock = Lock()
         time.sleep(1)
@@ -30,7 +30,7 @@ class Thermolino(AbstractSensor):
 class Thermoplatino(AbstractSensor):
     type = UnitType.TEMPERATURE
 
-    def __init__(self, _port:str):
+    def __init__(self, _port: str):
         self.serial = serial.Serial(_port, timeout=1.5, baudrate=115200)
         self.com_lock = Lock()
         time.sleep(1)
@@ -49,14 +49,14 @@ class Thermoplatino(AbstractSensor):
 
 
 class ElchiTherm(AbstractController):
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.OUTPUT_ENABLE, ControllerFeatures.MANUAL_POWER,
                 ControllerFeatures.TC_SELECT}
 
     tc_ids = {'B': 0, 'E': 1, 'J': 2, 'K': 3, 'N': 4, 'R': 5, 'S': 6, 'T': 7}
     tc_types = {value: key for key, value in tc_ids.items()}
 
-    def __init__(self, _port_name:str, _slave_address:int, baudrate=9600):
+    def __init__(self, _port_name: str, _slave_address: int, baudrate=9600):
         self.instrument = minimalmodbus.Instrument(port=_port_name, slaveaddress=_slave_address)
         self.instrument.serial.baudrate = baudrate
         time.sleep(2)
@@ -80,7 +80,7 @@ class ElchiTherm(AbstractController):
         with self.com_lock:
             return self.instrument.read_register(1, number_of_decimals=1)
 
-    def set_manual_output_power(self, output:float) -> None:
+    def set_manual_output_power(self, output: float) -> None:
         """Set the power output of the controller in percent"""
         with self.com_lock:
             self.instrument.write_register(2, output, number_of_decimals=2)
@@ -122,7 +122,7 @@ class ElchiTherm(AbstractController):
     def get_control_mode(self) -> str:
         """get the active control mode"""
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(6, 0)]
+            return {0: 'Automatic', 1: 'Manual'}[int(self.instrument.read_register(6, 0))]
 
     def set_pid_p(self, p: float) -> None:
         """Set the P (Proportional band) for the PID controller"""
@@ -159,13 +159,13 @@ class ElchiTherm(AbstractController):
         with self.com_lock:
             self.instrument.write_register(10, 0)
 
-    def get_enable_state(self) -> int:
+    def get_enable_state(self) -> bool:
         with self.com_lock:
-            return self.instrument.read_register(10)
+            return bool(self.instrument.read_register(10))
 
     def get_tc_fault(self) -> int:
         with self.com_lock:
-            return self.instrument.read_register(12)
+            return int(self.instrument.read_register(12))
 
     def set_tc_type(self, tc: str) -> None:
         with self.com_lock:
@@ -173,7 +173,7 @@ class ElchiTherm(AbstractController):
 
     def get_tc_type(self) -> str:
         with self.com_lock:
-            return ElchiTherm.tc_types[self.instrument.read_register(11)]
+            return ElchiTherm.tc_types[int(self.instrument.read_register(11))]
 
     def emergency_stop(self) -> None:
         self.disable_output()

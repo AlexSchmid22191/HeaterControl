@@ -1,7 +1,7 @@
 import enum
 from _typeshed import Incomplete
 
-import serial
+import serial as ser
 
 __url__: str
 __version__: str
@@ -31,10 +31,10 @@ class Instrument:
     clear_buffers_before_each_transaction: bool
     close_port_after_each_call: Incomplete
     handle_local_echo: bool
-    serial: serial.Serial | None
+    serial: ser.Serial
 
-    def __init__(self, port: str | serial.Serial, slaveaddress: int, mode: str = ...,
-                 close_port_after_each_call: bool = False, debug: bool = False) -> None: ...
+    def __init__(self, port: str, slaveaddress: int, mode: str = ..., close_port_after_each_call: bool = False,
+                 debug: bool = False) -> None: ...
 
     @property
     def roundtrip_time(self) -> float | None: ...

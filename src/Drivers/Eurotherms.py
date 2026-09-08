@@ -7,7 +7,7 @@ from src.Drivers.BaseClasses import AbstractController, AbstractSensor, Controll
 
 class Eurotherm3216(AbstractController):
     """Instrument class for Eurotherm 3216 process controller."""
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name: str, _slave_address: int, baudrate=9600):
@@ -82,7 +82,7 @@ class Eurotherm3216(AbstractController):
         """get the active control mode"""
         """get the active control mode"""
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(273, 0)]
+            return {0: 'Automatic', 1: 'Manual'}[int(self.instrument.read_register(273, 0))]
 
     def write_external_target_setpoint(self, target: float) -> None:
         """Set an external target setpoint value (for complex temperature programs)"""
@@ -139,7 +139,7 @@ class Eurotherm3216(AbstractController):
 
 class Eurotherm2408(AbstractController):
     """Instrument class for Eurotherm 2408 process controller."""
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name:str, _slave_address:int, baudrate:int=9600):
@@ -188,7 +188,7 @@ class Eurotherm2408(AbstractController):
     def get_control_mode(self) -> str:
         """get the active control mode"""
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(273, 0)]
+            return {0: 'Automatic', 1: 'Manual'}[int(self.instrument.read_register(273, 0))]
 
     def set_target_setpoint(self, setpoint: float) -> None:
         """Set the target setpoint"""
@@ -223,7 +223,7 @@ class Eurotherm3508(AbstractController):
     * _slave_address (int): slave address in the range 1 to 247
     """
 
-    type = UnitType.VOLTAGE
+    controller_type = UnitType.VOLTAGE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.GAIN_SCHEDULING, ControllerFeatures.MANUAL_POWER}
 
     def __init__(self, _port_name: str, _slave_address: int, baudrate:int=9600):
@@ -291,7 +291,7 @@ class Eurotherm3508(AbstractController):
     def get_control_mode(self) -> str:
         """get the active control mode"""
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(273, 0)]
+            return {0: 'Automatic', 1: 'Manual'}[int(self.instrument.read_register(273, 0))]
 
     def set_pid_p(self, p: float) -> None:
         """Set the P (Proportional band) for the PID controller, Set 1"""
@@ -413,11 +413,11 @@ class Eurotherm3508(AbstractController):
         """Get the gain scheduling mode"""
         mode_dict = {0: 'None', 1: 'Set', 2: 'Setpoint', 3: 'Process Variable', 5: 'Output'}
         with self.com_lock:
-            return mode_dict[self.instrument.read_register(15360)]
+            return mode_dict[int(self.instrument.read_register(15360))]
 
     def get_active_set(self) -> int:
         with self.com_lock:
-            return self.instrument.read_register(72)
+            return int(self.instrument.read_register(72))
 
     def set_active_set(self, active_set: int) -> None:
         with self.com_lock:

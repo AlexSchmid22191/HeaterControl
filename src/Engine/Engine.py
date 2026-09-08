@@ -110,7 +110,7 @@ class HeaterControlEngine(QObject):
 
     def report_devices(self):
         utype = self.unit_type
-        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.type == utype],
+        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.controller_type == utype],
                    'Sensor':     [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
         engine_signals.available_devices.emit(devices)
 

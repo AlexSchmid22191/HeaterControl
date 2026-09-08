@@ -6,7 +6,7 @@ from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, Unit
 
 
 class OmegaPt(AbstractController):
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID}
 
     def __init__(self, _port_name: str, _slave_address: int):
@@ -16,12 +16,12 @@ class OmegaPt(AbstractController):
 
         # Due to the way the Omega Pt works (no Rate setting, just ramp/soak mode), the driver needs to be aware of
         # setpoint and ramp setting
-        self.rate = 15  # In °C per minute
-        self.setpoint = self.instrument.read_float(618)  # In °C
+        self.rate: float = 15  # In °C per minute
+        self.setpoint: float = self.instrument.read_float(618)  # In °C
 
         # For conversion into alternate representation (Proportional band, Integration time and derivative time), the
         # driver needs to be aware of the PID P parameter
-        self.kp = 1
+        self.kp: float = 1
         self.get_pid_p()
 
         # Set SP1 to be controlled by the ramp soak cycle

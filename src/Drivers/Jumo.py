@@ -6,10 +6,10 @@ from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, Unit
 
 
 class JumoQuantrol(AbstractController):
-    type = UnitType.TEMPERATURE
+    controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID}
 
-    def __init__(self, _port_name:str, _slave_address:str) -> None:
+    def __init__(self, _port_name: str, _slave_address: int) -> None:
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
         self.instrument.serial.baudrate = 9600
         self.instrument.serial.timeout = 0.25
@@ -40,7 +40,7 @@ class JumoQuantrol(AbstractController):
 
     def get_control_mode(self) -> str:
         with self.com_lock:
-            return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(0x0020) >> 12 & 1]
+            return {0: 'Automatic', 1: 'Manual'}[int(self.instrument.read_register(0x0020)) >> 12 & 1]
 
     def set_manual_mode(self) -> None:
         with self.com_lock:
@@ -53,12 +53,14 @@ class JumoQuantrol(AbstractController):
     def set_target_setpoint(self, setpoint: float) -> None:
         with self.com_lock:
             self.instrument.write_float(0x3100, setpoint, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
-            self.instrument.write_register(0x0047, 0b1 << 8)  # Restart ramp function, so it begins at current process value
+            self.instrument.write_register(0x0047,
+                                           0b1 << 8)  # Restart ramp function, so it begins at current process value
 
     def set_rate(self, rate: float) -> None:
         with self.com_lock:
             self.instrument.write_float(0x004E, rate, byteorder=minimalmodbus.BYTEORDER_LITTLE_SWAP)
-            self.instrument.write_register(0x0047, 0b1 << 8)  # Restart ramp function, so it begins at current process value
+            self.instrument.write_register(0x0047,
+                                           0b1 << 8)  # Restart ramp function, so it begins at current process value
 
     def set_pid_p(self, p: float) -> None:
         with self.com_lock:
