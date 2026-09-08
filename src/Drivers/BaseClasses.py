@@ -13,6 +13,10 @@ class SensorFeatures(Enum):
     TC_SELECT = auto()
 
 
+class PowerSupplyFeatures(Enum):
+    OUTPUT_ENABLE = auto()
+
+
 class ControllerFeatures(Enum):
     SIMPLE_PID = auto()
     GAIN_SCHEDULING = auto()
@@ -285,7 +289,7 @@ class AbstractSensor(ABC):
 
     @abstractmethod
     def close(self) -> None:
-        """Close the sensors serial port"""
+        """Close the sensor serial port"""
         pass
 
     def switch_aiming_beam(self, state: bool) -> None:
@@ -299,3 +303,66 @@ class AbstractSensor(ABC):
     def get_sensor_tc(self) -> str:
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('get_sensor_tc', self.__class__.__name__))
+
+
+class AbstractPowerSupply(ABC):
+    """
+    Abstract base class for power supplies. Drivers for specific devices inherit this class and implement the methods.
+    Core functionality is mandatory and has to be overridden.
+    Optional functionality raises an exception if the methods are not overwritten in derived subclasses.
+    """
+    features: Set[PowerSupplyFeatures] = set()
+
+    # Mandatory methods ------------------------------------------------------------------------------------------------
+
+    @abstractmethod
+    def __init__(self, port: str):
+        """Init"""
+
+    @abstractmethod
+    def set_voltage_limit(self, voltage: float) -> None:
+        """Set the voltage limit of the power supply"""
+
+    @abstractmethod
+    def set_current_limit(self, current: float) -> None:
+        """Set the current limit of the power supply"""
+
+    @abstractmethod
+    def get_voltage_limit(self) -> float:
+        """Get the voltage limit of the power supply"""
+
+    @abstractmethod
+    def get_current_limit(self) -> float:
+        """Get the current limit of the power supply"""
+
+    @abstractmethod
+    def get_voltage(self) -> float:
+        """Get the output voltage of the power supply"""
+
+    @abstractmethod
+    def get_current(self) -> float:
+        """Get the output of the power supply"""
+
+    @abstractmethod
+    def get_limit_mode(self) -> str:
+        """Get the limit mode of the power supply (CV or CC)"""
+
+    @abstractmethod
+    def get_resistance(self) -> float:
+        """Get the load resistance measured by the power supply"""
+
+    @abstractmethod
+    def close(self) -> None:
+        """Close the power supply serial connection"""
+
+    # Optional methods -------------------------------------------------------------------------------------------------
+
+    def enable_output(self) -> None:
+        """Enable power supply output"""
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('enable_output', self.__class__.__name__))
+
+    def disable_output(self) -> None:
+        """Disable power supply output"""
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('disable_output', self.__class__.__name__))

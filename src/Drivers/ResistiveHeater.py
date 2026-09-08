@@ -5,7 +5,7 @@ import time
 from PySide6.QtCore import QThreadPool, QTimer
 from scipy.stats import linregress
 
-from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, UnitType
+from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, UnitType, AbstractPowerSupply
 from src.Drivers.HCS import HCS34
 from src.Drivers.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma
@@ -18,11 +18,11 @@ class ResistiveHeater(AbstractController):
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER, ControllerFeatures.EXTERNAL_PV,
                 ControllerFeatures.EXT_CONFIG}
 
-    def __init__(self, _port_name: str, power_supply, config_name: str, *args, **kwargs):
+    def __init__(self, _port_name: str, power_supply: type[AbstractPowerSupply], config_name: str, *args, **kwargs):
 
         self.config_name = config_name
         self.port = _port_name
-        self.power_supply = power_supply(_port_name)
+        self.power_supply: AbstractPowerSupply = power_supply(_port_name)
 
         self.workers = []
 

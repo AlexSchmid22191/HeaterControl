@@ -4,7 +4,8 @@ import time
 
 import serial
 
-from src.Drivers.BaseClasses import AbstractController, AbstractSensor, ControllerFeatures, SensorFeatures, UnitType
+from src.Drivers.BaseClasses import AbstractController, AbstractSensor, AbstractPowerSupply, ControllerFeatures, \
+    PowerSupplyFeatures, SensorFeatures, UnitType
 
 
 class TestSensor(AbstractSensor):
