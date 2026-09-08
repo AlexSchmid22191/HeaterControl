@@ -10,11 +10,11 @@ class SetpointProgrammer:
         self.engine = engine
         self.segments = segments
         self.is_ramping = False
-        self.current_segment = 0
+        self.current_segment: int = 0
         self.hold_start_time = int(time.time())
         self.hold_endtime = int(time.time())
 
-        self.working_setpoint = 0
+        self.working_setpoint: float = 0
         engine_signals.controller_status_update.connect(self.set_working_setpoint)
 
         self.timer = QTimer()
@@ -23,7 +23,7 @@ class SetpointProgrammer:
 
         engine.set_control_mode('Automatic')
 
-    def execute(self):
+    def execute(self) -> None:
         if self.is_ramping:
             # Check if the working setpoint of the controller has reached the target setpoint, then switch to hold
             if abs(self.working_setpoint - self.segments[self.current_segment].get('Setpoint')) < 0.1:
@@ -35,20 +35,20 @@ class SetpointProgrammer:
                 self.current_segment += 1
                 self.start_ramp()
 
-    def set_working_setpoint(self, status_values):
+    def set_working_setpoint(self, status_values: dict[str, float]) -> None:
         assert isinstance(status_values, dict), 'Illegal data type received: {:s}'.format(str(type(status_values)))
         if 'Setpoint' in status_values.keys():
             self.working_setpoint = status_values['Setpoint']
 
-    def start_ramp(self):
+    def start_ramp(self) -> None:
         self.is_ramping = True
         self.engine.controller.set_rate(self.segments[self.current_segment].get('Rate'))
         self.engine.controller.set_target_setpoint(self.segments[self.current_segment].get('Setpoint'))
         engine_signals.ramp_segment_started.emit(self.current_segment)
 
-    def start_hold(self, hold_time):
+    def start_hold(self, hold_time: float) -> None:
         self.is_ramping = False
         self.hold_start_time = int(time.time())
-        self.hold_endtime = self.hold_start_time + hold_time * 60
+        self.hold_endtime = self.hold_start_time + int(hold_time * 60)
 
         engine_signals.hold_segment_started.emit(self.current_segment)
