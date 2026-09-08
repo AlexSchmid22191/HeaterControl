@@ -78,10 +78,11 @@ class Eurotherm3216(AbstractController):
         with self.com_lock:
             self.instrument.write_register(273, 1)
 
-    def get_control_mode(self) -> int:
+    def get_control_mode(self) -> str:
+        """get the active control mode"""
         """get the active control mode"""
         with self.com_lock:
-            return self.instrument.read_register(273, 1)
+            return {0: 'Automatic', 1: 'Manual'}[self.instrument.read_register(273, 0)]
 
     def write_external_target_setpoint(self, target: float) -> None:
         """Set an external target setpoint value (for complex temperature programs)"""

@@ -9,7 +9,7 @@ class OmegaPt(AbstractController):
     type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID}
 
-    def __init__(self, _port_name, _slave_address):
+    def __init__(self, _port_name: str, _slave_address: int):
         self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
 
         self.com_lock = threading.Lock()
@@ -29,10 +29,10 @@ class OmegaPt(AbstractController):
         # Select constant soak time mode
         self.instrument.write_register(615, 1)
 
-    def close(self):
+    def close(self) -> None:
         self.instrument.serial.close()
 
-    def adjust_ramp_soak(self):
+    def adjust_ramp_soak(self) -> None:
         current_temp = self.get_process_variable()
         # Calculate ramp time is ms from the difference between real and set temp., multiply by 60 for s and 1000 for ms
         time = int(abs((self.setpoint - current_temp) / self.rate) * 60 * 1000)
@@ -58,79 +58,79 @@ class OmegaPt(AbstractController):
             self.instrument.write_register(576, 8)
             self.instrument.write_register(576, 6)
 
-    def set_target_setpoint(self, temperature):
+    def set_target_setpoint(self, temperature: float) -> None:
         """Set the target setpoint, in degree Celsius. Start heating to this setpoint with the set rate"""
         self.setpoint = temperature
         self.adjust_ramp_soak()
 
-    def set_rate(self, rate):
+    def set_rate(self, rate: float) -> None:
         """Set the rate of change for the working setpoint i.e., the max heating/cooling rate"""
         self.rate = rate
         self.adjust_ramp_soak()
 
-    def get_working_output(self):
+    def get_working_output(self) -> float:
         """Return the current power output of the instrument"""
         with self.com_lock:
             return self.instrument.read_float(554)
 
-    def get_process_variable(self):
+    def get_process_variable(self) -> float:
         """Return the current temperature of the internal thermocouple"""
         with self.com_lock:
             return self.instrument.read_float(640)
 
-    def get_working_setpoint(self):
+    def get_working_setpoint(self) -> float:
         """Get the current working setpoint of the instrument"""
         with self.com_lock:
             return self.instrument.read_float(548)
 
-    def get_target_setpoint(self):
+    def get_target_setpoint(self) -> float:
         return self.setpoint
 
-    def get_rate(self):
+    def get_rate(self) -> float:
         return self.rate
 
-    def get_control_mode(self):
+    def get_control_mode(self) -> str:
         with self.com_lock:
             return 'Manual' if self.instrument.read_register(576) == 3 else 'Automatic'
 
-    def set_automatic_mode(self):
+    def set_automatic_mode(self) -> None:
         with self.com_lock:
             self.instrument.write_register(576, 6)
 
-    def set_manual_mode(self):
+    def set_manual_mode(self) -> None:
         with self.com_lock:
             self.instrument.write_register(576, 3)
 
-    def get_pid_p(self):
+    def get_pid_p(self) -> float:
         with self.com_lock:
             self.kp = self.instrument.read_float(676)
         return 100 / self.kp
 
-    def set_pid_p(self, p):
+    def set_pid_p(self, p: float) -> None:
         self.kp = 100 / p
         with self.com_lock:
             self.instrument.write_float(676, self.kp)
 
-    def get_pid_i(self):
+    def get_pid_i(self) -> float:
         self.get_pid_p()
         with self.com_lock:
             return 100 * self.kp / self.instrument.read_float(678)
 
-    def set_pid_i(self, i):
+    def set_pid_i(self, i: float) -> None:
         self.get_pid_p()
         with self.com_lock:
             self.instrument.write_float(678, 100 * self.kp / i)
 
-    def get_pid_d(self):
+    def get_pid_d(self) -> float:
         self.get_pid_p()
         with self.com_lock:
             return 100 * self.instrument.read_float(680) / self.kp
 
-    def set_pid_d(self, d):
+    def set_pid_d(self, d: float) -> None:
         self.get_pid_p()
         with self.com_lock:
             self.instrument.write_float(680, self.kp * d / 100)
 
-    def emergency_stop(self):
+    def emergency_stop(self) -> None:
         self.set_manual_mode()
         self.set_manual_output_power(0)

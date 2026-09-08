@@ -2,7 +2,7 @@ import time
 
 
 class SoftwarePID:
-    def __init__(self, pb, ti, td, loop_interval=0.25):
+    def __init__(self, pb: float, ti: float, td: float, loop_interval: float=0.25):
         self.pb = pb
         self.ti = ti
         self.td = td
@@ -13,7 +13,7 @@ class SoftwarePID:
         self.interval = loop_interval  # seconds
         self.last_update = time.time()
 
-    def calculate_output(self, process_variable, setpoint):
+    def calculate_output(self, process_variable: float, setpoint: float) -> float | None:
         kp, ki, kd = self._transform_pid_params(self.pb, self.ti, self.td)
 
         now = time.time()
@@ -35,10 +35,10 @@ class SoftwarePID:
             return None
 
     @staticmethod
-    def _constrain(value, _min=0, _max=100):
+    def _constrain(value: float, _min: float = 0, _max:float=100) -> float:
         return max(min(_max, value), _min)
 
-    def _transform_pid_params(self, pb, ti, td):
+    def _transform_pid_params(self, pb:float, ti:float, td:float) -> tuple[float, float, float]:
         kp = 100 / pb
         ki = kp / ti * self.interval
         kd = kp * td / self.interval

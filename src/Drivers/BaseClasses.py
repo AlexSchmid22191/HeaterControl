@@ -99,7 +99,7 @@ class AbstractController(ABC):
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('get_manual_output_power', self.__class__.__name__))
 
-    def get_pid_p(self) -> None:
+    def get_pid_p(self) -> float:
         """Get the P (Proportional band) for the PID controller"""
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('set_pid_p', self.__class__.__name__))
@@ -253,7 +253,7 @@ class AbstractController(ABC):
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('update_external_pv', self.__class__.__name__))
 
-    def set_external_pv_mode(self, mode: str) -> None:
+    def set_external_pv_mode(self, mode: bool) -> None:
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('set_external_pv_mode', self.__class__.__name__))
 

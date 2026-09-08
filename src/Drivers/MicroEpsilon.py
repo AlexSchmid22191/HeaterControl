@@ -9,31 +9,31 @@ class ME_CTL(AbstractSensor):
     type = UnitType.TEMPERATURE
     features = {SensorFeatures.AIMING_BEAM}
 
-    def __init__(self, _port):
+    def __init__(self, _port: str):
         self.serial = serial.Serial(_port, baudrate=115200, timeout=1.5)
         self.com_lock = threading.Lock()
         self.serial.reset_input_buffer()
         self.switch_aiming_beam(False)
 
-    def get_sensor_value(self):
+    def get_sensor_value(self) -> float:
         with self.com_lock:
             self.serial.write(b'\x01')
             data = self.serial.read(2)
             return self._bytes_to_temp(data)
 
     @staticmethod
-    def _bytes_to_temp(data):
+    def _bytes_to_temp(data: bytes) -> float:
         return (int.from_bytes(data, byteorder='big') - 1000) / 10
 
     @staticmethod
-    def _checksum(command):
+    def _checksum(command: bytes) -> bytes:
         return bytes([functools.reduce(ixor, command)])
 
-    def switch_aiming_beam(self, state):
+    def switch_aiming_beam(self, state: bool) -> None:
         command = b'\xA5\x01' if state else b'\xA5\x00'
         command += self._checksum(command)
         self.serial.write(command)
         self.serial.read(1)
 
-    def close(self):
+    def close(self) -> None:
         self.serial.close()
