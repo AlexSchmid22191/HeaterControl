@@ -16,7 +16,8 @@ class SoftwarePID:
     def calculate_output(self, process_variable, setpoint):
         kp, ki, kd = self._transform_pid_params(self.pb, self.ti, self.td)
 
-        if now := time.time() - self.last_update > self.interval:
+        now = time.time()
+        if now - self.last_update > self.interval:
             error = setpoint - process_variable
             d_pv = process_variable - self.last_process_variable
 
