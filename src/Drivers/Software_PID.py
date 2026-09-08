@@ -7,8 +7,8 @@ class SoftwarePID:
         self.ti = ti
         self.td = td
 
-        self.last_process_variable = 0
-        self.output_sum = 0
+        self.last_process_variable = 0.0
+        self.output_sum = 0.0
 
         self.interval = loop_interval  # seconds
         self.last_update = time.time()
