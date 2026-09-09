@@ -10,7 +10,9 @@ if APP_VERSION_NUMERIC[2] != 0:
 APP_DESCRIPTION = 'ElchiTools'
 APP_AUTHOR = 'Alex Schmid'
 APP_COPYRIGHT = '© 2026 Alex Schmid'
-APP_COMPANY = 'TU Wien'
+APP_COMPANY = 'ElchWorks'
 APP_SOURCE = 'https://github.com/AlexSchmid22191/HeaterControl'
 APP_CONTACT = 'alex.schmid91@gmail.com'
 APP_LICENSE = 'GPL 3.0'
+
+APP_BUILD_NAME = f'{APP_NAME}v{APP_VERSION}'
