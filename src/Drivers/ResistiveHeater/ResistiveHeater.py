@@ -4,14 +4,20 @@ import time
 
 from PySide6.QtCore import QThreadPool, QTimer
 from scipy.stats import linregress
+from enum import Enum, auto
 
-from Drivers.ResistiveHeater.Software_PID import SoftwarePID
+from src.Drivers.ResistiveHeater.Software_PID import SoftwarePID
 from src.Drivers.BaseClasses import AbstractController, AbstractPowerSupply, ControllerFeatures, UnitType
 from src.Drivers.HCS import HCS34
 from src.Drivers.ResistiveHeater.ResHeaterConfig import *
 from src.Drivers.Tenma import Tenma
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
+
+
+class ControlMode(Enum):
+    AUTO = auto()
+    MANUAL = auto()
 
 
 class ResistiveHeater(AbstractController):
@@ -48,7 +54,7 @@ class ResistiveHeater(AbstractController):
         self.pid_controller = SoftwarePID(self.config.pid, loop_interval=self.loop_time / 1000)
 
         self.power_supply.set_voltage_limit(self.config.heater.max_voltage)
-        self.control_mode = 'Manual'
+        self.control_mode: ControlMode = ControlMode.MANUAL
 
         # Used for ensuring that sensor values arrive at least every 2 seconds in external pv mode
         self.external_pv_mode: bool = False
@@ -86,7 +92,7 @@ class ResistiveHeater(AbstractController):
         engine_signals.error.emit('Did not receive PV value from sensor in time. Reverting to normal control mode!')
 
     def _control_loop(self) -> None:
-        if self.control_mode == 'Manual':
+        if self.control_mode == ControlMode.MANUAL:
             self.working_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
@@ -148,7 +154,10 @@ class ResistiveHeater(AbstractController):
         return self.working_setpoint
 
     def get_control_mode(self) -> str:
-        return self.control_mode
+        if self.control_mode == ControlMode.AUTO:
+            return 'Automatic'
+        else:
+            return 'Manual'
 
     def set_target_setpoint(self, setpoint: float) -> None:
         self.target_setpoint = setpoint
@@ -159,13 +168,13 @@ class ResistiveHeater(AbstractController):
 
     def set_manual_mode(self) -> None:
         self.manual_output_power = self.working_power
-        self.control_mode = 'Manual'
+        self.control_mode = ControlMode.MANUAL
 
     def set_automatic_mode(self) -> None:
         self.working_setpoint = self.get_process_variable()
         # Reset the error accumulator on each switch to automatic mode to avoid windup
         self.pid_controller.output_sum = 0
-        self.control_mode = 'Automatic'
+        self.control_mode = ControlMode.AUTO
 
     def set_pid_p(self, p: float) -> None:
         self.config.pid.p = p
