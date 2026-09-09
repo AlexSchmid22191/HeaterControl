@@ -1,15 +1,15 @@
 import configparser
 import os
 import time
+from enum import auto, Enum
 
 from PySide6.QtCore import QThreadPool, QTimer
 from scipy.stats import linregress
-from enum import Enum, auto
 
-from src.Drivers.ResistiveHeater.Software_PID import SoftwarePID
 from src.Drivers.BaseClasses import AbstractController, AbstractPowerSupply, ControllerFeatures, UnitType
 from src.Drivers.HCS import HCS34
 from src.Drivers.ResistiveHeater.ResHeaterConfig import *
+from src.Drivers.ResistiveHeater.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
@@ -93,20 +93,24 @@ class ResistiveHeater(AbstractController):
 
     def _control_loop(self) -> None:
         if self.control_mode == ControlMode.MANUAL:
-            self.working_power = self.manual_output_power
+            target_power = self.manual_output_power
         else:
             self._working_setpoint_adjust()
             pv = self.external_pv if self.external_pv_mode else self.smoothed_temperature
             pid_result = (self.pid_controller.calculate_output(pv, self.working_setpoint) or self.working_power)
 
-            self.working_power = max(pid_result, self.config.heater.min_output)
-
+            target_power = max(pid_result, self.config.heater.min_output)
+        self.working_power = self._limit_working_power(target_power)
         current = self.working_power / 100 * self.config.heater.max_current
         worker = Worker(lambda: self.power_supply.set_current_limit(current))
         self.workers.append(worker)
         worker.signals.error.connect(lambda error: engine_signals.error.emit(error))
         worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         QThreadPool.globalInstance().start(worker)
+
+    def _limit_working_power(self, target_power) -> float:
+        power_limit = self.working_power + self.loop_time * self.config.control.power_rate / 60 / 1000
+        return min(target_power, power_limit)
 
     def _working_setpoint_adjust(self) -> None:
         increment = self.config.control.rate * self.loop_time / 1000 / 60
