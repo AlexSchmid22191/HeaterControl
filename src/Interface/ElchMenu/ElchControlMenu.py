@@ -45,7 +45,7 @@ class ElchControlMenu(QWidget):
         self.entries['Power'].setMaximum(100)
         self.entries['Power'].setSuffix(' %')
 
-        self.entries['Power_Rate'].setMaximum(100)
+        self.entries['Power_Rate'].setMaximum(6000)
         self.entries['Power_Rate'].setSuffix(' %/min')
 
         self.entries.update({key: QComboBox() for key in ['Mode', 'controller_tc', 'sensor_tc']})
@@ -284,8 +284,10 @@ class CalDialog(QDialog):
             vbox = QVBoxLayout()
             vbox.setContentsMargins(20, 20, 20, 20)
             vbox.setSpacing(10)
-            vbox.addWidget(l := QLabel('Calibration failed!\nCheck if the circuit is closed\n'
-                                       'and the output is enabled!'), alignment=Qt.AlignHCenter)
+            vbox.addWidget(l := QLabel('Calibration failed! Check:\n'
+                                       '* Circuit closed\n'
+                                       '* Output enabled\n'
+                                       '* Power rate >= 100 %/min'), alignment=Qt.AlignHCenter)
             l.setObjectName('Header')
             vbox.addWidget(button2 := QPushButton('Close'))
             # noinspection PyUnresolvedReferences
