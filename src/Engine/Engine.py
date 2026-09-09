@@ -15,7 +15,7 @@ from src.Drivers.Keithly import Keithley2000Temp, Keithley2000Volt
 from src.Drivers.MicroEpsilon import ME_CTL
 from src.Drivers.Omega import OmegaPt
 from src.Drivers.Pyrometer import Pyrometer
-from src.Drivers.ResistiveHeater import ResistiveHeaterHCS, ResistiveHeaterTenma
+from src.Drivers.ResistiveHeater.ResistiveHeater import ResistiveHeaterHCS, ResistiveHeaterTenma
 from src.Drivers.TestDevices import ExtendedTestController, ExtendedTestSensor, FaultyTestController, TestController, \
     TestSensor
 from src.Engine.SetProg import SetpointProgrammer

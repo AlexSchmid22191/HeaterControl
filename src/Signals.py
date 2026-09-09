@@ -32,7 +32,7 @@ class GuiSignals(QObject):
 
     get_calibration_data = Signal()
     get_resistive_heater_config = Signal()
-    set_resistive_heater_config = Signal(dict)
+    set_resistive_heater_config = Signal(object)
     shutdown = Signal()
 
     set_external_pv_mode = Signal(bool)
@@ -61,7 +61,7 @@ class EngineSignals(QObject):
     sensor_status_update = Signal(dict, float)
     pid_parameters_update = Signal(dict)
     calibration_data_update = Signal(dict)
-    resistive_heater_config_update = Signal(dict)
+    resistive_heater_config_update = Signal(object)
 
     sensor_tc_update = Signal(str)
     heater_tc_update = Signal(str)

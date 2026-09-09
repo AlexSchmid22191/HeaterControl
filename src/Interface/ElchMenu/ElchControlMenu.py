@@ -3,14 +3,15 @@ import functools
 import matplotlib.font_manager as fm
 import matplotlib.style
 import matplotlib.ticker
-from PySide6.QtCore import Qt, QSignalBlocker, QTimer
-from PySide6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QVBoxLayout, QPushButton, QDialog, \
-    QGridLayout, QFormLayout, QComboBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from PySide6.QtCore import QSignalBlocker, Qt
+from PySide6.QtWidgets import QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QGridLayout, QLabel, QPushButton, \
+    QVBoxLayout, QWidget
 
 from src.Drivers.BaseClasses import ControllerFeatures, SensorFeatures, UnitType
-from src.Signals import gui_signals, engine_signals
+from src.Drivers.ResistiveHeater.ResHeaterConfig import HeaterConfig
+from src.Signals import engine_signals, gui_signals
 
 
 class ElchControlMenu(QWidget):
@@ -25,9 +26,9 @@ class ElchControlMenu(QWidget):
         label.setObjectName('Header')
         vbox.addWidget(label)
 
-        self.labels = {'Setpoint': 'Target setpoint', 'Rate': 'Rate', 'Power': 'Manual power', 'Mode': 'Control mode',
-                       'External_PV': 'Sensor as PV', 'Enable': 'Output Enable', 'Aiming': 'Aiming beam',
-                       'controller_tc': 'Thermocouple', 'sensor_tc': 'Thermocouple',
+        self.labels = {'Setpoint':      'Target setpoint', 'Rate': 'Rate', 'Power': 'Manual power',
+                       'Mode':          'Control mode', 'External_PV': 'Sensor as PV', 'Enable': 'Output Enable',
+                       'Aiming':        'Aiming beam', 'controller_tc': 'Thermocouple', 'sensor_tc': 'Thermocouple',
                        'Sensor_Aiming': 'Aiming beam', 'res_config': 'Configure resistive heater'}
 
         self.entries = {key: QDoubleSpinBox() for key in ['Setpoint', 'Rate', 'Power']}
@@ -49,8 +50,8 @@ class ElchControlMenu(QWidget):
         self.entries['controller_tc'].addItems(['S', 'K', 'J', 'T', 'E', 'N', 'R', 'B'])
         self.entries['sensor_tc'].addItems(['S', 'K', 'J', 'T', 'E', 'N', 'R', 'B'])
 
-        self.buttons = {key: QPushButton(text=self.labels[key]) for key in ['External_PV', 'Enable', 'Aiming',
-                                                                            'Sensor_Aiming', 'res_config']}
+        self.buttons = {key: QPushButton(text=self.labels[key]) for key in
+                        ['External_PV', 'Enable', 'Aiming', 'Sensor_Aiming', 'res_config']}
 
         form = QFormLayout()
         form.setSpacing(5)
@@ -243,13 +244,18 @@ class ResConfDialog(QDialog):
         self.setLayout(vbox)
 
     def save_config(self):
-        gui_signals.set_resistive_heater_config.emit({_field: _spin_box.value()
-                                                      for (_field, _spin_box) in self.boxes.items()})
+        heater_conf = HeaterConfig(max_voltage=self.boxes['maximum voltage'].value(),
+                                   min_output=self.boxes['minimum output'].value(),
+                                   max_current=self.boxes['maximum current'].value(),
+                                   r_cold=self.boxes['cold resistance'].value())
+        gui_signals.set_resistive_heater_config.emit(heater_conf)
         self.close()
 
-    def update_params(self, parameters):
-        for key, value in parameters.items():
-            self.boxes[key].setValue(float(value))
+    def update_params(self, parameters: HeaterConfig):
+        self.boxes['maximum voltage'].setValue(parameters.max_voltage)
+        self.boxes['cold resistance'].setValue(parameters.r_cold)
+        self.boxes['maximum current'].setValue(parameters.max_current)
+        self.boxes['minimum output'].setValue(parameters.min_output)
 
     def display_calibration_results(self, calibration_data):
         dlg = CalDialog(data=calibration_data, parent=self)

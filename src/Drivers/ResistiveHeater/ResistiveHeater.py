@@ -5,7 +5,8 @@ import time
 from PySide6.QtCore import QThreadPool, QTimer
 from scipy.stats import linregress
 
-from src.Drivers.BaseClasses import AbstractController, ControllerFeatures, UnitType, AbstractPowerSupply
+from src.Drivers.ResistiveHeater.ResHeaterConfig import *
+from src.Drivers.BaseClasses import AbstractController, AbstractPowerSupply, ControllerFeatures, UnitType
 from src.Drivers.HCS import HCS34
 from src.Drivers.Software_PID import SoftwarePID
 from src.Drivers.Tenma import Tenma
@@ -31,38 +32,32 @@ class ResistiveHeater(AbstractController):
         self.working_setpoint: float = 25
         self.target_setpoint: float = 25
 
-        self.smoothed_temperature: float = 25
-        self.smoothing_factor: float = 0.8
-
-        self.max_voltage = config['Heater']['U_max']
-        self.max_current = config['Heater']['I_max']
-        self.min_output = config['Heater']['P_min']
-
-        self.power_supply.set_voltage_limit(self.max_voltage)
-        self.control_mode = 'Manual'
-
         self.manual_output_power: float = 0
         self.working_power: float = 0
 
-        self.offset: float = config['Material']['Offset']
-        self.slope: float = config['Material']['Slope']
+        self.smoothed_temperature: float = 25
+        self.smoothing_factor: float = 0.8
 
-        self.rate: float = config['Control']['Rate']
+        self.max_voltage = config.heater.max_voltage
+        self.max_current = config.heater.max_current
+        self.min_output = config.heater.min_output
+        self.r_cold = config.heater.r_cold
+
+        self.offset = config.material.offset
+        self.slope = config.material.slope
+        self.wire_geometry_factor: float = 0.2075 / self.r_cold
+
+        self.rate = config.control.rate
 
         # Timer for automatic ramping mode
         self.loop_time: int = 250
         self.timer = QTimer()
         self.timer.timeout.connect(self._control_loop)
         self.timer.start(self.loop_time)
+        self.pid_controller = SoftwarePID(config.pid.p, config.pid.i, config.pid.d, loop_interval=self.loop_time / 1000)
 
-        # Take heater resistance from the config file
-        self.r_cold: float = config['Heater']['R_cold']
-        self.wire_geometry_factor: float = 0.2075 / self.r_cold
-
-        pb: float = config['PID']['P']
-        ti: float = config['PID']['I']
-        td: float = config['PID']['D']
-        self.pid_controller = SoftwarePID(pb, ti, td, loop_interval=self.loop_time / 1000)
+        self.power_supply.set_voltage_limit(self.max_voltage)
+        self.control_mode = 'Manual'
 
         # Used for ensuring that sensor values arrive at least every 2 seconds in external pv mode
         self.external_pv_mode: bool = False
@@ -220,46 +215,48 @@ class ResistiveHeater(AbstractController):
         with open(config_file_path, 'w') as configfile:
             config.write(configfile)
 
-    def read_from_config(self) -> dict:
+    def read_from_config(self) -> ResistiveHeaterConfig:
         config = configparser.ConfigParser()
-        app_data = os.getenv('APPDATA')
+
+        app_data = os.getenv("APPDATA")
         if not app_data:
-            raise ValueError('APPDATA environment variable not set')
-        else:
-            config_file_path = os.path.join(app_data, 'ElchWorks', 'ElchiTools', self.config_name)
+            raise ValueError("APPDATA environment variable not set")
+
+        config_file_path = os.path.join(app_data, "ElchWorks", "ElchiTools", self.config_name)
         if os.path.exists(config_file_path):
             config.read(config_file_path)
             if self.port in config.sections():
-                engine_signals.message.emit(f'Using configuration file for port {self.port}!')
+                engine_signals.message.emit(f"Using configuration file for port {self.port}!")
             else:
-                engine_signals.message.emit(f'No configuration file found for port {self.port}, using defaults!')
+                engine_signals.message.emit(f"No configuration file found for port {self.port}, using defaults!")
         else:
-            engine_signals.message.emit('No configuration file found, using defaults!')
+            engine_signals.message.emit("No configuration file found, using defaults!")
 
-        return {'PID': {'P': config.getfloat(self.port, 'P', fallback=750),
-                        'I': config.getfloat(self.port, 'I', fallback=12),
-                        'D': config.getfloat(self.port, 'D', fallback=0)},
-                'Control': {'Rate': config.getfloat(self.port, 'Rate', fallback=15)},
-                'Heater': {'R_cold': config.getfloat(self.port, 'R_cold', fallback=0.5),
-                           'U_max':  config.getfloat(self.port, 'U_max', fallback=10),
-                           'I_max':  config.getfloat(self.port, 'I_max', fallback=10),
-                           'P_min':  config.getfloat(self.port, 'P_min', fallback=10)},
-                'Material': {'Offset': config.getfloat(self.port, 'Offset', fallback=0.2),
-                             'Slope':  config.getfloat(self.port, 'Slope', fallback=0.0003)}}
+        pid_conf = PIDConfig(p=config.getfloat(self.port, "P", fallback=750),
+                             i=config.getfloat(self.port, "I", fallback=12),
+                             d=config.getfloat(self.port, "D", fallback=0))
+        heater_conf = HeaterConfig(r_cold=config.getfloat(self.port, "R_cold", fallback=0.5),
+                                   max_voltage=config.getfloat(self.port, "U_max", fallback=10),
+                                   max_current=config.getfloat(self.port, "I_max", fallback=10),
+                                   min_output=config.getfloat(self.port, "P_min", fallback=10))
+        control_conf = ControlConfig(rate=config.getfloat(self.port, "Rate", fallback=15))
+        material_conf = MaterialConfig(offset=config.getfloat(self.port, "Offset", fallback=0.2),
+                                       slope=config.getfloat(self.port, "Slope", fallback=0.0003))
 
-    def update_config(self, parameters: dict) -> None:
-        self.max_voltage = parameters['maximum voltage']
-        self.max_current = parameters['maximum current']
-        self.r_cold = parameters['cold resistance']
+        return ResistiveHeaterConfig(pid=pid_conf, control=control_conf, heater=heater_conf, material=material_conf)
+
+    def update_config(self, parameters: HeaterConfig) -> None:
+        self.max_voltage = parameters.max_voltage
+        self.max_current = parameters.max_current
+        self.r_cold = parameters.r_cold
         self.wire_geometry_factor = 0.2075 / self.r_cold
-        self.min_output = parameters['minimum output']
+        self.min_output = parameters.min_output
         self.write_config_to_file()
-
         self.power_supply.set_voltage_limit(self.max_voltage)
 
     def report_heater_config(self) -> None:
-        parameters = {'cold resistance': self.r_cold, 'maximum current': self.max_current,
-                      'maximum voltage': self.max_voltage, 'minimum output': self.min_output}
+        parameters = HeaterConfig(r_cold=self.r_cold, max_current=self.max_current, max_voltage=self.max_voltage,
+                                  min_output=self.min_output)
         engine_signals.resistive_heater_config_update.emit(parameters)
 
     def calibrate(self):
