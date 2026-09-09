@@ -10,8 +10,8 @@ class Eurotherm3216(AbstractController):
     controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER}
 
-    def __init__(self, _port_name: str, _slave_address: int, baudrate=9600):
-        self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
+    def __init__(self, _port_name: str, baudrate=9600):
+        self.instrument = minimalmodbus.Instrument(_port_name, slaveaddress=1)
         self.instrument.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
         with self.com_lock:
@@ -142,8 +142,8 @@ class Eurotherm2408(AbstractController):
     controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.MANUAL_POWER}
 
-    def __init__(self, _port_name:str, _slave_address:int, baudrate:int=9600):
-        self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
+    def __init__(self, _port_name:str, baudrate:int=9600):
+        self.instrument = minimalmodbus.Instrument(_port_name, slaveaddress=1)
         self.instrument.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
 
@@ -226,8 +226,8 @@ class Eurotherm3508(AbstractController):
     controller_type = UnitType.VOLTAGE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.GAIN_SCHEDULING, ControllerFeatures.MANUAL_POWER}
 
-    def __init__(self, _port_name: str, _slave_address: int, baudrate:int=9600):
-        self.instrument = minimalmodbus.Instrument(_port_name, _slave_address)
+    def __init__(self, _port_name: str, baudrate:int=9600):
+        self.instrument = minimalmodbus.Instrument(_port_name, slaveaddress=1)
         self.instrument.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
 
@@ -438,8 +438,8 @@ class Eurotherm3508S(AbstractSensor):
         """
     type = UnitType.VOLTAGE
 
-    def __init__(self, _port: str, _slave_address:int=1, baudrate:int=9600) -> None:
-        self.instrument = minimalmodbus.Instrument(_port, _slave_address)
+    def __init__(self, _port: str, baudrate:int=9600) -> None:
+        self.instrument = minimalmodbus.Instrument(_port, slaveaddress=1)
         self.instrument.serial.baudrate = baudrate
         self.com_lock = threading.Lock()
 

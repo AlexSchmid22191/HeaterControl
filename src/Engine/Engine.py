@@ -57,8 +57,6 @@ class HeaterControlEngine(QObject):
             self.controller_types['Faulty Test Controller'] = FaultyTestController
             self.available_ports['COM Test'] = 'Test Port'
 
-        self.controller_slave_address = 1
-
         self.is_logging = False
         self.log_start_time = None
         self.data = {'Sensor PV': [], 'Controller PV': [], 'Setpoint': [], 'Power': []}
@@ -154,8 +152,7 @@ class HeaterControlEngine(QObject):
 
     def add_controller(self, controller_type, controller_port):
         try:
-            self.controller = self.controller_types[controller_type](_port_name=controller_port,
-                                                                     _slave_address=self.controller_slave_address)
+            self.controller = self.controller_types[controller_type](_port_name=controller_port)
         except (SerialException, NoResponseError) as e:
             engine_signals.connection_failed.emit(e)
         else:

@@ -40,7 +40,7 @@ class AbstractController(ABC):
     # Mandatory methods ------------------------------------------------------------------------------------------------
 
     @abstractmethod
-    def __init__(self, _port_name: str, _slave_address: int = 1):
+    def __init__(self, _port_name: str):
         """Init"""
 
     @abstractmethod
