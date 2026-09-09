@@ -26,6 +26,8 @@ class ResistiveHeater(AbstractController):
                 ControllerFeatures.EXT_CONFIG}
 
     T_REF = 25  # Reference temperature where the cold resistance was measured, 25 C should be fine for most labs
+    MSEC_PER_MIN = 60000
+    MSEC_PER_SEC = 1000
 
     def __init__(self, _port_name: str, power_supply: type[AbstractPowerSupply], config_name: str):
 
@@ -51,7 +53,7 @@ class ResistiveHeater(AbstractController):
         self.timer = QTimer()
         self.timer.timeout.connect(self._control_loop)
         self.timer.start(self.loop_time)
-        self.pid_controller = SoftwarePID(self.config.pid, loop_interval=self.loop_time / 1000)
+        self.pid_controller = SoftwarePID(self.config.pid, loop_interval=self.loop_time / self.MSEC_PER_SEC)
 
         self.power_supply.set_voltage_limit(self.config.heater.max_voltage)
         self.control_mode: ControlMode = ControlMode.MANUAL
@@ -109,11 +111,12 @@ class ResistiveHeater(AbstractController):
         QThreadPool.globalInstance().start(worker)
 
     def _limit_working_power(self, target_power) -> float:
-        power_limit = self.working_power + self.loop_time * self.config.control.power_rate / 60 / 1000
-        return min(target_power, power_limit)
+        upper_power_limit = self.working_power + self.loop_time * self.config.control.power_rate / self.MSEC_PER_MIN
+        lower_power_limit = self.working_power - self.loop_time * self.config.control.power_rate / self.MSEC_PER_MIN
+        return min(max(target_power, lower_power_limit), upper_power_limit)
 
     def _working_setpoint_adjust(self) -> None:
-        increment = self.config.control.rate * self.loop_time / 1000 / 60
+        increment = self.config.control.rate * self.loop_time / self.MSEC_PER_MIN
         if self.working_setpoint < self.target_setpoint:
             self.working_setpoint = min(self.working_setpoint + increment, self.target_setpoint)
         elif self.working_setpoint > self.target_setpoint:
