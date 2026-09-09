@@ -23,7 +23,7 @@ class ControlMode(Enum):
 class ResistiveHeater(AbstractController):
     controller_type = UnitType.TEMPERATURE
     features = {ControllerFeatures.SIMPLE_PID, ControllerFeatures.MANUAL_POWER, ControllerFeatures.EXTERNAL_PV,
-                ControllerFeatures.EXT_CONFIG}
+                ControllerFeatures.EXT_CONFIG, ControllerFeatures.POWER_RATE_LIMIT}
 
     T_REF = 25  # Reference temperature where the cold resistance was measured, 25 C should be fine for most labs
     MSEC_PER_MIN = 60000
@@ -110,7 +110,7 @@ class ResistiveHeater(AbstractController):
         worker.signals.finished.connect(lambda w=worker: self.workers.remove(w))
         QThreadPool.globalInstance().start(worker)
 
-    def _limit_working_power(self, target_power) -> float:
+    def _limit_working_power(self, target_power:float) -> float:
         upper_power_limit = self.working_power + self.loop_time * self.config.control.power_rate / self.MSEC_PER_MIN
         lower_power_limit = self.working_power - self.loop_time * self.config.control.power_rate / self.MSEC_PER_MIN
         return min(max(target_power, lower_power_limit), upper_power_limit)
@@ -172,6 +172,13 @@ class ResistiveHeater(AbstractController):
     def set_rate(self, rate: float) -> None:
         self.config.control.rate = rate
         self.write_config_to_file()
+
+    def set_power_rate_limit(self, rate: float) -> None:
+        self.config.control.power_rate = rate
+        self.write_config_to_file()
+
+    def get_power_rate_limit(self) -> float:
+        return self.config.control.power_rate
 
     def set_manual_mode(self) -> None:
         self.manual_output_power = self.working_power

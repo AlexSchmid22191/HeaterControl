@@ -26,12 +26,13 @@ class ElchControlMenu(QWidget):
         label.setObjectName('Header')
         vbox.addWidget(label)
 
-        self.labels = {'Setpoint':      'Target setpoint', 'Rate': 'Rate', 'Power': 'Manual power',
-                       'Mode':          'Control mode', 'External_PV': 'Sensor as PV', 'Enable': 'Output Enable',
-                       'Aiming':        'Aiming beam', 'controller_tc': 'Thermocouple', 'sensor_tc': 'Thermocouple',
-                       'Sensor_Aiming': 'Aiming beam', 'res_config': 'Configure resistive heater'}
+        self.labels = {'Setpoint':   'Target setpoint', 'Rate': 'Rate', 'Power': 'Manual power',
+                       'Power_Rate': 'Power rate', 'Mode': 'Control mode', 'External_PV': 'Sensor as PV',
+                       'Enable':     'Output Enable', 'Aiming': 'Aiming beam', 'controller_tc': 'Thermocouple',
+                       'sensor_tc':  'Thermocouple', 'Sensor_Aiming': 'Aiming beam',
+                       'res_config': 'Configure resistive heater'}
 
-        self.entries = {key: QDoubleSpinBox() for key in ['Setpoint', 'Rate', 'Power']}
+        self.entries = {key: QDoubleSpinBox() for key in ['Setpoint', 'Rate', 'Power', 'Power_Rate']}
         for key, param in self.entries.items():
             param.setMaximum(1500)
             param.setMinimum(0)
@@ -43,6 +44,9 @@ class ElchControlMenu(QWidget):
 
         self.entries['Power'].setMaximum(100)
         self.entries['Power'].setSuffix(' %')
+
+        self.entries['Power_Rate'].setMaximum(100)
+        self.entries['Power_Rate'].setSuffix(' %/min')
 
         self.entries.update({key: QComboBox() for key in ['Mode', 'controller_tc', 'sensor_tc']})
 
@@ -58,7 +62,7 @@ class ElchControlMenu(QWidget):
         form.setHorizontalSpacing(20)
         form.setContentsMargins(0, 0, 0, 0)
 
-        for param in ['Setpoint', 'Rate', 'Power', 'Mode', 'controller_tc']:
+        for param in ['Setpoint', 'Rate', 'Power', 'Power_Rate', 'Mode', 'controller_tc']:
             form.addRow(self.labels[param], self.entries[param])
             self.entries[param].setEnabled(False)
             match param:
@@ -66,7 +70,7 @@ class ElchControlMenu(QWidget):
                     self.entries[param].currentTextChanged.connect(gui_signals.set_control_mode.emit)
                 case 'controller_tc':
                     self.entries[param].currentTextChanged.connect(gui_signals.set_heater_tc.emit)
-                case 'Setpoint' | 'Rate' | 'Power':
+                case 'Setpoint' | 'Rate' | 'Power' | 'Power_Rate':
                     self.entries[param].setKeyboardTracking(False)
                     # noinspection PyUnresolvedReferences
                     self.entries[param].valueChanged.connect(functools.partial(self.set_control_value, control=param))
@@ -137,6 +141,8 @@ class ElchControlMenu(QWidget):
                 gui_signals.set_rate.emit(value)
             case 'Power':
                 gui_signals.set_manual_output_power.emit(value)
+            case 'Power_Rate':
+                gui_signals.set_power_rate_limit.emit(value)
 
     def change_units(self, mode):
         self.entries['Setpoint'].setSuffix({UnitType.TEMPERATURE: ' \u00B0C', UnitType.VOLTAGE: ' mV'}[mode])
@@ -147,6 +153,8 @@ class ElchControlMenu(QWidget):
         self.entries['Rate'].setEnabled(True)
         self.entries['Setpoint'].setEnabled(True)
 
+        if ControllerFeatures.POWER_RATE_LIMIT in features:
+            self.entries['Power_Rate'].setEnabled(True)
         if ControllerFeatures.AIMING_BEAM in features:
             self.buttons['Aiming'].setEnabled(True)
         if ControllerFeatures.EXTERNAL_PV in features:

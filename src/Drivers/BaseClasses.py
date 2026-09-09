@@ -26,6 +26,7 @@ class ControllerFeatures(Enum):
     MANUAL_POWER = auto()
     EXT_CONFIG = auto()
     TC_SELECT = auto()
+    POWER_RATE_LIMIT = auto()
 
 
 class AbstractController(ABC):
@@ -268,6 +269,14 @@ class AbstractController(ABC):
     def get_tc_type(self) -> str:
         raise NotImplementedError(
             'Operation {:s} not supported for {:s} yet!'.format('get_tc_type', self.__class__.__name__))
+
+    def set_power_rate_limit(self, rate: float) -> None:
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('set_power_rate_limit', self.__class__.__name__))
+
+    def get_power_rate_limit(self) -> float:
+        raise NotImplementedError(
+            'Operation {:s} not supported for {:s} yet!'.format('get_power_rate_limit', self.__class__.__name__))
 
 
 class AbstractSensor(ABC):

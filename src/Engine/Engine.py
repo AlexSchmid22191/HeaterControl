@@ -108,8 +108,9 @@ class HeaterControlEngine(QObject):
 
     def report_devices(self):
         utype = self.unit_type
-        devices = {'Controller': [key for key, controller in self.controller_types.items() if controller.controller_type == utype],
-                   'Sensor':     [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
+        devices = {'Controller': [key for key, controller in self.controller_types.items() if
+                                  controller.controller_type == utype],
+                   'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
         engine_signals.available_devices.emit(devices)
 
     def refresh_available_ports(self):
@@ -182,6 +183,8 @@ class HeaterControlEngine(QObject):
                 gui_signals.set_heater_tc.connect(self.set_controller_tc)
                 gui_signals.refresh_parameters.connect(self.get_controller_tc)
                 self.get_controller_tc()
+            if ControllerFeatures.POWER_RATE_LIMIT in self.controller_types[controller_type].features:
+                gui_signals.set_power_rate_limit.connect(self.set_power_rate_limit)
             if ControllerFeatures.GAIN_SCHEDULING in self.controller_types[controller_type].features:
                 gui_signals.set_pid_parameters.connect(self.set_extended_pid)
                 gui_signals.refresh_pid.connect(self.get_extended_pid)
@@ -213,6 +216,8 @@ class HeaterControlEngine(QObject):
             gui_signals.set_manual_output_power.disconnect(self.set_manual_output_power)
         if ControllerFeatures.TC_SELECT in self.controller.features:
             gui_signals.set_heater_tc.disconnect(self.set_controller_tc)
+        if ControllerFeatures.POWER_RATE_LIMIT in self.controller.features:
+            gui_signals.set_power_rate_limit.disconnect(self.set_power_rate_limit)
         if ControllerFeatures.GAIN_SCHEDULING in self.controller.features:
             gui_signals.set_pid_parameters.disconnect(self.set_extended_pid)
             gui_signals.refresh_pid.disconnect(self.get_extended_pid)
@@ -323,10 +328,11 @@ class HeaterControlEngine(QObject):
             self.device_io(function, callbacks=callbacks)
 
     def get_controller_parameters(self):
-        for parameter, function in {'Setpoint': self.controller.get_target_setpoint,
-                                    'Power':    self.controller.get_manual_output_power,
-                                    'Rate':     self.controller.get_rate,
-                                    'Mode':     self.controller.get_control_mode}.items():
+        for parameter, function in {'Setpoint':   self.controller.get_target_setpoint,
+                                    'Power':      self.controller.get_manual_output_power,
+                                    'Rate':       self.controller.get_rate,
+                                    'Power_Rate': self.controller.get_power_rate_limit,
+                                    'Mode':       self.controller.get_control_mode}.items():
             self.device_io(function, callbacks=[
                 lambda result, _param=parameter: engine_signals.controller_parameters_update.emit({_param: result})])
 
@@ -342,6 +348,9 @@ class HeaterControlEngine(QObject):
 
     def set_rate(self, rate):
         self.device_io(self.controller.set_rate, None, rate)
+
+    def set_power_rate_limit(self, rate: float):
+        self.device_io(self.controller.set_power_rate_limit, None, rate)
 
     def get_pid_parameters(self):
         for parameter, function in {'P1': self.controller.get_pid_p, 'I1': self.controller.get_pid_i,

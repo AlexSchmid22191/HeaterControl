@@ -13,6 +13,7 @@ class GuiSignals(QObject):
 
     set_target_setpoint = Signal(float)
     set_rate = Signal(float)
+    set_power_rate_limit = Signal(float)
     set_manual_output_power = Signal(float)
     set_control_mode = Signal(str)
     enable_output = Signal(bool)
