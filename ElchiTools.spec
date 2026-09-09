@@ -88,4 +88,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name=src.appinfo.APP_NAME)
+               name=f'{src.appinfo.APP_NAME}v{src.appinfo.APP_VERSION}')
