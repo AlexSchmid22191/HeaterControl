@@ -1,7 +1,7 @@
 import math
 from datetime import datetime, timezone
 from typing import Type
-
+import logging
 import serial.tools.list_ports
 from minimalmodbus import NoResponseError
 from PySide6.QtCore import QObject, QThreadPool, QTimer
@@ -22,6 +22,8 @@ from src.Engine.SetProg import SetpointProgrammer
 from src.Engine.Worker import Worker
 from src.Signals import engine_signals, gui_signals
 
+logger = logging.getLogger(__name__)
+
 
 class HeaterControlEngine(QObject):
     sensor: AbstractSensor | None = None
@@ -29,6 +31,7 @@ class HeaterControlEngine(QObject):
     programmer: SetpointProgrammer | None = None
 
     def __init__(self, test_mode=False):
+        logger.debug("Engine initializing")
         super().__init__()
         self.test_mode = test_mode
         self.available_ports = {port[0]: port[1] for port in serial.tools.list_ports.comports()}
@@ -93,10 +96,12 @@ class HeaterControlEngine(QObject):
         self.workers = []
 
     def set_units(self, unit_type):
+        logger.debug(f'Changing units to {unit_type}')
         self.unit_type = unit_type
         self.report_devices()
 
     def shutdown(self):
+        logger.debug("Engine shutting down")
         engine_signals.message.emit('Shutting down!')
         self.refresh_timer.stop()
         self.external_pv_timer.stop()
@@ -111,6 +116,7 @@ class HeaterControlEngine(QObject):
         devices = {'Controller': [key for key, controller in self.controller_types.items() if
                                   controller.controller_type == utype],
                    'Sensor': [key for key, sensor in self.sensor_types.items() if sensor.type == utype]}
+        logger.debug(f"Reporting supported devices: {devices}")
         engine_signals.available_devices.emit(devices)
 
     def refresh_available_ports(self):
@@ -118,13 +124,17 @@ class HeaterControlEngine(QObject):
         if self.test_mode:
             self.available_ports['COM Test'] = 'Test Port'
         engine_signals.available_ports.emit(self.available_ports)
+        logger.debug(f"Reporting available ports: {self.available_ports}")
 
     def add_sensor(self, sensor_type, sensor_port):
         try:
+            logger.debug(f"Attempting to connect sensor {sensor_type} on port {sensor_port}")
             self.sensor = self.sensor_types[sensor_type](_port=sensor_port)
         except SerialException as e:
             engine_signals.connection_failed.emit(e)
+            logger.error(f"Failed to connect sensor {sensor_type} on port {sensor_port}", exc_info=True)
         else:
+            logger.info(f"Sensor {sensor_type} connected on port {sensor_port}")
             engine_signals.sensor_connected.emit(sensor_type, sensor_port, self.sensor_types[sensor_type].features)
             gui_signals.disconnect_sensor.connect(self.remove_sensor)
             gui_signals.connect_sensor.disconnect()
@@ -136,6 +146,7 @@ class HeaterControlEngine(QObject):
             self.get_sensor_status()
 
     def remove_sensor(self):
+        logger.debug("Disconnecting sensor")
         gui_signals.disconnect_sensor.disconnect(self.remove_sensor)
         gui_signals.connect_sensor.connect(self.add_sensor)
         if SensorFeatures.AIMING_BEAM in self.sensor.features:
@@ -143,20 +154,26 @@ class HeaterControlEngine(QObject):
         if SensorFeatures.TC_SELECT in self.sensor.features:
             gui_signals.set_sensor_tc.disconnect(self.set_sensor_tc)
         try:
+            logger.debug("Closing sensor port")
             self.sensor.close()
         except SerialException as e:
+            logger.error(f"Error when closing sensor", exc_info=True)
             engine_signals.connection_failed.emit(f'Error when closing sensor: {e}')
         else:
+            logger.info("Sensor disconnected")
             engine_signals.sensor_disconnected.emit()
         finally:
             self.sensor = None
 
     def add_controller(self, controller_type, controller_port):
         try:
+            logger.debug(f"Attempting to connect controller {controller_type} on port {controller_port}")
             self.controller = self.controller_types[controller_type](_port_name=controller_port)
         except (SerialException, NoResponseError) as e:
+            logger.error(f"Failed to connect controller {controller_type} on port {controller_port}", exc_info=True)
             engine_signals.connection_failed.emit(e)
         else:
+            logger.info(f"Controller {controller_type} connected on port {controller_port}")
             engine_signals.controller_connected.emit(controller_type, controller_port,
                                                      self.controller_types[controller_type].features)
 
@@ -197,6 +214,7 @@ class HeaterControlEngine(QObject):
             self.get_controller_parameters()
 
     def remove_controller(self):
+        logger.debug('Disconnecting controller')
         gui_signals.disconnect_controller.disconnect(self.remove_controller)
         # Mandatory signals all controllers must support
         gui_signals.set_target_setpoint.disconnect(self.set_target_setpoint)
@@ -226,24 +244,31 @@ class HeaterControlEngine(QObject):
             gui_signals.refresh_pid.disconnect(self.get_pid_parameters)
 
         try:
+            logger.debug('Closing controller port')
             self.controller.close()
         except SerialException as e:
+            logger.error(f'Error when closing controller', exc_info=True)
             engine_signals.connection_failed.emit(f'Error when closing controller: {e}')
         else:
             engine_signals.controller_disconnected.emit()
         finally:
+            logger.info('Controller disconnected')
             self.controller = None
             gui_signals.connect_controller.connect(self.add_controller)
 
     def set_sensor_tc(self, tc):
+        logger.info('Setting sensor TC: %s', tc)
         self.device_io(self.sensor.set_sensor_tc(tc))
 
     def get_sensor_tc(self):
+        logger.debug('Getting sensor TC')
         self.device_io(self.sensor.get_sensor_tc,
                        callbacks=[lambda result: engine_signals.sensor_tc_update.emit(result)])
 
     def set_external_pv_mode(self, mode):
+        logger.info('Setting external PV mode: %s', mode)
         if not self.controller or not self.sensor:
+            logger.error('Cannot set external PV mode without a controller and a sensor connected.')
             engine_signals.error.emit('Cannot set external PV mode without a controller and a sensor connected.')
             return
         if mode:
